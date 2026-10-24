@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node test-all.js",
+    "test:e2e": "node test-e2e-suite.js",
+    "push": "node push-to-github.js"
   },
   "dependencies": {
     "isomorphic-git": "^1.44.4"
