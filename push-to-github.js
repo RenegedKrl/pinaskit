@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Tela Completa de Novo Botao (Identificacao, Conteudo, Qualificacao, Cores, Posicao e Live Preview do Widget) Padrao CentralKit',
+    message: 'feat: Logo oficial do WhatsApp vetorizado (SVG) no botao flutuante e CTA identico a referencia',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

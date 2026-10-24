@@ -230,18 +230,20 @@ export function renderNewButtonView() {
                     <input type="text" placeholder="Seu nome *" disabled style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 11px; margin-bottom: 6px; border: 1px solid var(--pk-border); border-radius: 6px; background: var(--pk-bg-subtle);"/>
                     <input type="text" placeholder="+55 ▾ Seu WhatsApp *" disabled style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: 11px; margin-bottom: 10px; border: 1px solid var(--pk-border); border-radius: 6px; background: var(--pk-bg-subtle);"/>
 
-                    <!-- Botão CTA no Balão -->
-                    <button type="button" id="preview-floating-action-btn" style="width: 100%; border: none; background: #25D366; color: #FFF; font-weight: 700; font-size: 12px; padding: 9px 12px; border-radius: 8px; cursor: pointer; transition: all 150ms ease;">
-                      Falar no WhatsApp
+                    <!-- Botão CTA no Balão com Ícone Oficial de WhatsApp -->
+                    <button type="button" id="preview-floating-action-btn" style="width: 100%; border: none; background: #25D366; color: #FFF; font-weight: 700; font-size: 12.5px; padding: 10px 14px; border-radius: 8px; cursor: pointer; transition: all 150ms ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="#FFFFFF" style="flex-shrink: 0;">
+                        <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+                      </svg>
+                      <span id="preview-floating-action-text">Falar no WhatsApp</span>
                     </button>
                   </div>
 
-                  <!-- Botão Flutuante Circular com Ícone de WhatsApp -->
-                  <div id="preview-floating-trigger-btn" style="width: 50px; height: 50px; border-radius: 50%; background: #25D366; display: grid; place-items: center; color: #FFF; font-size: 24px; box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45); cursor: pointer; position: relative;">
-                    💬
-                    <span style="position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; background: #EF4444; color: #FFF; font-size: 10px; font-weight: 800; display: grid; place-items: center; border: 2px solid #FFF;">
-                      1
-                    </span>
+                  <!-- Botão Flutuante Circular com Logo Oficial do WhatsApp (Fiel à Imagem) -->
+                  <div id="preview-floating-trigger-btn" style="width: 56px; height: 56px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45), 0 2px 8px rgba(0, 0, 0, 0.12); cursor: pointer; position: relative; transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease;" title="Falar no WhatsApp">
+                    <svg width="32" height="32" viewBox="0 0 16 16" fill="#FFFFFF" style="display: block; pointer-events: none;">
+                      <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+                    </svg>
                   </div>
 
                 </div>

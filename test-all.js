@@ -170,6 +170,8 @@ assert(newButtonHtml.includes('🔥 Quente') && newButtonHtml.includes('❄️ M
 assert(newButtonHtml.includes('new-btn-color-picker'), 'Tela de Novo Botão possui seletor de cor');
 assert(newButtonHtml.includes('preview-floating-container'), 'Tela de Novo Botão possui moldura do mockup com widget flutuante');
 assert(newButtonHtml.includes('preview-store-avatar'), 'Mockup possui avatar com iniciais do botão');
+assert(newButtonHtml.includes('preview-floating-trigger-btn') && newButtonHtml.includes('M13.601 2.326A7.85'), 'Widget flutuante possui o logo oficial vetorizado do WhatsApp (SVG)');
+assert(!newButtonHtml.includes('💬'), 'Widget flutuante não possui emoji genérico, exibindo o logo vetorizado');
 
 // 2.4.2 Dashboard na Aba "new-button"
 const dashNewButtonHtml = renderDashboard('new-button');

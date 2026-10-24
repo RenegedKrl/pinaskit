@@ -301,9 +301,15 @@ class PinasKitApp {
 
     const newBtnCtaInput = document.getElementById('new-btn-cta-text');
     const previewActionBtn = document.getElementById('preview-floating-action-btn');
-    if (newBtnCtaInput && previewActionBtn) {
+    const previewActionText = document.getElementById('preview-floating-action-text');
+    if (newBtnCtaInput) {
       newBtnCtaInput.addEventListener('input', (e) => {
-        previewActionBtn.textContent = e.target.value || 'Falar no WhatsApp';
+        const val = e.target.value || 'Falar no WhatsApp';
+        if (previewActionText) {
+          previewActionText.textContent = val;
+        } else if (previewActionBtn) {
+          previewActionBtn.textContent = val;
+        }
       });
     }
 

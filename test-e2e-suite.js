@@ -456,6 +456,12 @@ async function runE2ETestSuite() {
     const newBtnContainerExists = await evalJs('document.getElementById("new-button-view-container") !== null');
     assert(newBtnContainerExists === true, 'Tela completa de Novo Botão aberta com sucesso');
 
+    const triggerHasWhatsappSvg = await evalJs('document.querySelector("#preview-floating-trigger-btn svg") !== null');
+    assert(triggerHasWhatsappSvg === true, 'Widget flutuante possui o ícone oficial em SVG do WhatsApp renderizado');
+
+    const triggerHasNoEmoji = await evalJs('!document.getElementById("preview-floating-trigger-btn")?.innerText.includes("💬")');
+    assert(triggerHasNoEmoji === true, 'Widget flutuante circular não possui emoji genérico, exibindo o logo fiel à imagem');
+
     // Digita novo nome interno
     await evalJs(`(() => {
       const input = document.getElementById("new-btn-name");
@@ -519,6 +525,12 @@ async function runE2ETestSuite() {
 
     const containerRightPos = await evalJs('document.getElementById("preview-floating-container")?.style.right');
     assert(containerRightPos === '20px', 'Widget flutuante reposicionado no canto inferior direito', containerRightPos);
+
+    // Retorna para o Verde Oficial do WhatsApp (#25D366) para ficar idêntico à imagem de referência
+    await evalJs(`(() => {
+      document.querySelector('.btn-color-preset[data-color="#25D366"]')?.click();
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
 
     await takeScreenshot('new-button-live-preview');
 
