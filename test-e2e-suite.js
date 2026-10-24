@@ -30,6 +30,16 @@ async function runE2ETestSuite() {
   console.log('🧪 PINAS KIT v7.0 — BATERIA DE TESTES E2E NO GOOGLE CHROME REAL');
   console.log('================================================================\n');
 
+  let serverProcess = null;
+  try {
+    const checkRes = await fetch(`${BASE_URL}/index.html`);
+    if (checkRes.ok) console.log('🌐 Servidor local já em execução em ' + BASE_URL);
+  } catch {
+    console.log('🚀 Inicializando servidor local para testes em ' + BASE_URL);
+    serverProcess = spawn('node', ['server.js'], { env: { ...process.env, PORT: '3334' } });
+    await new Promise(r => setTimeout(r, 1500));
+  }
+
   console.log('🌐 1. Inicializando Google Chrome Headless com porta CDP: ' + CDP_PORT);
   const chrome = spawn(CHROME_PATH, [
     '--headless=new',
@@ -594,9 +604,84 @@ async function runE2ETestSuite() {
     await new Promise(r => setTimeout(r, 300));
 
     // ------------------------------------------------------------------------
-    // 13. TESTANDO SITE REAL DO CLIENTE COM SCRIPT EMBED OFICIAL ATIVO
+    // 13. TESTANDO CENTRAL DE ANÚNCIOS, ATRIBUIÇÃO DE TRÁFEGO E GERADOR DE UTMS
     // ------------------------------------------------------------------------
-    console.log('\n🌐 13. Testando Site Real do Cliente com Script Embed (/teste-widget.html):');
+    console.log('\n📈 13. Testando Central de Anúncios & Atribuição de Tráfego:');
+    
+    // Navega para a aba de Anúncios
+    await evalJs('document.getElementById("side-nav-ads")?.click()');
+    await new Promise(r => setTimeout(r, 600));
+
+    const campaignsViewLoaded = await evalJs('document.getElementById("campaigns-view-container") !== null');
+    assert(campaignsViewLoaded === true, 'Aba Central de Anúncios & Atribuição de Tráfego renderizada com sucesso');
+
+    const campaignsCount = await evalJs('document.querySelectorAll(".campaign-row").length');
+    assert(campaignsCount >= 5, 'Tabela de campanhas exibe todas as campanhas iniciais rastreadas', campaignsCount);
+
+    // Testa filtro de plataforma Meta Ads
+    await evalJs('document.querySelector(".campaign-platform-filter[data-platform=\\"meta\\"]")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+    const metaFilterActive = await evalJs('document.querySelector(".campaign-platform-filter[data-platform=\\"meta\\"]")?.classList.contains("pk-btn-primary")');
+    assert(metaFilterActive === true, 'Filtro por plataforma Meta Ads ativado com destaque');
+
+    // Retorna para Todas as plataformas
+    await evalJs('document.querySelector(".campaign-platform-filter[data-platform=\\"Todas\\"]")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    // Testa alternar status da campanha (Ativa -> Pausada -> Ativa)
+    const initialCampStatusText = await evalJs('document.querySelector(".pk-btn-toggle-camp-status")?.innerText');
+    await evalJs('document.querySelector(".pk-btn-toggle-camp-status")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+    const updatedCampStatusText = await evalJs('document.querySelector(".pk-btn-toggle-camp-status")?.innerText');
+    assert(initialCampStatusText !== updatedCampStatusText, 'Alternância interativa de status da campanha na tabela');
+    // Restaura
+    await evalJs('document.querySelector(".pk-btn-toggle-camp-status")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    // Testa o Simulador de ROI (Arrasta slider)
+    await evalJs(`(() => {
+      const slider = document.getElementById("sim-budget-slider");
+      if (slider) {
+        slider.value = 1000;
+        slider.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
+    const simBudgetVal = await evalJs('document.getElementById("sim-budget-display")?.innerText');
+    assert(simBudgetVal && simBudgetVal.includes('1.000'), 'Simulador de ROI reage em tempo real ao valor do orçamento adicional');
+
+    // Testa abertura do Modal Gerador de Links com UTMs
+    await evalJs('document.getElementById("btn-open-utm-builder")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    const utmModalIsOpen = await evalJs('document.getElementById("utm-builder-modal-overlay")?.classList.contains("is-active")');
+    assert(utmModalIsOpen === true, 'Modal do Gerador de Links Rastreados (UTMs) aberto com sucesso');
+
+    const utmInitialUrl = await evalJs('document.getElementById("utm-output-url")?.value');
+    assert(utmInitialUrl && utmInitialUrl.includes('utm_source='), 'URL rastreada gerada com parâmetros oficiais de UTM');
+
+    // Alterna para canal Feed
+    await evalJs('document.querySelector(".utm-medium-chip[data-medium=\\"feed\\"]")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+    const utmUpdatedUrl = await evalJs('document.getElementById("utm-output-url")?.value');
+    assert(utmUpdatedUrl && utmUpdatedUrl.includes('utm_medium=feed'), 'Canal selecionado no modal atualiza o link UTM dinamicamente');
+
+    // Clica no botão de copiar link rastreado
+    await evalJs('document.getElementById("btn-copy-utm-url")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    await takeScreenshot('ads-traffic-utm-builder');
+
+    // Fecha modal de UTM
+    await evalJs('document.getElementById("btn-close-utm-modal")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    await takeScreenshot('campaigns-traffic-view');
+
+    // ------------------------------------------------------------------------
+    // 14. TESTANDO SITE REAL DO CLIENTE COM SCRIPT EMBED OFICIAL ATIVO
+    // ------------------------------------------------------------------------
+    console.log('\n🌐 14. Testando Site Real do Cliente com Script Embed (/teste-widget.html):');
     await send('Page.navigate', { url: `${BASE_URL}/teste-widget.html?button=btn-1` });
     await new Promise(r => setTimeout(r, 2000));
 
@@ -628,7 +713,8 @@ async function runE2ETestSuite() {
   } finally {
     if (ws) ws.close();
     chrome.kill('SIGKILL');
-    console.log('\n🛑 Google Chrome finalizado com segurança.');
+    if (serverProcess) serverProcess.kill('SIGKILL');
+    console.log('\n🛑 Google Chrome e Servidor finalizados com segurança.');
   }
 
   // --------------------------------------------------------------------------

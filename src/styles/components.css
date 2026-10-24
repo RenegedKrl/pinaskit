@@ -791,5 +791,48 @@ body[data-theme='dark'] .pk-select-option.is-selected {
   outline: none;
 }
 
+/* --------------------------------------------------------------------------
+   MÓDULO DE CAMPANHAS & GERADOR DE UTMS (CENTRALKIT V7.0)
+   -------------------------------------------------------------------------- */
+.campaign-row:hover {
+  background-color: var(--pk-bg-subtle) !important;
+}
+
+.pk-utm-source-card {
+  transition: all var(--pk-transition-fast);
+}
+
+.pk-utm-source-card:hover {
+  border-color: var(--pk-primary) !important;
+  background-color: var(--pk-bg-subtle) !important;
+}
+
+.utm-medium-chip {
+  transition: all var(--pk-transition-fast);
+  border-radius: var(--pk-radius-full) !important;
+  font-weight: 600 !important;
+}
+
+.utm-medium-chip.is-active {
+  background-color: var(--pk-primary) !important;
+  color: #FFFFFF !important;
+  border-color: var(--pk-primary) !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3) !important;
+}
+
+.campaign-platform-filter {
+  transition: all var(--pk-transition-fast);
+  border-radius: var(--pk-radius-full) !important;
+}
+
+.pk-btn-toggle-camp-status {
+  transition: all var(--pk-transition-fast);
+}
+
+.pk-btn-toggle-camp-status:hover {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
 
 

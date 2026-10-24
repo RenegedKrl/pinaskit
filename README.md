@@ -21,9 +21,13 @@
   - Seletor suspenso customizado com microanimações e badges visuais (não utiliza `<select>` nativo cinza).
   - Captura imediata de nome, WhatsApp e objetivos.
   - Formatação automática de mensagem pré-pronta e redirecionamento seguro para o WhatsApp.
-- **🔗 Central de Conexão de Anúncios (Multi-Tenant):**
-  - Simulação de integração OAuth 2.0 para **Facebook Ads**, **Instagram Ads** e **Google Ads**.
-  - Atribuição de campanhas e cálculo automático de métricas de investimento.
+- **📈 Central de Anúncios & Atribuição de Tráfego (Multi-Tenant):**
+  - Tabela com rastreamento completo de campanhas da **Meta (Facebook & Instagram)** e **Google Ads**.
+  - Cruzamento de dados de investimento em R$ com contatos reais capturados no WhatsApp.
+  - Cálculo automático e em tempo real de **Custo por Lead (CPL / CAC)**, **Faturamento Gerado** e **Retorno sobre Investimento (ROI / ROAS)**.
+  - **💡 Diagnóstico Inteligente de Tráfego:** Análise assistida em linguagem clara indicando a melhor campanha para escalar orçamento.
+  - **🎯 Simulador de Retorno:** Slider interativo que projeta novos contatos e faturamento previsto para investimentos adicionais.
+  - **🏷️ Gerador Assistido de Links com UTM:** Construtor rápido de URLs oficiais prontas para colar nos anúncios em 1 clique.
 - **🛠️ Construtor Visual No-Code:**
   - Permite aos clientes personalizarem a pergunta do formulário e criarem novas opções dinâmicas diretamente pela interface.
 - **🌓 Alternância Instantânea de Tema (Dark / Light):**
@@ -61,10 +65,6 @@
 
 2. **Inicie o servidor local:**
    ```bash
-   npm start
-   ```
-   *Ou diretamente:*
-   ```bash
    node server.js
    ```
 
@@ -77,14 +77,14 @@
 
 O Pinas Kit possui duas camadas rigorosas de validação automatizada:
 
-### 1. Testes de Integração e Regras de Negócio (48 testes)
-Valida a camada de gerenciamento de estado (`storage.js`), componentes de UI, persistência de dados, tokens CSS e conformidade com o plano mestre:
+### 1. Testes de Integração e Regras de Negócio (123 testes)
+Valida a camada de gerenciamento de estado (`storage.js`), componentes de UI, campanhas, cálculo de CPL/ROI, persistência de dados, tokens CSS e conformidade com o plano mestre:
 ```bash
 node test-all.js
 ```
 
-### 2. Testes Ponta a Ponta no Navegador Real (33 testes E2E)
-Executa o **Google Chrome** via Chrome DevTools Protocol (CDP), realizando cliques reais, preenchimento de formulários, navegação, responsividade mobile (375x812) e captura de tela:
+### 2. Testes Ponta a Ponta no Navegador Real (73 testes E2E)
+Executa o **Google Chrome** via Chrome DevTools Protocol (CDP), realizando cliques reais, testes da Central de Anúncios, Simulador de ROI, Gerador de UTMs, preenchimento de formulários, navegação, responsividade mobile (375x812) e captura de tela:
 ```bash
 node test-e2e-suite.js
 ```

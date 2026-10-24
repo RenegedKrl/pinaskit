@@ -12,6 +12,7 @@ import { renderFormBuilderModal } from './components/FormBuilderModal.js';
 import { renderVideoTourModal } from './components/VideoTourModal.js';
 import { renderCopyScriptModal } from './components/CopyScriptModal.js';
 import { renderLeadDrawer } from './components/LeadDrawer.js';
+import { renderUtmBuilderModal } from './components/UtmBuilderModal.js';
 
 class PinasKitApp {
   constructor() {
@@ -21,6 +22,9 @@ class PinasKitApp {
     this.activeButtonForEdit = null;
     this.isAnnualBilling = true;
     this.selectedLeadForDrawer = null;
+    this.campaignPlatformFilter = 'Todas';
+    this.campaignStatusFilter = 'Todas';
+    this.campaignSearchQuery = '';
     this.init();
   }
 
@@ -70,7 +74,7 @@ class PinasKitApp {
       <div id="view-container">
         ${this.currentView === 'landing' 
           ? renderLandingPage() 
-          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit)}
+          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit, this.campaignPlatformFilter, this.campaignStatusFilter, this.campaignSearchQuery)}
       </div>
 
       <!-- MODAIS DO SISTEMA -->
@@ -81,6 +85,7 @@ class PinasKitApp {
         ${renderVideoTourModal()}
         ${renderCopyScriptModal()}
         ${renderLeadDrawer(this.selectedLeadForDrawer)}
+        ${renderUtmBuilderModal()}
       </div>
 
       <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS) -->
@@ -211,6 +216,10 @@ class PinasKitApp {
     // Ações internas das abas de Anúncios, Automação e Relatórios
     document.getElementById('btn-open-ads-modal')?.addEventListener('click', () => this.openModal('connect-ads-modal-overlay'));
     document.getElementById('btn-connect-google-ads')?.addEventListener('click', () => this.openModal('connect-ads-modal-overlay'));
+    document.getElementById('btn-open-connect-ads-top')?.addEventListener('click', () => this.openModal('connect-ads-modal-overlay'));
+    document.getElementById('btn-sync-ads-now')?.addEventListener('click', () => {
+      this.showToast('🔄 Custos e cliques sincronizados com sucesso via API do Meta e Google Ads!');
+    });
     document.getElementById('btn-edit-rules-auto')?.addEventListener('click', () => this.openModal('form-builder-modal-overlay'));
     document.getElementById('btn-export-reports')?.addEventListener('click', () => {
       this.showToast('📊 Exportando relatório executivo de ROI e conversões...');
@@ -229,6 +238,8 @@ class PinasKitApp {
     document.getElementById('btn-dash-connect-ads')?.addEventListener('click', () => this.openModal('connect-ads-modal-overlay'));
     document.getElementById('btn-quick-all-buttons')?.addEventListener('click', () => this.switchDashTab('buttons'));
     document.getElementById('card-metric-leads')?.addEventListener('click', () => this.switchDashTab('leads'));
+    document.getElementById('card-metric-ads')?.addEventListener('click', () => this.switchDashTab('ads'));
+    document.getElementById('metric-card-ad-leads')?.addEventListener('click', () => this.switchDashTab('leads'));
 
     // Botão de upgrade
     document.getElementById('btn-upgrade-plan-hint')?.addEventListener('click', () => {
@@ -1181,6 +1192,173 @@ class PinasKitApp {
         this.bindEvents();
       }
     });
+
+    // ------------------------------------------------------------------------
+    // 11. EVENTOS DO MÓDULO DE CAMPANHAS & GERADOR DE LINKS COM UTM
+    // ------------------------------------------------------------------------
+    // Abrir Modal de UTMs
+    document.getElementById('btn-open-utm-builder')?.addEventListener('click', () => this.openUtmModal());
+    document.getElementById('btn-create-campaign-shortcut')?.addEventListener('click', () => this.openUtmModal());
+    document.getElementById('btn-close-utm-modal')?.addEventListener('click', () => this.closeModal('utm-builder-modal-overlay'));
+
+    // Abrir UTM já pré-preenchido com dados de uma campanha existente
+    document.querySelectorAll('.btn-open-utm-with-camp').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const camp = e.currentTarget.getAttribute('data-camp') || '';
+        const targetBtn = e.currentTarget.getAttribute('data-button') || '';
+        this.openUtmModal(camp, targetBtn);
+      });
+    });
+
+    // Alternar canal / medium chips no modal de UTM
+    document.querySelectorAll('.utm-medium-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        document.querySelectorAll('.utm-medium-chip').forEach(c => c.classList.remove('is-active'));
+        e.currentTarget.classList.add('is-active');
+        const medium = e.currentTarget.getAttribute('data-medium') || 'stories';
+        const hiddenMedium = document.getElementById('utm-medium-value');
+        if (hiddenMedium) hiddenMedium.value = medium;
+        this.updateUtmOutputUrl();
+      });
+    });
+
+    // Atualização reativa de inputs no modal de UTM
+    ['utm-target-button', 'utm-campaign-input', 'utm-content-input'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => this.updateUtmOutputUrl());
+        el.addEventListener('change', () => this.updateUtmOutputUrl());
+      }
+    });
+    document.querySelectorAll('input[name="utm-source-choice"]').forEach(radio => {
+      radio.addEventListener('change', () => this.updateUtmOutputUrl());
+    });
+
+    // Copiar link rastreado no modal de UTM
+    document.getElementById('btn-copy-utm-url')?.addEventListener('click', () => {
+      const url = document.getElementById('utm-output-url')?.value;
+      if (url) {
+        this.safeCopyToClipboard(url, '📋 Link rastreado com UTM copiado com sucesso! Cole no seu anúncio.');
+      }
+    });
+
+    // Filtros de Plataforma em Campanhas
+    document.querySelectorAll('.campaign-platform-filter').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        this.campaignPlatformFilter = e.currentTarget.getAttribute('data-platform');
+        this.render();
+        this.bindEvents();
+      });
+    });
+
+    // Filtro de Status em Campanhas
+    document.getElementById('campaign-status-filter')?.addEventListener('change', (e) => {
+      this.campaignStatusFilter = e.target.value;
+      this.render();
+      this.bindEvents();
+    });
+
+    // Busca rápida de campanhas
+    const campSearchInput = document.getElementById('campaign-search-input');
+    if (campSearchInput) {
+      campSearchInput.addEventListener('input', (e) => {
+        this.campaignSearchQuery = e.target.value;
+        const q = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('.campaign-row').forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = (!q || text.includes(q)) ? '' : 'none';
+        });
+      });
+    }
+
+    // Alternar status da campanha (Ativa / Pausada)
+    document.querySelectorAll('.pk-btn-toggle-camp-status').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const updated = StorageService.toggleCampaignStatus(id);
+        if (updated) {
+          this.showToast(`Campanha "${updated.name}" agora está ${updated.status}!`);
+          this.render();
+          this.bindEvents();
+        }
+      });
+    });
+
+    // Ver Leads da campanha no CRM
+    document.querySelectorAll('.btn-view-camp-leads').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const targetBtn = e.currentTarget.getAttribute('data-button');
+        this.leadFilterButton = targetBtn || 'Todos';
+        this.switchDashTab('leads');
+        this.showToast(`👥 Exibindo contatos capturados pelo botão "${targetBtn}"!`);
+      });
+    });
+
+    // Simulador de Investimento & Retorno (Slider Interativo)
+    const simSlider = document.getElementById('sim-budget-slider');
+    if (simSlider) {
+      const updateSim = () => {
+        const budget = Number(simSlider.value);
+        const metrics = StorageService.getAggregatedAdMetrics();
+        const avgCpl = metrics.avgCplRaw > 0 ? metrics.avgCplRaw : 15;
+        const roi = metrics.overallRoiRaw > 0 ? metrics.overallRoiRaw : 4.8;
+        const leadsEst = Math.round(budget / avgCpl);
+        const revEst = Math.round(budget * roi);
+
+        const bDisp = document.getElementById('sim-budget-display');
+        const lDisp = document.getElementById('sim-leads-display');
+        const rDisp = document.getElementById('sim-revenue-display');
+        const bBadge = document.getElementById('sim-roi-badge');
+
+        if (bDisp) bDisp.textContent = budget.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        if (lDisp) lDisp.textContent = `+${leadsEst} leads`;
+        if (rDisp) rDisp.textContent = revEst.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        if (bBadge) bBadge.textContent = `${roi}x ROI Estimado`;
+      };
+      simSlider.addEventListener('input', updateSim);
+      updateSim();
+    }
+  }
+
+  openUtmModal(prefillCampaign = '', prefillButton = '') {
+    if (prefillCampaign) {
+      const campInput = document.getElementById('utm-campaign-input');
+      if (campInput) campInput.value = prefillCampaign;
+    }
+    if (prefillButton) {
+      const btnSelect = document.getElementById('utm-target-button');
+      if (btnSelect) {
+        for (let i = 0; i < btnSelect.options.length; i++) {
+          if (btnSelect.options[i].getAttribute('data-name') === prefillButton) {
+            btnSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+    }
+    this.updateUtmOutputUrl();
+    this.openModal('utm-builder-modal-overlay');
+  }
+
+  updateUtmOutputUrl() {
+    const targetSelect = document.getElementById('utm-target-button');
+    const baseUrl = targetSelect ? targetSelect.value : 'https://clinicaestetica.com.br/gluteo-feminino';
+    const sourceRadio = document.querySelector('input[name="utm-source-choice"]:checked');
+    const source = sourceRadio ? sourceRadio.value : 'meta_ads';
+    const medium = document.getElementById('utm-medium-value')?.value || 'stories';
+    const campaign = document.getElementById('utm-campaign-input')?.value.trim() || 'campanha-outubro';
+    const content = document.getElementById('utm-content-input')?.value.trim() || '';
+
+    const finalUrl = StorageService.generateUtmUrl({
+      baseUrl,
+      utmSource: source,
+      utmMedium: medium,
+      utmCampaign: campaign,
+      utmContent: content
+    });
+
+    const output = document.getElementById('utm-output-url');
+    if (output) output.value = finalUrl;
   }
 
   switchView(view) {

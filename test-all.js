@@ -15,6 +15,8 @@ import { renderVideoTourModal } from './src/components/VideoTourModal.js';
 import { renderCopyScriptModal } from './src/components/CopyScriptModal.js';
 import { renderLeadDrawer } from './src/components/LeadDrawer.js';
 import { renderNewButtonView } from './src/components/NewButtonView.js';
+import { renderCampaignsView } from './src/components/CampaignsView.js';
+import { renderUtmBuilderModal } from './src/components/UtmBuilderModal.js';
 import fs from 'fs';
 
 let passCount = 0;
@@ -124,6 +126,47 @@ assert(newBtnSaved && newBtnSaved.name === 'Harmonização Facial', 'Criação d
 assert(newBtnSaved && newBtnSaved.slug === 'harmonizacao-facial', 'Slug do novo botão gerado corretamente');
 assert(StorageService.getButtons().some(b => b.name === 'Harmonização Facial'), 'Novo botão persistido no StorageService');
 
+// 1.10 Campanhas de Anúncios, Atribuição de Tráfego & Cálculo de Métricas
+const campaigns = StorageService.getCampaigns();
+assert(Array.isArray(campaigns) && campaigns.length >= 5, 'Carregamento inicial de campanhas de anúncios (5 campanhas)');
+assert(campaigns[0].cpl !== undefined && Number(campaigns[0].cpl) > 0, 'Cálculo dinâmico do Custo por Lead (CPL) em R$');
+assert(campaigns[0].roi !== undefined && Number(campaigns[0].roi) > 0, 'Cálculo dinâmico do Retorno sobre Investimento (ROI / ROAS)');
+assert(campaigns[0].tier && campaigns[0].tier.badge, 'Classificação visual de desempenho da campanha (Modelo D)');
+
+// Filtros por plataforma
+const metaCampaigns = StorageService.getCampaigns('meta');
+assert(metaCampaigns.every(c => c.platform === 'meta'), 'Filtro de campanhas por plataforma Meta Ads');
+const googleCampaigns = StorageService.getCampaigns('google');
+assert(googleCampaigns.every(c => c.platform === 'google'), 'Filtro de campanhas por plataforma Google Ads');
+
+// Alternar status da campanha
+const camp1 = campaigns[0];
+const initialStatus = camp1.status;
+const toggledCamp = StorageService.toggleCampaignStatus(camp1.id);
+assert(toggledCamp && toggledCamp.status !== initialStatus, 'Alternância de status da campanha (Ativa/Pausada)');
+StorageService.toggleCampaignStatus(camp1.id); // restaura
+
+// Métricas Agregadas do Dashboard
+const adMetrics = StorageService.getAggregatedAdMetrics();
+assert(adMetrics.totalSpend && adMetrics.totalSpend.includes('R$'), 'Métricas agregadas: Total investido formatado em R$');
+assert(adMetrics.totalLeads > 0, 'Métricas agregadas: Total de leads capturados via tráfego pago');
+assert(adMetrics.avgCpl && adMetrics.avgCpl.includes('R$'), 'Métricas agregadas: CPL médio calculado com precisão');
+assert(adMetrics.overallRoi && adMetrics.overallRoi.includes('x'), 'Métricas agregadas: ROI geral calculado como multiplicador');
+assert(adMetrics.bestCampaign && adMetrics.bestCampaign.name, 'Métricas agregadas: Identificação automática da campanha campeã');
+
+// Gerador de URLs com UTM
+const generatedUtm = StorageService.generateUtmUrl({
+  baseUrl: 'https://clinicaestetica.com.br/gluteo',
+  utmSource: 'meta_ads',
+  utmMedium: 'stories',
+  utmCampaign: 'promo-verao-gluteo',
+  utmContent: 'criativo-01'
+});
+assert(generatedUtm.includes('utm_source=meta_ads'), 'Gerador de UTM: Inclui utm_source');
+assert(generatedUtm.includes('utm_medium=stories'), 'Gerador de UTM: Inclui utm_medium');
+assert(generatedUtm.includes('utm_campaign=promo-verao-gluteo'), 'Gerador de UTM: Inclui utm_campaign');
+assert(generatedUtm.includes('utm_content=criativo-01'), 'Gerador de UTM: Inclui utm_content');
+
 // --------------------------------------------------------------------------
 // 2. TESTES DE COMPONENTES & HIERARQUIA VISUAL
 // --------------------------------------------------------------------------
@@ -229,6 +272,23 @@ assert(drawerHtml.includes('Falar no WhatsApp'), 'Drawer possui botão direto pa
 assert(drawerHtml.includes('Origem & Rastreamento de Anúncios'), 'Drawer possui seção de atribuição de tráfego e UTMs');
 assert(drawerHtml.includes('Linha do Tempo do Lead'), 'Drawer possui linha do tempo de atividades');
 assert(drawerHtml.includes('Anotações da Equipe'), 'Drawer possui bloco colaborativo de anotações');
+
+// 2.12 Módulo de Campanhas & Atribuição de Tráfego (CampaignsView)
+const campaignsHtml = renderCampaignsView();
+assert(campaignsHtml.includes('Central de Anúncios & Atribuição de Tráfego'), 'CampaignsView exibe título oficial');
+assert(campaignsHtml.includes('Diagnóstico Inteligente do Tráfego'), 'CampaignsView exibe card didático de diagnóstico');
+assert(campaignsHtml.includes('sim-budget-slider'), 'CampaignsView possui slider interativo de projeção de ROI');
+assert(campaignsHtml.includes('campaign-platform-filter'), 'CampaignsView possui botões de filtro por plataforma');
+assert(campaignsHtml.includes('campaigns-data-table'), 'CampaignsView possui a tabela de campanhas');
+assert(campaignsHtml.includes('btn-open-utm-builder'), 'CampaignsView possui botão do gerador de UTMs');
+assert(campaignsHtml.includes('pk-btn-toggle-camp-status'), 'Tabela de campanhas possui botões interativos de alternar status');
+
+// 2.13 Modal Gerador de Links Rastreados (UtmBuilderModal)
+const utmModalHtml = renderUtmBuilderModal();
+assert(utmModalHtml.includes('Gerador de Links Rastreados (UTMs)'), 'Modal UTM possui título correto');
+assert(utmModalHtml.includes('utm-target-button'), 'Modal UTM possui dropdown de botões de destino');
+assert(utmModalHtml.includes('utm-output-url'), 'Modal UTM possui área de saída do link gerado');
+assert(utmModalHtml.includes('btn-copy-utm-url'), 'Modal UTM possui botão de copiar link rastreado');
 
 // --------------------------------------------------------------------------
 // 3. TESTES DE ARQUIVOS ESTÁTICOS & ASSETS

@@ -6,12 +6,14 @@ import { StorageService } from '../services/storage.js';
 import { renderButtonsView } from './ButtonsView.js';
 import { renderLeadsView } from './LeadsView.js';
 import { renderNewButtonView } from './NewButtonView.js';
+import { renderCampaignsView } from './CampaignsView.js';
 
-export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null) {
+export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null, campaignPlatformFilter = 'Todas', campaignStatusFilter = 'Todas', campaignSearchQuery = '') {
   const currentTheme = StorageService.getTheme();
   const connectedAds = StorageService.getConnectedAds();
   const leads = StorageService.getLeads();
   const buttons = StorageService.getButtons();
+  const adMetrics = StorageService.getAggregatedAdMetrics();
 
   return `
     <div class="pk-dashboard-wrapper" id="dashboard-view">
@@ -143,7 +145,7 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
           : activeTab === 'sales'
           ? renderSalesView(leads)
           : activeTab === 'ads'
-          ? renderAdsView(connectedAds)
+          ? renderCampaignsView(campaignPlatformFilter, campaignStatusFilter, campaignSearchQuery)
           : activeTab === 'automation'
           ? renderAutomationView()
           : activeTab === 'reports'
@@ -246,10 +248,10 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
                   <span class="pk-metric-trend pk-trend-up">↑ 25% este mês</span>
                 </div>
 
-                <div class="pk-card pk-metric-card">
+                <div class="pk-card pk-metric-card" style="cursor: pointer;" id="card-metric-ads">
                   <span class="pk-metric-label">Investimento em anúncios</span>
-                  <div class="pk-metric-value">R$ 120,00</div>
-                  <span class="pk-metric-trend pk-trend-up">↑ 18% investido</span>
+                  <div class="pk-metric-value">${adMetrics.totalSpend}</div>
+                  <span class="pk-metric-trend pk-trend-up">CPL médio: ${adMetrics.avgCpl}</span>
                 </div>
               </div>
 

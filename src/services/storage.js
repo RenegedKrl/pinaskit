@@ -8,9 +8,119 @@ const STORAGE_KEYS = {
   BUTTONS: 'pk_buttons',
   FORM_CONFIG: 'pk_form_config',
   AD_ACCOUNTS: 'pk_ad_accounts',
+  CAMPAIGNS: 'pk_campaigns',
   CURRENT_VIEW: 'pk_current_view',
   CURRENT_DASH_TAB: 'pk_current_dash_tab'
 };
+
+// Campanhas de Anúncios Iniciais (Meta & Google Ads com Atribuição de Tráfego)
+const INITIAL_CAMPAIGNS = [
+  {
+    id: 'camp-1',
+    name: 'Glúteo Feminino - Feed & Stories SP',
+    platform: 'meta',
+    platformName: 'Meta Ads',
+    status: 'Ativa',
+    spend: 450.00,
+    clicks: 380,
+    impressions: 14200,
+    cpc: 1.18,
+    targetButton: 'Glúteo Feminino',
+    targetUrl: 'https://clinicaestetica.com.br/gluteo-feminino',
+    utmCampaign: 'campanha-gluteo-outubro',
+    utmSource: 'meta_ads',
+    utmMedium: 'feed_stories',
+    leadsCount: 30,
+    hotLeadsCount: 18,
+    salesCount: 4,
+    revenue: 5000.00,
+    createdAt: '2026-10-01'
+  },
+  {
+    id: 'camp-2',
+    name: 'Endolaser Facial & Papada - Pesquisa',
+    platform: 'google',
+    platformName: 'Google Ads',
+    status: 'Ativa',
+    spend: 600.00,
+    clicks: 210,
+    impressions: 5800,
+    cpc: 2.85,
+    targetButton: 'Endolaser',
+    targetUrl: 'https://clinicaestetica.com.br/endolaser',
+    utmCampaign: 'endolaser-rosto-corpo',
+    utmSource: 'google_ads',
+    utmMedium: 'cpc',
+    leadsCount: 12,
+    hotLeadsCount: 5,
+    salesCount: 2,
+    revenue: 5600.00,
+    createdAt: '2026-10-05'
+  },
+  {
+    id: 'camp-3',
+    name: 'Limpeza de Pele & Botox Express',
+    platform: 'meta',
+    platformName: 'Meta Ads',
+    status: 'Ativa',
+    spend: 150.00,
+    clicks: 180,
+    impressions: 8400,
+    cpc: 0.83,
+    targetButton: 'Glúteo Feminino',
+    targetUrl: 'https://clinicaestetica.com.br/gluteo-feminino',
+    utmCampaign: 'botox-express-promo',
+    utmSource: 'meta_ads',
+    utmMedium: 'reels',
+    leadsCount: 25,
+    hotLeadsCount: 14,
+    salesCount: 5,
+    revenue: 4250.00,
+    createdAt: '2026-10-10'
+  },
+  {
+    id: 'camp-4',
+    name: 'Depilação a Laser - Verão Sem Dor',
+    platform: 'meta',
+    platformName: 'Meta Ads',
+    status: 'Ativa',
+    spend: 320.00,
+    clicks: 240,
+    impressions: 9600,
+    cpc: 1.33,
+    targetButton: 'Depilação á Laser',
+    targetUrl: 'https://clinicaestetica.com.br/depilacao-laser',
+    utmCampaign: 'depilacao-laser-verao',
+    utmSource: 'meta_ads',
+    utmMedium: 'stories',
+    leadsCount: 20,
+    hotLeadsCount: 11,
+    salesCount: 3,
+    revenue: 4470.00,
+    createdAt: '2026-10-08'
+  },
+  {
+    id: 'camp-5',
+    name: 'Consulta Médica Preventiva & Check-up',
+    platform: 'google',
+    platformName: 'Google Ads',
+    status: 'Pausada',
+    spend: 180.00,
+    clicks: 95,
+    impressions: 3100,
+    cpc: 1.89,
+    targetButton: 'Consulta Médica',
+    targetUrl: 'https://drmedico.com.br/agendamento',
+    utmCampaign: 'consulta-checkup-sp',
+    utmSource: 'google_ads',
+    utmMedium: 'cpc',
+    leadsCount: 8,
+    hotLeadsCount: 3,
+    salesCount: 1,
+    revenue: 450.00,
+    createdAt: '2026-10-02'
+  }
+];
 
 // Botões / Sites Iniciais (Pastas de Captação)
 const INITIAL_BUTTONS = [
@@ -457,5 +567,177 @@ export const StorageService = {
 
   setConnectedAds(adsState) {
     localStorage.setItem(STORAGE_KEYS.AD_ACCOUNTS, JSON.stringify(adsState));
+  },
+
+  // --- MÓDULO DE CAMPANHAS & ATRIBUIÇÃO DE TRÁFEGO ---
+  getCampaigns(platformFilter = 'Todas', statusFilter = 'Todas', searchQuery = '') {
+    const data = localStorage.getItem(STORAGE_KEYS.CAMPAIGNS);
+    let campaigns = data ? JSON.parse(data) : INITIAL_CAMPAIGNS;
+
+    // Enriquece cada campanha com cálculos dinâmicos de CPL, ROI e Taxa de Conversão
+    campaigns = campaigns.map(camp => {
+      const spend = Number(camp.spend) || 0;
+      const clicks = Number(camp.clicks) || 0;
+      const impressions = Number(camp.impressions) || 0;
+      const leadsCount = Number(camp.leadsCount) || 0;
+      const salesCount = Number(camp.salesCount) || 0;
+      const revenue = Number(camp.revenue) || 0;
+
+      // Custo Real por Lead (CPL)
+      const cpl = leadsCount > 0 ? (spend / leadsCount) : spend;
+
+      // Retorno sobre o Investimento em Anúncios (ROI / ROAS)
+      const roi = spend > 0 ? (revenue / spend) : 0;
+
+      // Custo por Clique (CPC)
+      const cpc = clicks > 0 ? (spend / clicks) : 0;
+
+      // Taxa de Conversão de Cliques em Leads no WhatsApp
+      const convRate = clicks > 0 ? ((leadsCount / clicks) * 100).toFixed(1) : '0.0';
+
+      // Classificação de Desempenho (Modelo D: Visual & Didático)
+      let tier = { badge: '✨ Saudável', class: 'pk-badge-success', tip: 'Campanha gerando contatos com bom custo-benefício.' };
+      if (roi >= 4.0) {
+        tier = { badge: '🔥 Super ROI', class: 'pk-badge-hot', tip: 'Excelente retorno! Recomendado escalar o orçamento.' };
+      } else if (cpl > 40.0) {
+        tier = { badge: '⚠️ Custo Alto', class: 'pk-badge-warm', tip: 'Custo por contato elevado. Teste novos criativos ou públicos.' };
+      } else if (camp.status === 'Pausada') {
+        tier = { badge: '⏸️ Pausada', class: 'pk-badge-cold', tip: 'Campanha inativa no gerenciador de anúncios.' };
+      }
+
+      return {
+        ...camp,
+        spend,
+        clicks,
+        impressions,
+        leadsCount,
+        salesCount,
+        revenue,
+        cpl: cpl.toFixed(2),
+        roi: roi.toFixed(1),
+        cpc: cpc.toFixed(2),
+        convRate,
+        tier
+      };
+    });
+
+    // Filtros
+    return campaigns.filter(c => {
+      const matchPlatform = platformFilter === 'Todas' 
+        || (platformFilter === 'meta' && c.platform === 'meta')
+        || (platformFilter === 'google' && c.platform === 'google')
+        || c.platform === platformFilter;
+
+      const matchStatus = statusFilter === 'Todas' || c.status === statusFilter;
+
+      const q = (searchQuery || '').toLowerCase().trim();
+      const matchSearch = !q 
+        || c.name.toLowerCase().includes(q) 
+        || (c.targetButton && c.targetButton.toLowerCase().includes(q))
+        || (c.utmCampaign && c.utmCampaign.toLowerCase().includes(q));
+
+      return matchPlatform && matchStatus && matchSearch;
+    });
+  },
+
+  getCampaignById(id) {
+    const list = this.getCampaigns('Todas', 'Todas');
+    return list.find(c => c.id === id) || null;
+  },
+
+  saveCampaign(campaignData) {
+    const data = localStorage.getItem(STORAGE_KEYS.CAMPAIGNS);
+    let campaigns = data ? JSON.parse(data) : INITIAL_CAMPAIGNS;
+    const idx = campaigns.findIndex(c => c.id === campaignData.id);
+
+    let saved;
+    if (idx >= 0) {
+      saved = { ...campaigns[idx], ...campaignData };
+      campaigns[idx] = saved;
+    } else {
+      saved = {
+        id: campaignData.id || `camp-${Date.now()}`,
+        status: 'Ativa',
+        clicks: 0,
+        impressions: 0,
+        leadsCount: 0,
+        salesCount: 0,
+        revenue: 0,
+        createdAt: new Date().toISOString().split('T')[0],
+        ...campaignData
+      };
+      campaigns.unshift(saved);
+    }
+    localStorage.setItem(STORAGE_KEYS.CAMPAIGNS, JSON.stringify(campaigns));
+    return saved;
+  },
+
+  toggleCampaignStatus(id) {
+    const camp = this.getCampaignById(id);
+    if (!camp) return null;
+    const nextStatus = camp.status === 'Ativa' ? 'Pausada' : 'Ativa';
+    return this.saveCampaign({ ...camp, status: nextStatus });
+  },
+
+  getAggregatedAdMetrics() {
+    const all = this.getCampaigns('Todas', 'Todas');
+    const active = all.filter(c => c.status === 'Ativa');
+
+    const totalSpend = all.reduce((sum, c) => sum + c.spend, 0);
+    const totalLeads = all.reduce((sum, c) => sum + c.leadsCount, 0);
+    const totalHotLeads = all.reduce((sum, c) => sum + (c.hotLeadsCount || 0), 0);
+    const totalClicks = all.reduce((sum, c) => sum + c.clicks, 0);
+    const totalSales = all.reduce((sum, c) => sum + c.salesCount, 0);
+    const totalRevenue = all.reduce((sum, c) => sum + c.revenue, 0);
+
+    const avgCpl = totalLeads > 0 ? (totalSpend / totalLeads).toFixed(2) : '0.00';
+    const overallRoi = totalSpend > 0 ? (totalRevenue / totalSpend).toFixed(1) : '0.0';
+    const avgConvRate = totalClicks > 0 ? ((totalLeads / totalClicks) * 100).toFixed(1) : '0.0';
+
+    // Campanha campeã (menor CPL e pelo menos 10 leads)
+    const sortedByCpl = [...all].filter(c => c.leadsCount >= 10).sort((a, b) => Number(a.cpl) - Number(b.cpl));
+    const bestCampaign = sortedByCpl[0] || all[0] || null;
+
+    return {
+      totalSpend: totalSpend.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      totalSpendRaw: totalSpend,
+      totalLeads,
+      totalHotLeads,
+      totalClicks,
+      totalSales,
+      totalRevenue: totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      totalRevenueRaw: totalRevenue,
+      avgCpl: `R$ ${avgCpl}`,
+      avgCplRaw: Number(avgCpl),
+      overallRoi: `${overallRoi}x`,
+      overallRoiRaw: Number(overallRoi),
+      avgConvRate: `${avgConvRate}%`,
+      bestCampaign,
+      activeCampaignsCount: active.length,
+      totalCampaignsCount: all.length
+    };
+  },
+
+  generateUtmUrl({ baseUrl, utmSource, utmMedium, utmCampaign, utmContent, utmTerm }) {
+    if (!baseUrl) return '';
+    try {
+      const url = new URL(baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`);
+      if (utmSource) url.searchParams.set('utm_source', utmSource);
+      if (utmMedium) url.searchParams.set('utm_medium', utmMedium);
+      if (utmCampaign) url.searchParams.set('utm_campaign', utmCampaign);
+      if (utmContent) url.searchParams.set('utm_content', utmContent);
+      if (utmTerm) url.searchParams.set('utm_term', utmTerm);
+      return url.toString();
+    } catch {
+      // Fallback para URL simples
+      const params = [];
+      if (utmSource) params.push(`utm_source=${encodeURIComponent(utmSource)}`);
+      if (utmMedium) params.push(`utm_medium=${encodeURIComponent(utmMedium)}`);
+      if (utmCampaign) params.push(`utm_campaign=${encodeURIComponent(utmCampaign)}`);
+      if (utmContent) params.push(`utm_content=${encodeURIComponent(utmContent)}`);
+      if (utmTerm) params.push(`utm_term=${encodeURIComponent(utmTerm)}`);
+      const separator = baseUrl.includes('?') ? '&' : '?';
+      return `${baseUrl}${params.length ? separator + params.join('&') : ''}`;
+    }
   }
 };
