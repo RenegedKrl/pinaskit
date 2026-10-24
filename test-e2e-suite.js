@@ -253,6 +253,28 @@ async function runE2ETestSuite() {
     await evalJs('document.getElementById("btn-close-copy-modal")?.click()');
     await new Promise(r => setTimeout(r, 300));
 
+    // Testar Vinculação & Edição Rápida do Link do Site do Botão
+    const siteUrlCardExists = await evalJs('document.querySelector(".pk-site-url-card-box") !== null');
+    assert(siteUrlCardExists === true, 'Card do botão exibe a caixa de site vinculado exclusivo');
+
+    // Clica no botão de alterar site no primeiro card
+    await evalJs('document.querySelector(".btn-quick-edit-site-url")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const editSiteModalActive = await evalJs('document.getElementById("edit-site-modal-overlay")?.classList.contains("is-active")');
+    assert(editSiteModalActive === true, 'Modal de vincular site exclusivo abre ao clicar em Alterar Site');
+
+    // Preenche novo link de site
+    await evalJs(`
+      const input = document.getElementById("edit-site-url-input");
+      if (input) input.value = "https://brunamentoriadecarreira.vercel.app";
+      document.getElementById("edit-site-url-form")?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    `);
+    await new Promise(r => setTimeout(r, 600));
+
+    const updatedCardSiteUrl = await evalJs('document.querySelector(".btn-linked-website-link")?.innerText');
+    assert(updatedCardSiteUrl && updatedCardSiteUrl.includes('brunamentoriadecarreira.vercel.app'), 'Card do botão atualizou automaticamente o link do site vinculado exclusivo');
+
     // Capturar screenshot da tela de botões
     await takeScreenshot('buttons-view');
 
@@ -535,6 +557,19 @@ async function runE2ETestSuite() {
 
     const containerRightPos = await evalJs('document.getElementById("preview-floating-container")?.style.right');
     assert(containerRightPos === '20px', 'Widget flutuante reposicionado no canto inferior direito', containerRightPos);
+
+    // Atualiza o link do site no formulário de novo botão e verifica a barra de endereço em tempo real
+    await evalJs(`(() => {
+      const siteInput = document.getElementById("new-btn-site-url");
+      if (siteInput) {
+        siteInput.value = "https://clinica-harmonize.com.br";
+        siteInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    })()`);
+    await new Promise(r => setTimeout(r, 200));
+
+    const browserAddressUrl = await evalJs('document.getElementById("preview-browser-url")?.innerText');
+    assert(browserAddressUrl === 'clinica-harmonize.com.br', 'Barra de endereço do navegador simulado atualiza em tempo real com o domínio digitado');
 
     // Retorna para o Verde Oficial do WhatsApp (#25D366) para ficar idêntico à imagem de referência
     await evalJs(`(() => {

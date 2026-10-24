@@ -80,11 +80,31 @@ export function renderButtonsView() {
               </h2>
 
               <!-- Link Direto / Slug -->
-              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background-color: var(--pk-bg-subtle); border-radius: var(--pk-radius-sm); font-size: 12px; color: var(--pk-text-secondary); margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background-color: var(--pk-bg-subtle); border-radius: var(--pk-radius-sm); font-size: 12px; color: var(--pk-text-secondary); margin-bottom: 8px;">
                 <span style="opacity: 0.6;">🔗</span>
                 <span style="font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
                   pinaskit.com.br/b/${btn.slug}
                 </span>
+              </div>
+
+              <!-- Site Vinculado Exclusivo -->
+              <div class="pk-site-url-card-box" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 10px; background: rgba(124, 58, 237, 0.05); border: 1.5px solid rgba(124, 58, 237, 0.22); border-radius: var(--pk-radius-sm); font-size: 12px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1;">
+                  <span style="font-size: 14px;">🌐</span>
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+                    <span style="font-size: 9.5px; font-weight: 800; color: var(--pk-primary); text-transform: uppercase; letter-spacing: 0.5px; display: block; line-height: 1.1;">Site Vinculado Exclusivo</span>
+                    ${btn.siteUrl ? `
+                      <a href="${btn.siteUrl}" target="_blank" rel="noopener noreferrer" class="btn-linked-website-link" style="font-size: 11.5px; font-weight: 700; color: var(--pk-text-primary); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;" title="${btn.siteUrl}">
+                        ${btn.siteUrl.replace(/^https?:\/\//, '')} ↗
+                      </a>
+                    ` : `
+                      <span style="font-size: 11.5px; color: var(--pk-text-muted); font-style: italic;">Nenhum site configurado</span>
+                    `}
+                  </div>
+                </div>
+                <button type="button" class="pk-btn pk-btn-ghost pk-btn-xs btn-quick-edit-site-url" data-button-id="${btn.id}" data-site-url="${btn.siteUrl || ''}" data-button-name="${btn.name}" title="Alterar o link do site deste botão" style="font-size: 11px; font-weight: 700; color: var(--pk-primary); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(124, 58, 237, 0.25); background: var(--pk-bg-card); cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+                  ✏️ Alterar Site
+                </button>
               </div>
 
               <!-- Destino WhatsApp -->

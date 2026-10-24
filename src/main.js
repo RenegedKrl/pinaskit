@@ -13,6 +13,7 @@ import { renderVideoTourModal } from './components/VideoTourModal.js';
 import { renderCopyScriptModal } from './components/CopyScriptModal.js';
 import { renderLeadDrawer } from './components/LeadDrawer.js';
 import { renderUtmBuilderModal } from './components/UtmBuilderModal.js';
+import { renderEditSiteModal } from './components/EditSiteModal.js';
 
 class PinasKitApp {
   constructor() {
@@ -86,6 +87,7 @@ class PinasKitApp {
         ${renderCopyScriptModal()}
         ${renderLeadDrawer(this.selectedLeadForDrawer)}
         ${renderUtmBuilderModal()}
+        ${renderEditSiteModal()}
       </div>
 
       <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS) -->
@@ -330,6 +332,16 @@ class PinasKitApp {
       });
     }
 
+    // Reatividade do Link do Site no Mockup do Navegador
+    const newBtnSiteUrlInput = document.getElementById('new-btn-site-url');
+    const previewBrowserUrl = document.getElementById('preview-browser-url');
+    if (newBtnSiteUrlInput && previewBrowserUrl) {
+      newBtnSiteUrlInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim().replace(/^https?:\/\//, '') || 'seu-site.com.br';
+        previewBrowserUrl.textContent = val;
+      });
+    }
+
     const newBtnGreetingInput = document.getElementById('new-btn-greeting');
     const previewGreeting = document.getElementById('preview-floating-greeting');
     if (newBtnGreetingInput && previewGreeting) {
@@ -563,6 +575,12 @@ class PinasKitApp {
         e.preventDefault();
         const editId = newBtnForm.getAttribute('data-edit-id');
         const name = document.getElementById('new-btn-name')?.value.trim() || 'Novo Botão';
+        const siteUrlInputVal = document.getElementById('new-btn-site-url')?.value.trim();
+        let siteUrl = siteUrlInputVal;
+        if (siteUrl && !siteUrl.startsWith('http://') && !siteUrl.startsWith('https://')) {
+          siteUrl = 'https://' + siteUrl;
+        }
+
         const whatsapp = document.getElementById('new-btn-whatsapp')?.value.trim().replace(/\D/g, '') || '5511999999999';
         const greeting = document.getElementById('new-btn-greeting')?.value.trim() || 'Confirme seus dados para iniciar a conversa';
         const floatCta = document.getElementById('new-btn-cta-text')?.value.trim() || 'Falar no WhatsApp';
@@ -599,12 +617,15 @@ class PinasKitApp {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
 
+        const existingBtn = editId ? StorageService.getButtonById(editId) : null;
+        const finalSiteUrl = siteUrl || (existingBtn?.siteUrl) || `https://${slug || 'site'}.com.br`;
+
         const buttonData = {
           id: editId || `btn-${Date.now()}`,
           name,
           slug: slug || `btn-${Date.now()}`,
           category: 'Campanha WhatsApp',
-          siteUrl: `https://${slug || 'site'}.com.br`,
+          siteUrl: finalSiteUrl,
           whatsappNumber: whatsapp,
           status: isActive ? 'Ativo' : 'Pausado',
           clicks: 0,
@@ -680,6 +701,55 @@ class PinasKitApp {
         this.switchDashTab('leads');
       });
     });
+
+    // Edição Rápida do Link do Site do Botão
+    document.querySelectorAll('.btn-quick-edit-site-url').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const btnId = e.currentTarget.getAttribute('data-button-id');
+        const siteUrl = e.currentTarget.getAttribute('data-site-url') || '';
+        const btnName = e.currentTarget.getAttribute('data-button-name') || '';
+
+        const idInput = document.getElementById('edit-site-button-id');
+        const nameSpan = document.getElementById('edit-site-button-name');
+        const urlInput = document.getElementById('edit-site-url-input');
+
+        if (idInput) idInput.value = btnId;
+        if (nameSpan) nameSpan.textContent = btnName;
+        if (urlInput) urlInput.value = siteUrl;
+
+        this.openModal('edit-site-modal-overlay');
+      });
+    });
+
+    // Fechar Modal de Edição de Site
+    document.getElementById('btn-close-edit-site-modal')?.addEventListener('click', () => {
+      this.closeModal('edit-site-modal-overlay');
+    });
+    document.getElementById('btn-cancel-edit-site')?.addEventListener('click', () => {
+      this.closeModal('edit-site-modal-overlay');
+    });
+
+    // Salvar Link do Site (Atualização Automática no Site Inteiro)
+    const editSiteForm = document.getElementById('edit-site-url-form');
+    if (editSiteForm) {
+      editSiteForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const btnId = document.getElementById('edit-site-button-id')?.value;
+        let newUrl = document.getElementById('edit-site-url-input')?.value.trim();
+        if (newUrl && !newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
+          newUrl = 'https://' + newUrl;
+        }
+
+        if (btnId && newUrl) {
+          const updated = StorageService.updateButtonSiteUrl(btnId, newUrl);
+          this.closeModal('edit-site-modal-overlay');
+          this.showToast(`🌐 Site do botão "${updated?.name || ''}" atualizado para "${newUrl}" com sucesso!`);
+          this.render();
+          this.bindEvents();
+        }
+      });
+    }
 
     // ------------------------------------------------------------------------
     // 6. EVENTOS DO MÓDULO DE LEADS (IMAGEM 2)
@@ -1386,9 +1456,14 @@ class PinasKitApp {
     const scriptSrc = isLocal ? `${window.location.origin}/embed.js` : 'https://pinaskit.com.br/embed.js';
     const scriptTag = `<script async src="${scriptSrc}" data-pinaskit="${buttonId}"></script>`;
 
+    const btn = StorageService.getButtonById(buttonId);
+    const siteUrlEl = document.getElementById('copy-modal-site-url');
+    const siteUrl = btn?.siteUrl || 'https://brunamentoriadecarreira.vercel.app';
+
     if (titleEl) titleEl.textContent = buttonName;
     if (scriptEl) scriptEl.value = scriptTag;
     if (urlEl) urlEl.value = `https://pinaskit.com.br/b/${slug}`;
+    if (siteUrlEl) siteUrlEl.textContent = siteUrl;
 
     const liveTestBtn = document.getElementById('btn-open-live-test');
     if (liveTestBtn) {
@@ -1406,7 +1481,8 @@ ${scriptTag}
 - Se a página já possui um formulário de contato/aplicação (ex: formulário na coluna da direita com título 'Aplicação' ou similar), substitua apenas a tag <form> antiga por <div id="pinaskit-form"></div> mantendo todo o layout de 2 colunas, textos e estilos ao redor intactos.
 - O formulário NUNCA deve ficar abaixo do rodapé: certifique-se de que ele fique estritamente ACIMA da tag <footer>.
 
-3. Fluxo de envio de leads:
+3. Fluxo de envio de leads & Proteção de Domínio:
+- O botão e formulário operam exclusivamente neste site: ${siteUrl}.
 - Ao preencher o formulário, os dados são gravados diretamente no CRM do Pinas Kit e uma confirmação de sucesso é exibida na própria página.
 - Não há redirecionamento para o WhatsApp do visitante: o assinante entra em contato com o lead a partir do painel.
 - O script rastreia automaticamente UTMs de anúncios do Meta Ads e Google Ads.`;

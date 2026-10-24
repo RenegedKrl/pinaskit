@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'fix: Inserção acima do rodapé, substituição inteligente de formulário existente e tela de confirmação sem redirect WhatsApp',
+    message: 'feat: Vinculação de site exclusivo por botão com validação de domínio no embed.js, modal de edição e sincronização automática',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

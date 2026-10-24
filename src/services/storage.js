@@ -443,6 +443,17 @@ export const StorageService = {
     return buttons;
   },
 
+  updateButtonSiteUrl(id, siteUrl) {
+    const buttons = this.getButtons();
+    const btn = buttons.find(b => b.id === id);
+    if (btn) {
+      btn.siteUrl = (siteUrl || '').trim();
+      localStorage.setItem(STORAGE_KEYS.BUTTONS, JSON.stringify(buttons));
+      return btn;
+    }
+    return null;
+  },
+
   // --- GERENCIAMENTO DE LEADS (CENTRALKIT) ---
   getLeads(buttonFilter = 'Todos', stageFilter = 'Todos') {
     const data = localStorage.getItem(STORAGE_KEYS.LEADS);

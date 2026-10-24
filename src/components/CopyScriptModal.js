@@ -14,9 +14,18 @@ export function renderCopyScriptModal() {
           <h2 style="font-size: 22px; font-weight: 800; color: var(--pk-text-primary); margin: 0 0 6px 0;">
             Botão "<span id="copy-modal-button-name">Glúteo Feminino</span>" criado! 🎉
           </h2>
-          <p style="font-size: 13.5px; color: var(--pk-text-secondary); margin: 0;">
+          <p style="font-size: 13.5px; color: var(--pk-text-secondary); margin: 0 0 10px 0;">
             Agora é só instalar no seu site. Escolha a forma mais fácil para você:
           </p>
+
+          <!-- INDICADOR DO SITE EXCLUSIVO VINCULADO -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: rgba(124, 58, 237, 0.06); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 8px; font-size: 12px; margin-top: 10px;">
+            <div style="display: flex; align-items: center; gap: 6px; overflow: hidden;">
+              <span>🌐</span>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Site Autorizado: <strong id="copy-modal-site-url" style="color: var(--pk-primary); font-family: monospace;">https://clinicaestetica.com.br/gluteo-feminino</strong></span>
+            </div>
+            <span class="pk-badge pk-badge-purple" style="font-size: 10px; white-space: nowrap;">Exclusivo deste site</span>
+          </div>
         </div>
 
         <!-- SWITCHER DE ABAS: CÓDIGO vs PEDIR PARA UMA IA -->

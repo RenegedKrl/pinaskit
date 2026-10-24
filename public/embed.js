@@ -89,6 +89,7 @@
       if (match) {
         activeConfig = {
           name: match.name,
+          siteUrl: match.siteUrl || '',
           whatsapp: match.whatsappNumber || '5511975374960',
           color: (match.style && match.style.color) ? match.style.color : '#25D366',
           position: (match.style && match.style.position) ? match.style.position : 'right',
@@ -99,6 +100,36 @@
       }
     }
   } catch (_) {}
+
+  // 2.1 Verificação de Domínio Exclusivo do Botão
+  // Garante que cada botão opere exclusivamente no site cadastrado pelo usuário
+  function isSiteDomainAuthorized(allowedUrl) {
+    if (!allowedUrl) return true;
+    try {
+      const currentHost = (window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : '';
+      // Sempre autoriza localhost, 127.0.0.1 e páginas locais para testes e desenvolvimento
+      if (!currentHost || currentHost === 'localhost' || currentHost === '127.0.0.1') return true;
+
+      let clean = allowedUrl.trim().toLowerCase();
+      if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+        clean = 'https://' + clean;
+      }
+      const targetHost = new URL(clean).hostname.toLowerCase();
+
+      // Autoriza correspondência exata ou subdomínios (ex: app.site.com e site.com)
+      if (currentHost === targetHost || currentHost.endsWith('.' + targetHost) || targetHost.endsWith('.' + currentHost)) {
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  if (activeConfig.siteUrl && !isSiteDomainAuthorized(activeConfig.siteUrl)) {
+    console.warn(`%c[Pinas Kit] O botão "${activeConfig.name}" está restrito exclusivamente ao site: ${activeConfig.siteUrl}. Execução ignorada no host: ${window.location.hostname}.`, 'color: #F59E0B; font-weight: bold;');
+    return;
+  }
 
   // 3. Injetar Estilos do Widget Isolados
   const styleEl = document.createElement('style');

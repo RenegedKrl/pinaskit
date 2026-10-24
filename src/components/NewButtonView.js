@@ -9,6 +9,7 @@ const WHATSAPP_SVG_PATH = `M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.
 export function renderNewButtonView(button = null) {
   const isEditing = Boolean(button);
   const name = button ? button.name : 'Harmonização Facial';
+  const siteUrl = button ? (button.siteUrl || '') : 'https://brunamentoriadecarreira.vercel.app';
   const whatsapp = button ? (button.whatsappNumber || '') : '5511951047970';
   const color = (button && button.style && button.style.color) ? button.style.color : '#25D366';
   const position = (button && button.style && button.style.position) ? button.style.position : 'right';
@@ -66,12 +67,34 @@ export function renderNewButtonView(button = null) {
                 <h3 style="font-size: 15px; font-weight: 800; color: var(--pk-text-primary); margin: 0;">1. Identificação & WhatsApp</h3>
                 <span class="pk-badge pk-badge-primary" style="font-size: 10px;">Geral</span>
               </div>
-              <p style="font-size: 12.5px; color: var(--pk-text-muted); margin: 0 0 16px 0;">Nome interno para relatórios e o número onde os leads qualificados chegarão.</p>
+              <p style="font-size: 12.5px; color: var(--pk-text-muted); margin: 0 0 16px 0;">Nome interno, site exclusivo onde o botão vai funcionar e número do WhatsApp.</p>
 
               <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div class="pk-form-group">
                   <label class="pk-label" for="new-btn-name">Nome interno do botão / procedimento *</label>
                   <input type="text" id="new-btn-name" class="pk-input" placeholder="Ex: Harmonização Facial ou Glúteo Feminino" value="${name}" required/>
+                </div>
+
+                <div class="pk-form-group">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                    <label class="pk-label" for="new-btn-site-url" style="margin: 0;">Link ou Domínio do Site (Exclusivo deste botão) *</label>
+                    <span class="pk-badge pk-badge-purple" style="font-size: 10px;">Exclusividade por Domínio</span>
+                  </div>
+                  <div style="position: relative; display: flex; align-items: center;">
+                    <span style="position: absolute; left: 12px; font-size: 14px; opacity: 0.6; pointer-events: none;">🌐</span>
+                    <input 
+                      type="text" 
+                      id="new-btn-site-url" 
+                      class="pk-input" 
+                      placeholder="Ex: https://brunamentoriadecarreira.vercel.app ou brunamentoriadecarreira.vercel.app" 
+                      value="${siteUrl}" 
+                      style="padding-left: 36px; font-family: monospace; font-size: 12.5px;"
+                      required
+                    />
+                  </div>
+                  <span style="font-size: 11px; color: var(--pk-text-muted); margin-top: 4px; display: block; line-height: 1.4;">
+                    🔒 O botão flutuante e o formulário funcionarão apenas neste endereço, evitando conflitos caso você gerencie múltiplos sites.
+                  </span>
                 </div>
 
                 <div class="pk-form-group">
@@ -278,7 +301,7 @@ export function renderNewButtonView(button = null) {
                   <span style="width: 10px; height: 10px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
                 </div>
                 <div style="background: var(--pk-bg-surface); border: 1px solid var(--pk-border); border-radius: 6px; padding: 3px 12px; font-size: 11px; color: var(--pk-text-muted); flex: 1; text-align: center; font-family: monospace;">
-                  🔒 seu site.com.br
+                  🔒 <span id="preview-browser-url">${siteUrl ? siteUrl.replace(/^https?:\/\//, '') : 'seu-site.com.br'}</span>
                 </div>
               </div>
 

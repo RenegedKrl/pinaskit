@@ -17,6 +17,7 @@ import { renderLeadDrawer } from './src/components/LeadDrawer.js';
 import { renderNewButtonView } from './src/components/NewButtonView.js';
 import { renderCampaignsView } from './src/components/CampaignsView.js';
 import { renderUtmBuilderModal } from './src/components/UtmBuilderModal.js';
+import { renderEditSiteModal } from './src/components/EditSiteModal.js';
 import fs from 'fs';
 
 let passCount = 0;
@@ -125,6 +126,8 @@ const newBtnSaved = StorageService.saveButton({
 assert(newBtnSaved && newBtnSaved.name === 'Harmonização Facial', 'Criação de novo botão via saveButton');
 assert(newBtnSaved && newBtnSaved.slug === 'harmonizacao-facial', 'Slug do novo botão gerado corretamente');
 assert(StorageService.getButtons().some(b => b.name === 'Harmonização Facial'), 'Novo botão persistido no StorageService');
+const updatedBtnSite = StorageService.updateButtonSiteUrl('btn-1', 'https://brunamentoriadecarreira.vercel.app');
+assert(updatedBtnSite && updatedBtnSite.siteUrl === 'https://brunamentoriadecarreira.vercel.app', 'StorageService atualiza o link do site do botão');
 
 // 1.10 Campanhas de Anúncios, Atribuição de Tráfego & Cálculo de Métricas
 const campaigns = StorageService.getCampaigns();
@@ -203,15 +206,19 @@ assert(buttonsHtml.includes('Cota de Sites'), 'Tela de Botões exibe cota do Pla
 assert(buttonsHtml.includes('Glúteo Feminino') && buttonsHtml.includes('Endolaser'), 'Tela de Botões exibe os cards dos sites');
 assert(buttonsHtml.includes('btn-copy-script-action'), 'Cards de Botões possuem botão para copiar script');
 assert(buttonsHtml.includes('btn-test-widget-action'), 'Cards de Botões possuem botão para testar widget');
+assert(buttonsHtml.includes('pk-site-url-card-box'), 'Cards de Botões possuem caixa de exibição do site vinculado');
+assert(buttonsHtml.includes('btn-quick-edit-site-url'), 'Cards de Botões possuem botão para alterar site vinculado');
 
 // 2.4.1 Módulo "Novo Botão" (Tela Completa CentralKit)
 const newButtonHtml = renderNewButtonView();
 assert(newButtonHtml.includes('new-btn-name'), 'Tela de Novo Botão possui campo de nome interno');
+assert(newButtonHtml.includes('new-btn-site-url'), 'Tela de Novo Botão possui campo de Link ou Domínio do Site');
 assert(newButtonHtml.includes('new-btn-whatsapp'), 'Tela de Novo Botão possui campo de número WhatsApp');
 assert(newButtonHtml.includes('new-btn-question'), 'Tela de Novo Botão possui pergunta de qualificação');
 assert(newButtonHtml.includes('🔥 Quente') && newButtonHtml.includes('❄️ Morno'), 'Tela de Novo Botão possui badges de temperatura');
 assert(newButtonHtml.includes('new-btn-color-picker'), 'Tela de Novo Botão possui seletor de cor');
 assert(newButtonHtml.includes('preview-floating-container'), 'Tela de Novo Botão possui moldura do mockup com widget flutuante');
+assert(newButtonHtml.includes('preview-browser-url'), 'Mockup possui barra de endereço com o domínio do site');
 assert(newButtonHtml.includes('preview-store-avatar'), 'Mockup possui avatar com iniciais do botão');
 assert(newButtonHtml.includes('preview-floating-trigger-btn') && newButtonHtml.includes('M13.601 2.326A7.85'), 'Widget flutuante possui o logo oficial vetorizado do WhatsApp (SVG)');
 assert(!newButtonHtml.includes('💬'), 'Widget flutuante não possui emoji genérico, exibindo o logo vetorizado');
@@ -264,6 +271,13 @@ assert(copyModalHtml.includes('copy-script-code'), 'Modal Copiar Script possui o
 assert(copyModalHtml.includes('tab-btn-ai'), 'Modal Copiar Script possui a aba "Pedir para uma IA"');
 assert(copyModalHtml.includes('copy-ai-prompt-code'), 'Modal Copiar Script possui o container do prompt formatado para IA');
 assert(copyModalHtml.includes('btn-do-copy-ai-prompt'), 'Modal Copiar Script possui o botão de copiar prompt para IA');
+assert(copyModalHtml.includes('copy-modal-site-url'), 'Modal Copiar Script exibe o site exclusivo autorizado');
+
+// 2.10.1 Modal de Edição Rápida de Site (Vinculação Exclusiva)
+const editSiteModalHtml = renderEditSiteModal();
+assert(editSiteModalHtml.includes('edit-site-url-form'), 'Modal de Edição de Site possui formulário de atualização');
+assert(editSiteModalHtml.includes('edit-site-url-input'), 'Modal de Edição de Site possui campo para digitar o link do site');
+assert(editSiteModalHtml.includes('btn-save-edit-site'), 'Modal de Edição de Site possui botão de salvar e atualizar');
 
 // 2.11 Drawer Lateral da Ficha do Lead
 const drawerHtml = renderLeadDrawer(lead1);
