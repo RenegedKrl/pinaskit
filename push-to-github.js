@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Modal de instalacao do script com abas de Codigo e Pedir para uma IA (gerador de prompt inteligente)',
+    message: 'feat: Tela Completa de Novo Botao (Identificacao, Conteudo, Qualificacao, Cores, Posicao e Live Preview do Widget) Padrao CentralKit',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

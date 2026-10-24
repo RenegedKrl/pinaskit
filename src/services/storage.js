@@ -307,20 +307,23 @@ export const StorageService = {
   saveButton(buttonData) {
     const buttons = this.getButtons();
     const existingIndex = buttons.findIndex(b => b.id === buttonData.id);
+    let savedButton;
     if (existingIndex >= 0) {
-      buttons[existingIndex] = { ...buttons[existingIndex], ...buttonData };
+      savedButton = { ...buttons[existingIndex], ...buttonData };
+      buttons[existingIndex] = savedButton;
     } else {
-      buttons.push({
-        id: `btn-${Date.now()}`,
+      savedButton = {
+        id: buttonData.id || `btn-${Date.now()}`,
         clicks: 0,
         leadsCount: 0,
         conversionRate: '0.0%',
-        status: 'Ativo',
+        status: buttonData.status || 'Ativo',
         ...buttonData
-      });
+      };
+      buttons.push(savedButton);
     }
     localStorage.setItem(STORAGE_KEYS.BUTTONS, JSON.stringify(buttons));
-    return buttons;
+    return savedButton;
   },
 
   deleteButton(id) {

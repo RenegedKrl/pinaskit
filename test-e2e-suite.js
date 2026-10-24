@@ -444,6 +444,119 @@ async function runE2ETestSuite() {
     const builderClosed = await evalJs('!document.getElementById("form-builder-modal-overlay")?.classList.contains("is-active")');
     assert(builderClosed === true, 'Construtor salva as alterações e fecha o modal automaticamente');
 
+    // --------------------------------------------------------------------------
+    // TESTE 12: TELA COMPLETA DE NOVO BOTÃO & PREVIEW AO VIVO (CENTRALKIT STYLE)
+    // --------------------------------------------------------------------------
+    console.log('\n🔘 12. Testando Tela Completa de Novo Botão & Live Widget Preview:');
+    
+    // Clica no botão "+ Criar Novo Botão / Site"
+    await evalJs('document.getElementById("btn-create-new-button")?.click()');
+    await new Promise(r => setTimeout(r, 500));
+
+    const newBtnContainerExists = await evalJs('document.getElementById("new-button-view-container") !== null');
+    assert(newBtnContainerExists === true, 'Tela completa de Novo Botão aberta com sucesso');
+
+    // Digita novo nome interno
+    await evalJs(`(() => {
+      const input = document.getElementById("new-btn-name");
+      if (input) {
+        input.value = "Clínica Harmonize";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
+
+    const previewNameUpdated = await evalJs('document.getElementById("preview-store-name")?.innerText');
+    assert(previewNameUpdated === 'Clínica Harmonize', 'Nome atualizado em tempo real no mockup do site', previewNameUpdated);
+
+    const previewAvatarUpdated = await evalJs('document.getElementById("preview-store-avatar")?.innerText');
+    assert(previewAvatarUpdated === 'CH', 'Iniciais no avatar do mockup atualizadas para "CH"', previewAvatarUpdated);
+
+    // Digita nova saudação
+    await evalJs(`(() => {
+      const input = document.getElementById("new-btn-greeting");
+      if (input) {
+        input.value = "Agende sua avaliação VIP";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
+
+    const previewGreetingUpdated = await evalJs('document.getElementById("preview-floating-greeting")?.innerText');
+    assert(previewGreetingUpdated === 'Agende sua avaliação VIP', 'Saudação do balão atualizada em tempo real no mockup', previewGreetingUpdated);
+
+    // Altera a cor usando preset violeta #7C3AED
+    await evalJs(`(() => {
+      document.querySelector('.btn-color-preset[data-color="#7C3AED"]')?.click();
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
+
+    const hexInputVal = await evalJs('document.getElementById("new-btn-color-hex")?.value');
+    assert(hexInputVal === '#7C3AED', 'Preset de cor Violeta Pinas (#7C3AED) aplicado ao campo hex', hexInputVal);
+
+    // Altera a posição para esquerda
+    await evalJs(`(() => {
+      const radioLeft = document.querySelector('input[name="new-btn-position"][value="left"]');
+      if (radioLeft) {
+        radioLeft.checked = true;
+        radioLeft.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
+
+    const containerLeftPos = await evalJs('document.getElementById("preview-floating-container")?.style.left');
+    assert(containerLeftPos === '20px', 'Widget flutuante deslocado para o canto inferior esquerdo com sucesso', containerLeftPos);
+
+    // Retorna para o canto direito
+    await evalJs(`(() => {
+      const radioRight = document.querySelector('input[name="new-btn-position"][value="right"]');
+      if (radioRight) {
+        radioRight.checked = true;
+        radioRight.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    })()`);
+    await new Promise(r => setTimeout(r, 300));
+
+    const containerRightPos = await evalJs('document.getElementById("preview-floating-container")?.style.right');
+    assert(containerRightPos === '20px', 'Widget flutuante reposicionado no canto inferior direito', containerRightPos);
+
+    await takeScreenshot('new-button-live-preview');
+
+    // Submete o formulário para criar o botão
+    await evalJs(`(() => {
+      const form = document.getElementById("new-button-form");
+      if (form) form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    })()`);
+    await new Promise(r => setTimeout(r, 800));
+
+    // Verifica que retornou para a lista de botões
+    const returnedToButtons = await evalJs('document.getElementById("buttons-view-container") !== null');
+    assert(returnedToButtons === true, 'Retornou automaticamente para a lista de botões após criação');
+
+    // Verifica que o modal de instalação (CopyScriptModal) abriu automaticamente
+    const copyScriptModalOpen = await evalJs('document.getElementById("copy-script-modal-overlay")?.classList.contains("is-active")');
+    assert(copyScriptModalOpen === true, 'Modal de instalação com Script e Prompt para IA abriu automaticamente');
+
+    const modalTitleHasNewName = await evalJs('document.getElementById("copy-modal-button-name")?.innerText.includes("Clínica Harmonize")');
+    assert(modalTitleHasNewName === true, 'Modal exibe o nome do botão recém-criado ("Clínica Harmonize")');
+
+    // Alterna para a aba de IA no modal
+    await evalJs('document.getElementById("tab-btn-ai")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const newAiPromptValue = await evalJs('document.getElementById("copy-ai-prompt-code")?.value');
+    assert(newAiPromptValue && newAiPromptValue.includes('data-pinaskit='), 'Prompt para IA gerado dinamicamente com o ID do novo botão');
+
+    // Testa cópia segura do prompt de IA
+    await evalJs('document.getElementById("btn-do-copy-ai-prompt")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    await takeScreenshot('new-button-installation-modal');
+
+    // Fecha o modal
+    await evalJs('document.getElementById("btn-close-copy-modal")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
   } catch (err) {
     console.error('🚨 Erro inesperado no teste E2E:', err);
     testFails++;

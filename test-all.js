@@ -14,6 +14,7 @@ import { renderFormBuilderModal } from './src/components/FormBuilderModal.js';
 import { renderVideoTourModal } from './src/components/VideoTourModal.js';
 import { renderCopyScriptModal } from './src/components/CopyScriptModal.js';
 import { renderLeadDrawer } from './src/components/LeadDrawer.js';
+import { renderNewButtonView } from './src/components/NewButtonView.js';
 import fs from 'fs';
 
 let passCount = 0;
@@ -111,6 +112,18 @@ assert(updatedStageLead.timeline[0].title.includes('Proposta'), 'Adição autom�
 const updatedNoteLead = StorageService.addLeadNote('lead-1', 'Lead super interessada para o sábado', 'Mariana');
 assert(updatedNoteLead && updatedNoteLead.activityNotes.length > 0, 'Adição de anotação interna no lead');
 
+// 1.9 Criação e Persistência de Novo Botão
+const newBtnSaved = StorageService.saveButton({
+  name: 'Harmonização Facial',
+  slug: 'harmonizacao-facial',
+  whatsappNumber: '5511951047970',
+  category: 'Procedimento Estético',
+  status: 'Ativo'
+});
+assert(newBtnSaved && newBtnSaved.name === 'Harmonização Facial', 'Criação de novo botão via saveButton');
+assert(newBtnSaved && newBtnSaved.slug === 'harmonizacao-facial', 'Slug do novo botão gerado corretamente');
+assert(StorageService.getButtons().some(b => b.name === 'Harmonização Facial'), 'Novo botão persistido no StorageService');
+
 // --------------------------------------------------------------------------
 // 2. TESTES DE COMPONENTES & HIERARQUIA VISUAL
 // --------------------------------------------------------------------------
@@ -147,6 +160,21 @@ assert(buttonsHtml.includes('Cota de Sites'), 'Tela de Botões exibe cota do Pla
 assert(buttonsHtml.includes('Glúteo Feminino') && buttonsHtml.includes('Endolaser'), 'Tela de Botões exibe os cards dos sites');
 assert(buttonsHtml.includes('btn-copy-script-action'), 'Cards de Botões possuem botão para copiar script');
 assert(buttonsHtml.includes('btn-test-widget-action'), 'Cards de Botões possuem botão para testar widget');
+
+// 2.4.1 Módulo "Novo Botão" (Tela Completa CentralKit)
+const newButtonHtml = renderNewButtonView();
+assert(newButtonHtml.includes('new-btn-name'), 'Tela de Novo Botão possui campo de nome interno');
+assert(newButtonHtml.includes('new-btn-whatsapp'), 'Tela de Novo Botão possui campo de número WhatsApp');
+assert(newButtonHtml.includes('new-btn-question'), 'Tela de Novo Botão possui pergunta de qualificação');
+assert(newButtonHtml.includes('🔥 Quente') && newButtonHtml.includes('❄️ Morno'), 'Tela de Novo Botão possui badges de temperatura');
+assert(newButtonHtml.includes('new-btn-color-picker'), 'Tela de Novo Botão possui seletor de cor');
+assert(newButtonHtml.includes('preview-floating-container'), 'Tela de Novo Botão possui moldura do mockup com widget flutuante');
+assert(newButtonHtml.includes('preview-store-avatar'), 'Mockup possui avatar com iniciais do botão');
+
+// 2.4.2 Dashboard na Aba "new-button"
+const dashNewButtonHtml = renderDashboard('new-button');
+assert(dashNewButtonHtml.includes('Novo Botão de WhatsApp'), 'Dashboard exibe título "Novo Botão de WhatsApp"');
+assert(dashNewButtonHtml.includes('new-button-view-container'), 'Dashboard renderiza o container de Novo Botão');
 
 // 2.5 Módulo "Leads" (Tabela da Imagem 2)
 const leadsHtml = renderLeadsView('Todos');

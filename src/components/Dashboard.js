@@ -5,6 +5,7 @@
 import { StorageService } from '../services/storage.js';
 import { renderButtonsView } from './ButtonsView.js';
 import { renderLeadsView } from './LeadsView.js';
+import { renderNewButtonView } from './NewButtonView.js';
 
 export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos') {
   const currentTheme = StorageService.getTheme();
@@ -31,7 +32,7 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
             </div>
 
             <!-- ⭐ ABA BOTÕES (CENTRALKIT) -->
-            <div class="pk-sidebar-item ${activeTab === 'buttons' ? 'is-active' : ''}" id="side-nav-buttons" data-tab="buttons">
+            <div class="pk-sidebar-item ${activeTab === 'buttons' || activeTab === 'new-button' ? 'is-active' : ''}" id="side-nav-buttons" data-tab="buttons">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
               <span>Botões</span>
             </div>
@@ -90,6 +91,7 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
             <h2 class="pk-dash-greeting" style="font-size: 22px; font-weight: 800; color: var(--pk-text-primary);">
               ${activeTab === 'overview' ? 'Olá, Mariana! 👋' 
                 : activeTab === 'buttons' ? 'Gerenciador de Botões & Sites' 
+                : activeTab === 'new-button' ? 'Novo Botão de WhatsApp'
                 : activeTab === 'leads' ? 'Base Geral de Leads' 
                 : activeTab === 'conversations' || activeTab === 'crm' ? 'Conversas & CRM WhatsApp'
                 : activeTab === 'sales' ? 'Vendas & Faturamento'
@@ -99,7 +101,9 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
                 : 'Painel de Controle'}
             </h2>
             <p class="pk-dash-subgreeting" style="font-size: 13px; color: var(--pk-text-secondary); margin-top: 2px;">
-              ${activeTab === 'overview' ? 'Vamos continuar configurando seu Pinas Kit?' : 'Workspace: Luana Albuquerque · Plano Starter'}
+              ${activeTab === 'overview' ? 'Vamos continuar configurando seu Pinas Kit?' 
+                : activeTab === 'new-button' ? 'Configure a aparência, triagem e comportamento do seu widget flutuante' 
+                : 'Workspace: Luana Albuquerque · Plano Starter'}
             </p>
           </div>
 
@@ -130,6 +134,8 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
         <!-- RENDERIZAÇÃO DA ABA ATIVA -->
         ${activeTab === 'buttons' 
           ? renderButtonsView() 
+          : activeTab === 'new-button'
+          ? renderNewButtonView()
           : activeTab === 'leads'
           ? renderLeadsView(leadFilterButton)
           : activeTab === 'conversations' || activeTab === 'crm'

@@ -261,13 +261,202 @@ class PinasKitApp {
     // ------------------------------------------------------------------------
     // 5. EVENTOS DO MÓDULO DE BOTÕES (CENTRALKIT)
     // ------------------------------------------------------------------------
-    // Criar Novo Botão -> Abre o Construtor No-Code
+    // Criar Novo Botão -> Vai para a tela completa CentralKit de Novo Botão
     document.getElementById('btn-create-new-button')?.addEventListener('click', () => {
-      this.activeButtonForEdit = null;
-      this.render();
-      this.bindEvents();
-      this.openModal('form-builder-modal-overlay');
+      this.switchDashTab('new-button');
     });
+
+    // ------------------------------------------------------------------------
+    // 5.1. EVENTOS DA TELA DE NOVO BOTÃO & PREVIEW AO VIVO (PADRÃO CENTRALKIT)
+    // ------------------------------------------------------------------------
+    // Voltar para a lista de botões
+    const backToButtons = () => {
+      this.switchDashTab('buttons');
+    };
+    document.getElementById('btn-back-to-buttons')?.addEventListener('click', backToButtons);
+    document.getElementById('btn-cancel-new-button-bottom')?.addEventListener('click', backToButtons);
+
+    // Reatividade do Mockup / Preview ao vivo:
+    const newBtnNameInput = document.getElementById('new-btn-name');
+    const previewStoreName = document.getElementById('preview-store-name');
+    const previewStoreAvatar = document.getElementById('preview-store-avatar');
+    if (newBtnNameInput && previewStoreName) {
+      newBtnNameInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim() || 'Meu Botão';
+        previewStoreName.textContent = val;
+        if (previewStoreAvatar) {
+          const initials = val.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'PK';
+          previewStoreAvatar.textContent = initials;
+        }
+      });
+    }
+
+    const newBtnGreetingInput = document.getElementById('new-btn-greeting');
+    const previewGreeting = document.getElementById('preview-floating-greeting');
+    if (newBtnGreetingInput && previewGreeting) {
+      newBtnGreetingInput.addEventListener('input', (e) => {
+        previewGreeting.textContent = e.target.value || 'Confirme seus dados para iniciar a conversa';
+      });
+    }
+
+    const newBtnCtaInput = document.getElementById('new-btn-cta-text');
+    const previewActionBtn = document.getElementById('preview-floating-action-btn');
+    if (newBtnCtaInput && previewActionBtn) {
+      newBtnCtaInput.addEventListener('input', (e) => {
+        previewActionBtn.textContent = e.target.value || 'Falar no WhatsApp';
+      });
+    }
+
+    // Cores (Color Picker, Hex Input e Presets Rápidos)
+    const newBtnColorPicker = document.getElementById('new-btn-color-picker');
+    const newBtnColorHex = document.getElementById('new-btn-color-hex');
+    const previewTriggerBtn = document.getElementById('preview-floating-trigger-btn');
+
+    const updatePreviewColor = (hex) => {
+      if (!hex) return;
+      if (newBtnColorPicker) newBtnColorPicker.value = hex;
+      if (newBtnColorHex) newBtnColorHex.value = hex;
+      if (previewTriggerBtn) {
+        previewTriggerBtn.style.backgroundColor = hex;
+        previewTriggerBtn.style.boxShadow = `0 6px 18px ${hex}73`;
+      }
+      if (previewActionBtn) previewActionBtn.style.backgroundColor = hex;
+      if (previewStoreAvatar) previewStoreAvatar.style.backgroundColor = hex;
+    };
+
+    if (newBtnColorPicker) {
+      newBtnColorPicker.addEventListener('input', (e) => updatePreviewColor(e.target.value));
+    }
+    if (newBtnColorHex) {
+      newBtnColorHex.addEventListener('input', (e) => {
+        let val = e.target.value.trim();
+        if (val && !val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+          updatePreviewColor(val);
+        }
+      });
+    }
+    document.querySelectorAll('.btn-color-preset').forEach(preset => {
+      preset.addEventListener('click', (e) => {
+        const col = e.currentTarget.getAttribute('data-color');
+        if (col) updatePreviewColor(col);
+      });
+    });
+
+    // Posição na Tela (Canto inferior esquerdo vs direito)
+    const floatingContainer = document.getElementById('preview-floating-container');
+    document.querySelectorAll('input[name="new-btn-position"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (!floatingContainer) return;
+        if (e.target.value === 'left') {
+          floatingContainer.style.left = '20px';
+          floatingContainer.style.right = 'auto';
+          floatingContainer.style.alignItems = 'flex-start';
+        } else {
+          floatingContainer.style.right = '20px';
+          floatingContainer.style.left = 'auto';
+          floatingContainer.style.alignItems = 'flex-end';
+        }
+      });
+    });
+
+    // Checkbox de Botão Ativo
+    const statusCheckbox = document.getElementById('new-btn-status');
+    if (statusCheckbox && floatingContainer) {
+      statusCheckbox.addEventListener('change', (e) => {
+        floatingContainer.style.opacity = e.target.checked ? '1' : '0.25';
+        floatingContainer.style.pointerEvents = e.target.checked ? 'auto' : 'none';
+      });
+    }
+
+    // Toggle Balão / Popup no Mockup
+    const floatingPopup = document.getElementById('preview-floating-popup');
+    if (previewTriggerBtn && floatingPopup) {
+      previewTriggerBtn.addEventListener('click', () => {
+        const isHidden = floatingPopup.style.display === 'none';
+        floatingPopup.style.display = isHidden ? 'block' : 'none';
+      });
+    }
+    document.getElementById('preview-close-popup-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (floatingPopup) floatingPopup.style.display = 'none';
+    });
+
+    // Submissão do Formulário de Criação de Botão
+    const newBtnForm = document.getElementById('new-button-form');
+    if (newBtnForm) {
+      newBtnForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('new-btn-name')?.value.trim() || 'Novo Botão';
+        const whatsapp = document.getElementById('new-btn-whatsapp')?.value.trim().replace(/\D/g, '') || '5511999999999';
+        const prefilled = document.getElementById('new-btn-prefilled')?.value.trim() || '';
+        const ctaText = document.getElementById('new-btn-cta-text')?.value.trim() || 'Falar no WhatsApp';
+        const greeting = document.getElementById('new-btn-greeting')?.value.trim() || 'Confirme seus dados para iniciar a conversa';
+        const question = document.getElementById('new-btn-question')?.value.trim() || 'Qual região você gostaria de tratar?';
+        const color = document.getElementById('new-btn-color-hex')?.value.trim() || '#25D366';
+        const position = document.querySelector('input[name="new-btn-position"]:checked')?.value || 'right';
+        const isActive = document.getElementById('new-btn-status')?.checked ?? true;
+
+        // Opções de Qualificação
+        const options = [];
+        document.querySelectorAll('.new-btn-option-row').forEach((row, idx) => {
+          const labelInput = row.querySelector('.new-opt-label');
+          const badgeSelect = row.querySelector('.new-opt-badge');
+          if (labelInput && labelInput.value.trim()) {
+            const badge = badgeSelect ? badgeSelect.value : '🔥 Quente';
+            const score = badge.includes('Quente') ? 35 : badge.includes('Morno') ? 25 : 15;
+            options.push({
+              id: String(idx + 1),
+              label: labelInput.value.trim(),
+              badge,
+              score
+            });
+          }
+        });
+
+        const slug = name.toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        const newButton = StorageService.saveButton({
+          id: `btn-${Date.now()}`,
+          name,
+          slug: slug || `btn-${Date.now()}`,
+          category: 'Campanha WhatsApp',
+          siteUrl: `https://${slug || 'site'}.com.br`,
+          whatsappNumber: whatsapp,
+          status: isActive ? 'Ativo' : 'Pausado',
+          clicks: 0,
+          leadsCount: 0,
+          conversionRate: '0.0%',
+          style: {
+            color,
+            position,
+            ctaText,
+            greeting
+          },
+          formConfig: {
+            title: greeting,
+            subtitle: 'Preencha os campos para receber uma avaliação personalizada.',
+            buttonText: ctaText,
+            questionLabel: question,
+            options: options.length ? options : [
+              { id: '1', label: 'Quero atendimento imediato', score: 35, badge: '🔥 Quente' },
+              { id: '2', label: 'Gostaria de tirar dúvidas', score: 25, badge: '❄️ Morno' }
+            ],
+            whatsappTemplate: prefilled ? `${prefilled} [Objetivo: {momento}]` : 'Olá! Vim pelo site. Meu objetivo é: {momento}.'
+          }
+        });
+
+        this.showToast(`🎉 Botão "${name}" criado com sucesso!`);
+        this.switchDashTab('buttons');
+        // Abre imediatamente o modal com o script embed e prompt para IA!
+        setTimeout(() => {
+          this.openCopyScriptModal(newButton.id, newButton.name, newButton.slug);
+        }, 150);
+      });
+    }
 
     // Ações em cada Card de Botão
     document.querySelectorAll('.btn-copy-script-action').forEach(btn => {
