@@ -107,6 +107,7 @@ async function runPush() {
     dir: REPO_DIR,
     remote: 'origin',
     ref: 'main',
+    remoteRef: 'refs/heads/main',
     force: true,
     onAuth: () => ({
       username: creds.username,
