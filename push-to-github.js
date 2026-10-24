@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Construtor No-Code interativo de formularios com Phone Mockup e live preview em tempo real',
+    message: 'feat: Modal de instalacao do script com abas de Codigo e Pedir para uma IA (gerador de prompt inteligente)',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

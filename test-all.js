@@ -184,10 +184,13 @@ const videoModalHtml = renderVideoTourModal();
 assert(videoModalHtml.includes('Veja o Pinas Kit funcionando em 1 minuto'), 'Modal de Vídeo Tour possui título correto');
 assert(videoModalHtml.includes('tour-play-btn'), 'Modal de Vídeo Tour possui botão de play');
 
-// 2.10 Modal Copiar Script
+// 2.10 Modal Copiar Script (Padrão CentralKit com Aba de Código e Aba de IA)
 const copyModalHtml = renderCopyScriptModal();
-assert(copyModalHtml.includes('Instalar Botão no seu Site'), 'Modal Copiar Script possui instruções claras');
+assert(copyModalHtml.includes('Agora é só instalar no seu site'), 'Modal Copiar Script possui subtítulo oficial');
 assert(copyModalHtml.includes('copy-script-code'), 'Modal Copiar Script possui o textarea com o código');
+assert(copyModalHtml.includes('tab-btn-ai'), 'Modal Copiar Script possui a aba "Pedir para uma IA"');
+assert(copyModalHtml.includes('copy-ai-prompt-code'), 'Modal Copiar Script possui o container do prompt formatado para IA');
+assert(copyModalHtml.includes('btn-do-copy-ai-prompt'), 'Modal Copiar Script possui o botão de copiar prompt para IA');
 
 // 2.11 Drawer Lateral da Ficha do Lead
 const drawerHtml = renderLeadDrawer(lead1);

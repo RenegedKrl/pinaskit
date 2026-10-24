@@ -718,4 +718,78 @@ body[data-theme='dark'] .pk-select-option.is-selected {
   background-color: var(--pk-primary-soft);
 }
 
+/* ==========================================================================
+   MODAL DE INSTALAÇÃO DO SCRIPT (ABAS: CÓDIGO vs PEDIR PARA UMA IA)
+   ========================================================================== */
+.pk-script-tabs {
+  display: flex;
+  gap: 8px;
+  background-color: var(--pk-bg-subtle);
+  padding: 5px;
+  border-radius: var(--pk-radius-lg);
+  border: 1px solid var(--pk-border);
+  margin-bottom: 18px;
+}
+
+.pk-script-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  border-radius: var(--pk-radius-md);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--pk-text-secondary);
+  cursor: pointer;
+  transition: all var(--pk-transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pk-script-tab:hover {
+  color: var(--pk-primary);
+}
+
+.pk-script-tab.is-active {
+  background-color: var(--pk-bg-surface);
+  color: var(--pk-text-primary);
+  box-shadow: var(--pk-shadow-sm);
+  border: 1px solid var(--pk-border);
+}
+
+.pk-install-code-box {
+  background-color: var(--pk-bg-card);
+  border: 1.5px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  transition: border-color var(--pk-transition-fast);
+}
+
+.pk-install-code-box:focus-within {
+  border-color: var(--pk-primary);
+}
+
+.pk-install-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pk-install-code-text {
+  font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pk-text-primary);
+  background: transparent;
+  border: none;
+  width: 100%;
+  resize: none;
+  outline: none;
+}
+
+
 

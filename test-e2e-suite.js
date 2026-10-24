@@ -203,14 +203,41 @@ async function runE2ETestSuite() {
     const quotaText = await evalJs('document.querySelector(".pk-card")?.innerText.includes("Cota de Sites")');
     assert(quotaText === true, 'Indicador de cota do Plano Starter exibido com destaque');
 
-    // Testar botão "Copiar Script" no primeiro botão
+    // Testar botão "Copiar Script" no primeiro botão (Glúteo Feminino)
     await evalJs('document.querySelector(".btn-copy-script-action")?.click()');
     await new Promise(r => setTimeout(r, 400));
 
     const copyModalActive = await evalJs('document.getElementById("copy-script-modal-overlay")?.classList.contains("is-active")');
-    assert(copyModalActive === true, 'Botão "Copiar Script" abre modal com o código embed e link direto');
+    assert(copyModalActive === true, 'Botão "Copiar Script" abre modal com as abas de Código e IA');
 
-    await takeScreenshot('copy-script');
+    const copyModalTitle = await evalJs('document.getElementById("copy-modal-button-name")?.innerText');
+    assert(copyModalTitle.includes('Glúteo Feminino'), 'Modal exibe o nome do botão ("Glúteo Feminino") no cabeçalho');
+
+    // Validar Aba 1 (</> Código) ativa por padrão
+    const isCodeTabVisible = await evalJs('document.getElementById("copy-tab-code")?.style.display !== "none"');
+    assert(isCodeTabVisible === true, 'Aba "</> Código" está visível por padrão com o script de instalação');
+
+    const scriptCodeValue = await evalJs('document.getElementById("copy-script-code")?.value');
+    assert(scriptCodeValue && scriptCodeValue.includes('data-pinaskit="btn-1"'), 'Script embed contém o identificador do botão (data-pinaskit="btn-1")');
+
+    await takeScreenshot('copy-script-code-tab');
+
+    // Alternar para a Aba 2 (🤖 Pedir para uma IA)
+    await evalJs('document.getElementById("tab-btn-ai")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const isAiTabVisible = await evalJs('document.getElementById("copy-tab-ai")?.style.display !== "none"');
+    assert(isAiTabVisible === true, 'Aba "🤖 Pedir para uma IA" abre e fica visível ao clicar');
+
+    const aiPromptValue = await evalJs('document.getElementById("copy-ai-prompt-code")?.value');
+    assert(aiPromptValue && aiPromptValue.includes('Preciso adicionar um widget de botão flutuante'), 'Prompt para IA contém a instrução profissional completa');
+    assert(aiPromptValue && aiPromptValue.includes('data-pinaskit="btn-1"'), 'Prompt para IA injeta automaticamente a tag do botão correspondente');
+
+    // Clicar no botão de copiar prompt para IA
+    await evalJs('document.getElementById("btn-do-copy-ai-prompt")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    await takeScreenshot('copy-script-ai-tab');
 
     // Fechar modal copiar script
     await evalJs('document.getElementById("btn-close-copy-modal")?.click()');

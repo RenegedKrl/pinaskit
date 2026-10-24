@@ -1,62 +1,125 @@
 /* ==========================================================================
-   PINAS KIT — MODAL COPIAR SCRIPT & LINK DO BOTÃO
+   PINAS KIT — MODAL DE INSTALAÇÃO DO BOTÃO & SCRIPT EMBED
+   (COM ABAS: </> CÓDIGO vs 🤖 PEDIR PARA UMA IA)
    ========================================================================== */
 
 export function renderCopyScriptModal() {
   return `
     <div class="pk-modal-overlay" id="copy-script-modal-overlay">
-      <div class="pk-modal" style="max-width: 580px;">
+      <div class="pk-modal" style="max-width: 640px; padding: 24px;">
         <button class="pk-modal-close" id="btn-close-copy-modal" aria-label="Fechar">✕</button>
 
-        <div style="margin-bottom: 20px;">
-          <span class="pk-badge pk-badge-purple" style="margin-bottom: 6px;">📋 Instalação Simples</span>
-          <h2 style="font-size: 22px; font-weight: 800; color: var(--pk-text-primary);" id="copy-modal-button-name">
-            Instalar Botão no seu Site
+        <!-- CABEÇALHO DO MODAL -->
+        <div style="margin-bottom: 18px;">
+          <h2 style="font-size: 22px; font-weight: 800; color: var(--pk-text-primary); margin: 0 0 6px 0;">
+            Botão "<span id="copy-modal-button-name">Glúteo Feminino</span>" criado! 🎉
           </h2>
-          <p style="font-size: 13px; color: var(--pk-text-secondary); margin-top: 4px;">
-            Cole este código no seu site (WordPress, Elementor, Wix ou HTML) antes do fechamento da tag &lt;/body&gt;.
+          <p style="font-size: 13.5px; color: var(--pk-text-secondary); margin: 0;">
+            Agora é só instalar no seu site. Escolha a forma mais fácil para você:
           </p>
         </div>
 
-        <!-- Script Embutível -->
-        <div class="pk-form-group">
-          <label class="pk-label">Código do Widget (JavaScript)</label>
-          <div style="position: relative;">
-            <textarea 
-              id="copy-script-code" 
-              class="pk-textarea" 
-              rows="3" 
-              readonly 
-              style="font-family: monospace; font-size: 12px; background-color: var(--pk-bg-subtle); resize: none;"
-            >&lt;script src="https://pinaskit.com.br/widget.js" data-button-id="btn-1" defer&gt;&lt;/script&gt;</textarea>
-            <button class="pk-btn pk-btn-primary pk-btn-sm" id="btn-do-copy-script" style="position: absolute; bottom: 12px; right: 12px;">
-              Copiar Código
-            </button>
-          </div>
+        <!-- SWITCHER DE ABAS: CÓDIGO vs PEDIR PARA UMA IA -->
+        <div class="pk-script-tabs">
+          <button type="button" class="pk-script-tab is-active" id="tab-btn-code" data-target="copy-tab-code">
+            <span>&lt;/&gt; Código</span>
+          </button>
+          <button type="button" class="pk-script-tab" id="tab-btn-ai" data-target="copy-tab-ai">
+            <span>🤖 Pedir para uma IA</span>
+          </button>
         </div>
 
-        <!-- Link Direto / Redirecionador -->
-        <div class="pk-form-group" style="margin-top: 16px;">
-          <label class="pk-label">Link Direto para Anúncios (Bio do Insta / Google Ads)</label>
-          <div style="display: flex; gap: 8px;">
+        <!-- CONTEÚDO DA ABA 1: CÓDIGO DIRETO -->
+        <div id="copy-tab-code" class="copy-tab-pane">
+          <p style="font-size: 13px; color: var(--pk-text-secondary); line-height: 1.5; margin: 0 0 14px 0;">
+            Cole este script no seu site, uma única vez (de preferência antes de <code>&lt;/body&gt;</code>). As alterações feitas no botão atualizam sozinhas — sem precisar trocar o código.
+          </p>
+
+          <!-- Bloco do Script de Instalação -->
+          <div class="pk-install-code-box">
+            <div class="pk-install-label-row">
+              <span style="font-size: 12px; font-weight: 700; color: var(--pk-text-primary);">Script de instalação</span>
+              <button type="button" class="pk-btn pk-btn-ghost pk-btn-xs" id="btn-do-copy-script" style="color: var(--pk-primary); font-size: 12px;">
+                📋 Copiar Código
+              </button>
+            </div>
+            <textarea 
+              id="copy-script-code" 
+              class="pk-install-code-text" 
+              rows="3" 
+              readonly
+            >&lt;script async src="https://pinaskit.com.br/embed.js" data-pinaskit="btn-1" data-api="https://api.pinaskit.com.br/v1"&gt;&lt;/script&gt;</textarea>
+          </div>
+
+          <!-- Bloco do Link Direto -->
+          <div class="pk-install-code-box">
+            <div class="pk-install-label-row">
+              <span style="font-size: 12px; font-weight: 700; color: var(--pk-text-primary);">Sem site? Use o link direto (bio, anúncios, mensagens)</span>
+              <button type="button" class="pk-btn pk-btn-ghost pk-btn-xs" id="btn-do-copy-url" style="color: var(--pk-primary); font-size: 12px;">
+                📋 Copiar Link
+              </button>
+            </div>
             <input 
               type="text" 
               id="copy-direct-url" 
-              class="pk-input" 
+              class="pk-install-code-text" 
               readonly 
               value="https://pinaskit.com.br/b/gluteo-feminino" 
-              style="font-size: 13px;"
+              style="font-size: 13px; font-weight: 600;"
             />
-            <button class="pk-btn pk-btn-outline pk-btn-sm" id="btn-do-copy-url">
-              Copiar Link
-            </button>
           </div>
         </div>
 
-        <div style="margin-top: 24px; padding: 12px 16px; background-color: var(--pk-bg-subtle); border-radius: var(--pk-radius-md); font-size: 12px; color: var(--pk-text-secondary); display: flex; align-items: center; gap: 8px;">
-          <span>💡</span>
-          <span>Este link rastreia automaticamente UTMs da Meta e Google Ads e pontua o lead em tempo real.</span>
+        <!-- CONTEÚDO DA ABA 2: PEDIR PARA UMA IA -->
+        <div id="copy-tab-ai" class="copy-tab-pane" style="display: none;">
+          <p style="font-size: 13px; color: var(--pk-text-secondary); line-height: 1.5; margin: 0 0 14px 0;">
+            Use este prompt se você estiver construindo seu site com <strong>ChatGPT, Claude, Cursor, v0, Bolt</strong> ou com um programador. Basta copiar e colar:
+          </p>
+
+          <div class="pk-install-code-box" style="background-color: var(--pk-bg-subtle);">
+            <div class="pk-install-label-row">
+              <span style="font-size: 12px; font-weight: 700; color: var(--pk-primary);">Prompt pronto para IA</span>
+              <span class="pk-badge pk-badge-purple" style="font-size: 10px;">1 clique para copiar</span>
+            </div>
+
+            <textarea 
+              id="copy-ai-prompt-code" 
+              class="pk-install-code-text" 
+              rows="10" 
+              readonly 
+              style="font-size: 11.5px; line-height: 1.45;"
+            >Preciso adicionar um widget de botão flutuante de WhatsApp ao meu site.
+
+Insira o script abaixo em todas as páginas, uma única vez, imediatamente antes do fechamento da tag </body>. Se o site usa um framework (React, Next.js, Vue, Astro, WordPress, Shopify, etc.), adicione-o no HTML base/layout para carregar em todas as páginas:
+
+<script async src="https://pinaskit.com.br/embed.js" data-pinaskit="btn-1" data-api="https://api.pinaskit.com.br/v1"></script>
+
+Regras importantes:
+- Não altere nem remova os atributos data-pinaskit e data-api (eles identificam o botão e rastreiam UTMs de anúncios).
+- Não é preciso criar nenhum HTML/CSS/JS adicional: o próprio script renderiza o botão flutuante e o formulário de qualificação.
+- O widget aparece como um botão flutuante no canto da tela e se atualiza sozinho; não é preciso mexer no código depois.</textarea>
+          </div>
+
+          <button type="button" class="pk-btn pk-btn-primary" id="btn-do-copy-ai-prompt" style="width: 100%; justify-content: center; font-size: 13.5px; padding: 12px 18px; font-weight: 700;">
+            🤖 Copiar Prompt para IA
+          </button>
+
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; justify-content: center;">
+            <span class="pk-badge pk-badge-primary" style="font-size: 10px;">ChatGPT</span>
+            <span class="pk-badge pk-badge-purple" style="font-size: 10px;">Claude</span>
+            <span class="pk-badge pk-badge-blue" style="font-size: 10px;">Cursor</span>
+            <span class="pk-badge pk-badge-green" style="font-size: 10px;">WordPress / Elementor</span>
+            <span class="pk-badge pk-badge-amber" style="font-size: 10px;">Shopify / Nuvemshop</span>
+            <span class="pk-badge pk-badge-ruby" style="font-size: 10px;">Next.js / React</span>
+          </div>
         </div>
+
+        <!-- RODAPÉ INFORMATIVO -->
+        <div style="margin-top: 18px; padding: 10px 14px; background-color: var(--pk-bg-subtle); border-radius: var(--pk-radius-md); font-size: 12px; color: var(--pk-text-secondary); display: flex; align-items: center; gap: 8px;">
+          <span>💡</span>
+          <span>O script detecta automaticamente visitantes do Meta Ads e Google Ads, rastreando cliques e conversões para seu WhatsApp.</span>
+        </div>
+
       </div>
     </div>
   `;

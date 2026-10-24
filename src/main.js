@@ -240,8 +240,7 @@ class PinasKitApp {
       btn.addEventListener('click', (e) => {
         const slug = e.currentTarget.getAttribute('data-slug');
         const url = `https://pinaskit.com.br/b/${slug}`;
-        navigator.clipboard?.writeText(url);
-        this.showToast(`📋 Link copiado: ${url}`);
+        this.safeCopyToClipboard(url, `📋 Link copiado: ${url}`);
       });
     });
 
@@ -388,8 +387,7 @@ class PinasKitApp {
     document.getElementById('drawer-btn-copy-phone')?.addEventListener('click', (e) => {
       const phone = e.currentTarget.getAttribute('data-phone');
       if (phone) {
-        navigator.clipboard?.writeText(phone);
-        this.showToast(`📋 Telefone copiado: ${phone}`);
+        this.safeCopyToClipboard(phone, `📋 Telefone copiado: ${phone}`);
       }
     });
 
@@ -436,20 +434,43 @@ class PinasKitApp {
     });
 
     // ------------------------------------------------------------------------
-    // 7. EVENTOS DO MODAL COPIAR SCRIPT
+    // 7. EVENTOS DO MODAL COPIAR SCRIPT (ABAS CÓDIGO vs PEDIR PARA UMA IA)
     // ------------------------------------------------------------------------
     document.getElementById('btn-close-copy-modal')?.addEventListener('click', () => this.closeModal('copy-script-modal-overlay'));
     
+    // Alternância de Abas: Código vs Pedir para uma IA
+    document.querySelectorAll('.pk-script-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.pk-script-tab').forEach(t => t.classList.remove('is-active'));
+        e.currentTarget.classList.add('is-active');
+
+        const targetId = e.currentTarget.getAttribute('data-target');
+        const codePane = document.getElementById('copy-tab-code');
+        const aiPane = document.getElementById('copy-tab-ai');
+
+        if (targetId === 'copy-tab-code') {
+          if (codePane) codePane.style.display = 'block';
+          if (aiPane) aiPane.style.display = 'none';
+        } else {
+          if (codePane) codePane.style.display = 'none';
+          if (aiPane) aiPane.style.display = 'block';
+        }
+      });
+    });
+
     document.getElementById('btn-do-copy-script')?.addEventListener('click', () => {
       const code = document.getElementById('copy-script-code')?.value;
-      navigator.clipboard?.writeText(code);
-      this.showToast('✅ Código do widget copiado! Cole no seu site.');
+      this.safeCopyToClipboard(code, '✅ Código do script copiado! Cole antes de </body>.');
     });
 
     document.getElementById('btn-do-copy-url')?.addEventListener('click', () => {
       const url = document.getElementById('copy-direct-url')?.value;
-      navigator.clipboard?.writeText(url);
-      this.showToast('✅ Link direto copiado com sucesso!');
+      this.safeCopyToClipboard(url, '✅ Link direto copiado com sucesso!');
+    });
+
+    document.getElementById('btn-do-copy-ai-prompt')?.addEventListener('click', () => {
+      const promptText = document.getElementById('copy-ai-prompt-code')?.value;
+      this.safeCopyToClipboard(promptText, '🤖 Prompt copiado com sucesso! Cole no ChatGPT, Claude ou Cursor.');
     });
 
     // ------------------------------------------------------------------------
@@ -820,10 +841,34 @@ class PinasKitApp {
     const titleEl = document.getElementById('copy-modal-button-name');
     const scriptEl = document.getElementById('copy-script-code');
     const urlEl = document.getElementById('copy-direct-url');
+    const aiPromptEl = document.getElementById('copy-ai-prompt-code');
 
-    if (titleEl) titleEl.textContent = `Instalar Botão: ${buttonName}`;
-    if (scriptEl) scriptEl.value = `<script src="https://pinaskit.com.br/widget.js" data-button-id="${buttonId}" defer></script>`;
+    const scriptTag = `<script async src="https://pinaskit.com.br/embed.js" data-pinaskit="${buttonId}" data-api="https://api.pinaskit.com.br/v1"></script>`;
+
+    if (titleEl) titleEl.textContent = buttonName;
+    if (scriptEl) scriptEl.value = scriptTag;
     if (urlEl) urlEl.value = `https://pinaskit.com.br/b/${slug}`;
+
+    if (aiPromptEl) {
+      aiPromptEl.value = `Preciso adicionar um widget de botão flutuante de WhatsApp ao meu site.
+
+Insira o script abaixo em todas as páginas, uma única vez, imediatamente antes do fechamento da tag </body>. Se o site usa um framework (React, Next.js, Vue, Astro, WordPress, Shopify, etc.), adicione-o no HTML base/layout para carregar em todas as páginas:
+
+${scriptTag}
+
+Regras importantes:
+- Não altere nem remova os atributos data-pinaskit e data-api (eles identificam o botão e rastreiam UTMs de anúncios).
+- Não é preciso criar nenhum HTML/CSS/JS adicional: o próprio script renderiza o botão flutuante e o formulário de qualificação.
+- O widget aparece como um botão flutuante no canto da tela e se atualiza sozinho; não é preciso mexer no código depois.`;
+    }
+
+    // Ativa a primeira aba (Código) por padrão
+    document.querySelectorAll('.pk-script-tab').forEach(t => t.classList.remove('is-active'));
+    document.getElementById('tab-btn-code')?.classList.add('is-active');
+    const codePane = document.getElementById('copy-tab-code');
+    const aiPane = document.getElementById('copy-tab-ai');
+    if (codePane) codePane.style.display = 'block';
+    if (aiPane) aiPane.style.display = 'none';
 
     this.openModal('copy-script-modal-overlay');
   }
@@ -857,6 +902,39 @@ class PinasKitApp {
       toast.classList.add('is-fading');
       setTimeout(() => toast.remove(), 300);
     }, 3500);
+  }
+
+  safeCopyToClipboard(text, successMsg) {
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          if (successMsg) this.showToast(successMsg);
+        })
+        .catch(() => {
+          this.fallbackCopyText(text);
+          if (successMsg) this.showToast(successMsg);
+        });
+    } else {
+      this.fallbackCopyText(text);
+      if (successMsg) this.showToast(successMsg);
+    }
+  }
+
+  fallbackCopyText(text) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '-9999px';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch (_) {}
   }
 }
 
