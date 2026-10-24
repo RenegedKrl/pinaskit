@@ -358,6 +358,26 @@ assert(planContent.includes('Módulo "Botões" (Sites, Pastas de Captação e Li
 assert(planContent.includes('Módulo "Leads" (Tabela Completa CentralKit com Filtro por Botão)'), 'Plano contém a especificação da Tabela CentralKit');
 
 // --------------------------------------------------------------------------
+// 5. TESTES DO EMBED.JS & BOTÃO MENTORIA DE CARREIRA (CROSS-DOMAIN)
+// --------------------------------------------------------------------------
+console.log('\n🚀 5. Testando Widget Embed.js & Resolução de Mentoria de Carreira:');
+
+const embedContent = fs.readFileSync('embed.js', 'utf8');
+const publicEmbedContent = fs.readFileSync('public/embed.js', 'utf8');
+const serverContent = fs.readFileSync('server.js', 'utf8');
+
+assert(embedContent.includes('btn-1792870382402'), 'embed.js possui o ID btn-1792870382402 no catálogo nativo');
+assert(embedContent.includes('Mentoria de Carreira'), 'embed.js configura o nome Mentoria de Carreira');
+assert(embedContent.includes('5511941713647'), 'embed.js configura o WhatsApp oficial 5511941713647 para Mentoria');
+assert(embedContent.includes('isMentoria'), 'embed.js possui detecção contextual inteligente para Mentoria de Carreira');
+assert(embedContent.includes('Atendimento Exclusivo'), 'embed.js possui fallback neutro que impede vazamento de Glúteo Feminino em outros nichos');
+assert(embedContent.includes('/api/leads'), 'embed.js realiza envio de leads cross-domain para o CRM central');
+assert(publicEmbedContent === embedContent, 'public/embed.js está perfeitamente sincronizado com embed.js');
+assert(serverContent.includes('/api/leads'), 'server.js disponibiliza a rota /api/leads para gravação e sincronização');
+assert(serverContent.includes('Access-Control-Allow-Origin'), 'server.js possui cabeçalhos CORS completos para permitir conexões externas');
+assert(typeof StorageService.syncRemoteLeads === 'function', 'StorageService possui o método syncRemoteLeads');
+
+// --------------------------------------------------------------------------
 // RESULTADO FINAL
 // --------------------------------------------------------------------------
 console.log('\n============================================================');

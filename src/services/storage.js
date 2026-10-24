@@ -218,6 +218,30 @@ const INITIAL_BUTTONS = [
       ],
       whatsappTemplate: 'Olá Dr.! Meu nome é {nome}. Vi seu site e gostaria de agendar uma consulta para: {momento}.'
     }
+  },
+  {
+    id: 'btn-1792870382402',
+    name: 'Mentoria de Carreira',
+    slug: 'mentoria-de-carreira',
+    category: 'Mentoria & Coaching Profissional',
+    siteUrl: 'https://brunamentoriadecarreira.vercel.app',
+    whatsappNumber: '5511941713647',
+    status: 'Ativo',
+    clicks: 120,
+    leadsCount: 14,
+    conversionRate: '11.6%',
+    formConfig: {
+      title: 'Aplicação para Mentoria',
+      subtitle: 'Preencha os campos para iniciar o alinhamento com a mentoria. Retorno em até 24 horas úteis.',
+      buttonText: 'Enviar Aplicação',
+      questionLabel: 'Qual é o seu objetivo principal hoje?',
+      options: [
+        { id: '1', label: 'Transição de Carreira e Novos Desafios', score: 35, badge: '🔥 Quente' },
+        { id: '2', label: 'Gostaria de entender valores e parcelamento', score: 25, badge: '❄️ Morno' },
+        { id: '3', label: 'Tenho interesse para os próximos meses', score: 15, badge: '🧊 Frio' }
+      ],
+      whatsappTemplate: 'Olá Bruna! Meu nome é {nome}. Vi o site da Mentoria de Carreira e meu objetivo é: {momento}.'
+    }
   }
 ];
 
@@ -478,6 +502,30 @@ export const StorageService = {
   },
 
   // --- GERENCIAMENTO DE LEADS (CENTRALKIT) ---
+  async syncRemoteLeads() {
+    try {
+      if (typeof window === 'undefined' || !window.fetch) return;
+      const res = await fetch('/api/leads');
+      if (res.ok) {
+        const remoteLeads = await res.json();
+        if (Array.isArray(remoteLeads) && remoteLeads.length > 0) {
+          const current = this.getLeads();
+          const existingIds = new Set(current.map(l => l.id));
+          let changed = false;
+          for (const rl of remoteLeads) {
+            if (!existingIds.has(rl.id)) {
+              current.unshift(rl);
+              changed = true;
+            }
+          }
+          if (changed) {
+            localStorage.setItem(STORAGE_KEYS.LEADS, JSON.stringify(current));
+          }
+        }
+      }
+    } catch (_) {}
+  },
+
   getLeads(buttonFilter = 'Todos', stageFilter = 'Todos') {
     const data = localStorage.getItem(STORAGE_KEYS.LEADS);
     const leads = data ? JSON.parse(data) : INITIAL_LEADS;

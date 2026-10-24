@@ -25,6 +25,61 @@ const server = http.createServer((req, res) => {
   let cleanUrl = req.url.split('?')[0];
   if (cleanUrl === '/') cleanUrl = '/index.html';
 
+  // CORS Preflight
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400'
+    });
+    return res.end();
+  }
+
+  // API de Leads para Integração Cross-Domain com embed.js
+  if (cleanUrl === '/api/leads') {
+    const leadsFile = path.join(__dirname, 'leads-data.json');
+    if (req.method === 'GET') {
+      let leads = [];
+      if (fs.existsSync(leadsFile)) {
+        try { leads = JSON.parse(fs.readFileSync(leadsFile, 'utf8')); } catch (_) {}
+      }
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': '*'
+      });
+      return res.end(JSON.stringify(leads));
+    }
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        try {
+          const newLead = JSON.parse(body);
+          let leads = [];
+          if (fs.existsSync(leadsFile)) {
+            try { leads = JSON.parse(fs.readFileSync(leadsFile, 'utf8')); } catch (_) {}
+          }
+          leads.unshift(newLead);
+          fs.writeFileSync(leadsFile, JSON.stringify(leads, null, 2), 'utf8');
+          console.log(`[Pinas Kit API] Novo Lead Recebido via Embed: ${newLead.name} (${newLead.button})`);
+          res.writeHead(201, {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Access-Control-Allow-Origin': '*'
+          });
+          return res.end(JSON.stringify({ success: true, lead: newLead }));
+        } catch (err) {
+          res.writeHead(400, {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Access-Control-Allow-Origin': '*'
+          });
+          return res.end(JSON.stringify({ success: false, error: 'JSON inválido' }));
+        }
+      });
+      return;
+    }
+  }
+
   let filePath = path.join(__dirname, cleanUrl);
   if (!fs.existsSync(filePath)) {
     filePath = path.join(__dirname, 'public', cleanUrl);

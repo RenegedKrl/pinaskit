@@ -1,0 +1,24 @@
+[
+  {
+    "id": "lead-1792877854169",
+    "name": "Renato Silva",
+    "phone": "11999998888",
+    "email": "renatosilva@cliente.com",
+    "button": "Glúteo Feminino",
+    "origin": "Direto / Orgânico",
+    "campaign": "Tráfego Pago",
+    "utmSource": "",
+    "utmMedium": "",
+    "utmCampaign": "",
+    "utmContent": "",
+    "utmTerm": "",
+    "temperature": "Quente",
+    "score": 35,
+    "interactions": 1,
+    "lastVisit": "Agora mesmo",
+    "stage": "Novo",
+    "qualQuestion": "Qual é o seu objetivo principal hoje?",
+    "qualAnswer": "Quero tonificação e aumento de volume (+35 pts)",
+    "userMessage": "Aplicação direta via formulário do site."
+  }
+]

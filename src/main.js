@@ -38,6 +38,9 @@ class PinasKitApp {
     const savedTheme = StorageService.getTheme();
     StorageService.setTheme(savedTheme);
 
+    // 1.1 Sincroniza leads remotos recebidos via API embed cross-domain
+    StorageService.syncRemoteLeads();
+
     // 2. Renderiza a estrutura da aplicação
     this.render();
 

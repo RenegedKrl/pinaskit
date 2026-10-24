@@ -16,10 +16,58 @@
   const scriptTag = document.currentScript || document.querySelector('script[data-pinaskit]');
   const urlParams = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : null;
   const buttonId = (urlParams && urlParams.get('button')) || (scriptTag ? scriptTag.getAttribute('data-pinaskit') : 'btn-1') || 'btn-1';
-  const apiEndpoint = scriptTag ? (scriptTag.getAttribute('data-api') || window.location.origin) : window.location.origin;
+  let scriptOrigin = '';
+  try {
+    if (scriptTag && scriptTag.src) {
+      scriptOrigin = new URL(scriptTag.src).origin;
+    }
+  } catch (_) {}
+  const apiEndpoint = scriptTag ? (scriptTag.getAttribute('data-api') || scriptOrigin || window.location.origin) : (scriptOrigin || window.location.origin);
 
-  // 2. Obter configurações do botão (do localStorage compartilhado ou dados padrão)
+  // 2. Catálogo Oficial Pré-configurado de Botões
   const DEFAULT_CONFIGS = {
+    'btn-1792870382402': {
+      name: 'Mentoria de Carreira',
+      whatsapp: '5511941713647',
+      color: '#25D366',
+      position: 'right',
+      greeting: 'Confirme seus dados para iniciar a conversa',
+      ctaText: 'Falar no WhatsApp',
+      siteUrl: 'https://brunamentoriadecarreira.vercel.app',
+      formConfig: {
+        title: 'Aplicação para Mentoria',
+        subtitle: 'Preencha os campos para iniciar o alinhamento com a mentoria. Retorno em até 24 horas úteis.',
+        questionLabel: 'Qual é o seu objetivo principal hoje?',
+        buttonText: 'Enviar Aplicação',
+        options: [
+          { id: '1', label: 'Transição de Carreira e Novos Desafios', score: 35, badge: '🔥 Quente' },
+          { id: '2', label: 'Gostaria de entender valores e parcelamento', score: 25, badge: '❄️ Morno' },
+          { id: '3', label: 'Tenho interesse para os próximos meses', score: 15, badge: '🧊 Frio' }
+        ],
+        whatsappTemplate: 'Olá Bruna! Meu nome é {nome}. Vi o site da Mentoria de Carreira e meu objetivo é: {momento}.'
+      }
+    },
+    'mentoria-de-carreira': {
+      name: 'Mentoria de Carreira',
+      whatsapp: '5511941713647',
+      color: '#25D366',
+      position: 'right',
+      greeting: 'Confirme seus dados para iniciar a conversa',
+      ctaText: 'Falar no WhatsApp',
+      siteUrl: 'https://brunamentoriadecarreira.vercel.app',
+      formConfig: {
+        title: 'Aplicação para Mentoria',
+        subtitle: 'Preencha os campos para iniciar o alinhamento com a mentoria. Retorno em até 24 horas úteis.',
+        questionLabel: 'Qual é o seu objetivo principal hoje?',
+        buttonText: 'Enviar Aplicação',
+        options: [
+          { id: '1', label: 'Transição de Carreira e Novos Desafios', score: 35, badge: '🔥 Quente' },
+          { id: '2', label: 'Gostaria de entender valores e parcelamento', score: 25, badge: '❄️ Morno' },
+          { id: '3', label: 'Tenho interesse para os próximos meses', score: 15, badge: '🧊 Frio' }
+        ],
+        whatsappTemplate: 'Olá Bruna! Meu nome é {nome}. Vi o site da Mentoria de Carreira e meu objetivo é: {momento}.'
+      }
+    },
     'btn-1': {
       name: 'Glúteo Feminino',
       whatsapp: '5511975374960',
@@ -31,6 +79,7 @@
         title: 'Conte sobre seu momento.',
         subtitle: 'Preencha os campos para receber uma avaliação personalizada.',
         questionLabel: 'Qual é o seu objetivo principal hoje?',
+        buttonText: 'Enviar Aplicação',
         options: [
           { id: '1', label: 'Quero tonificação e aumento de volume', score: 35, badge: '🔥 Quente' },
           { id: '2', label: 'Gostaria de entender valores e parcelamento', score: 25, badge: '❄️ Morno' },
@@ -50,6 +99,7 @@
         title: 'Avaliação de Endolaser.',
         subtitle: 'Preencha para tirar dúvidas sobre o procedimento de Endolaser.',
         questionLabel: 'Qual região você gostaria de tratar?',
+        buttonText: 'Enviar Aplicação',
         options: [
           { id: '1', label: 'Papada ou pescoço', score: 30, badge: '🔥 Quente' },
           { id: '2', label: 'Abdômen ou flancos', score: 30, badge: '🔥 Quente' },
@@ -69,6 +119,7 @@
         title: 'Agendamento de Consulta.',
         subtitle: 'Agende sua primeira consulta com nosso especialista.',
         questionLabel: 'O que melhor descreve sua necessidade médica?',
+        buttonText: 'Enviar Aplicação',
         options: [
           { id: '1', label: 'Consulta de urgência / dor aguda', score: 40, badge: '🔥 Quente' },
           { id: '2', label: 'Check-up de rotina ou acompanhamento', score: 25, badge: '❄️ Morno' },
@@ -79,27 +130,105 @@
     }
   };
 
-  // Tenta ler botões salvos do painel Pinas Kit se estiver no mesmo navegador
-  let activeConfig = DEFAULT_CONFIGS[buttonId] || DEFAULT_CONFIGS['btn-1'];
-  try {
-    const saved = localStorage.getItem('pk_buttons');
-    if (saved) {
-      const list = JSON.parse(saved);
-      const match = list.find(b => b.id === buttonId);
-      if (match) {
-        activeConfig = {
-          name: match.name,
-          siteUrl: match.siteUrl || '',
-          whatsapp: match.whatsappNumber || '5511975374960',
-          color: (match.style && match.style.color) ? match.style.color : '#25D366',
-          position: (match.style && match.style.position) ? match.style.position : 'right',
-          greeting: (match.style && match.style.greeting) ? match.style.greeting : 'Confirme seus dados para iniciar a conversa',
-          ctaText: (match.style && match.style.ctaText) ? match.style.ctaText : 'Falar no WhatsApp',
-          formConfig: match.formConfig || activeConfig.formConfig
-        };
+  // 2.1 Resolução Inteligente da Configuração Ativa
+  let activeConfig = null;
+
+  // Prioridade 1: ID exato no catálogo pré-configurado
+  if (DEFAULT_CONFIGS[buttonId]) {
+    activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIGS[buttonId]));
+  }
+
+  // Prioridade 2: Buscar do localStorage se compartilhado na mesma origem
+  if (!activeConfig) {
+    try {
+      const saved = localStorage.getItem('pk_buttons');
+      if (saved) {
+        const list = JSON.parse(saved);
+        const match = list.find(b => b.id === buttonId || b.slug === buttonId);
+        if (match) {
+          activeConfig = {
+            name: match.name,
+            siteUrl: match.siteUrl || '',
+            whatsapp: match.whatsappNumber || '5511941713647',
+            color: (match.style && match.style.color) ? match.style.color : '#25D366',
+            position: (match.style && match.style.position) ? match.style.position : 'right',
+            greeting: (match.style && match.style.greeting) ? match.style.greeting : 'Confirme seus dados para iniciar a conversa',
+            ctaText: (match.style && match.style.ctaText) ? match.style.ctaText : 'Falar no WhatsApp',
+            formConfig: match.formConfig || {
+              title: 'Aplicação para Mentoria',
+              subtitle: 'Preencha os campos para receber uma avaliação personalizada.',
+              questionLabel: 'Qual é o seu objetivo principal hoje?',
+              buttonText: 'Enviar Aplicação',
+              options: [
+                { id: '1', label: 'Transição de Carreira e Novos Desafios', score: 35, badge: '🔥 Quente' },
+                { id: '2', label: 'Gostaria de entender valores e parcelamento', score: 25, badge: '❄️ Morno' },
+                { id: '3', label: 'Tenho interesse para os próximos meses', score: 15, badge: '🧊 Frio' }
+              ]
+            }
+          };
+        }
       }
+    } catch (_) {}
+  }
+
+  // Prioridade 3: Detecção Contextual Heurística (impede exibir Glúteo em sites de mentoria)
+  if (!activeConfig) {
+    const pageText = (
+      (document.title || '') + ' ' + 
+      (window.location.href || '') + ' ' + 
+      (document.body ? (document.body.innerText || '').slice(0, 2000) : '')
+    ).toLowerCase();
+
+    const isMentoria = (
+      buttonId.includes('1792870382402') ||
+      buttonId.includes('mentoria') ||
+      pageText.includes('mentoria') ||
+      pageText.includes('carreira') ||
+      pageText.includes('bruna')
+    );
+
+    if (isMentoria) {
+      activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIGS['btn-1792870382402']));
+    } else if (pageText.includes('endolaser')) {
+      activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIGS['btn-2']));
+    } else if (pageText.includes('médic') || pageText.includes('consulta')) {
+      activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIGS['btn-3']));
+    } else if (buttonId === 'btn-1' || pageText.includes('glúteo') || pageText.includes('gluteo')) {
+      activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIGS['btn-1']));
+    } else {
+      activeConfig = {
+        name: 'Atendimento Exclusivo',
+        whatsapp: '5511941713647',
+        color: '#25D366',
+        position: 'right',
+        greeting: 'Confirme seus dados para iniciar a conversa',
+        ctaText: 'Falar no WhatsApp',
+        formConfig: {
+          title: 'Fale Conosco',
+          subtitle: 'Preencha os campos para receber um atendimento personalizado.',
+          questionLabel: 'Qual é o seu objetivo principal hoje?',
+          buttonText: 'Enviar Solicitação',
+          options: [
+            { id: '1', label: 'Quero mais informações sobre o serviço', score: 35, badge: '🔥 Quente' },
+            { id: '2', label: 'Gostaria de entender valores e condições', score: 25, badge: '❄️ Morno' },
+            { id: '3', label: 'Tenho interesse para os próximos meses', score: 15, badge: '🧊 Frio' }
+          ],
+          whatsappTemplate: 'Olá! Meu nome é {nome}. Vi o site e gostaria de atendimento.'
+        }
+      };
     }
-  } catch (_) {}
+  }
+
+  // Prioridade 4: Sobrescrita por parâmetros explícitos da tag <script>
+  if (scriptTag) {
+    if (scriptTag.getAttribute('data-name')) activeConfig.name = scriptTag.getAttribute('data-name');
+    if (scriptTag.getAttribute('data-whatsapp')) activeConfig.whatsapp = scriptTag.getAttribute('data-whatsapp');
+    if (scriptTag.getAttribute('data-color')) activeConfig.color = scriptTag.getAttribute('data-color');
+    if (scriptTag.getAttribute('data-cta')) activeConfig.ctaText = scriptTag.getAttribute('data-cta');
+    if (scriptTag.getAttribute('data-greeting')) activeConfig.greeting = scriptTag.getAttribute('data-greeting');
+    if (scriptTag.getAttribute('data-title') && activeConfig.formConfig) activeConfig.formConfig.title = scriptTag.getAttribute('data-title');
+    if (scriptTag.getAttribute('data-question') && activeConfig.formConfig) activeConfig.formConfig.questionLabel = scriptTag.getAttribute('data-question');
+  }
 
   // 2.1 Verificação de Domínio Exclusivo do Botão
   // Garante que cada botão opere exclusivamente no site cadastrado pelo usuário
@@ -425,6 +554,18 @@
       }
     } catch (_) {}
 
+    // Envio Cross-Domain via API Pinas Kit (para gravação direta no CRM central)
+    if (apiEndpoint) {
+      try {
+        fetch(`${apiEndpoint}/api/leads`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newLead),
+          mode: 'cors'
+        }).catch(() => {});
+      } catch (_) {}
+    }
+
     // Exibe tela de confirmação de sucesso no próprio formulário
     if (sourceContainer) {
       const isPopup = sourceContainer.id === 'pk-embed-popup';
@@ -525,23 +666,23 @@
   const popup = document.getElementById('pk-embed-popup');
   const closeBtn = document.getElementById('pk-embed-close-popup');
 
-  triggerBtn.addEventListener('click', () => {
-    popup.classList.toggle('is-open');
+  triggerBtn?.addEventListener('click', () => {
+    popup?.classList.toggle('is-open');
   });
 
-  closeBtn.addEventListener('click', (e) => {
+  closeBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-    popup.classList.remove('is-open');
+    popup?.classList.remove('is-open');
   });
 
-  document.getElementById('pk-embed-floating-form').addEventListener('submit', (e) => {
+  document.getElementById('pk-embed-floating-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const optEl = document.getElementById('pk-float-option');
     const selectedOpt = optEl ? optEl.options[optEl.selectedIndex] : null;
 
     handleLeadSubmission({
-      name: document.getElementById('pk-float-name').value.trim(),
-      phone: document.getElementById('pk-float-phone').value.trim(),
+      name: document.getElementById('pk-float-name')?.value?.trim() || '',
+      phone: document.getElementById('pk-float-phone')?.value?.trim() || '',
       selectedOptionLabel: selectedOpt ? selectedOpt.getAttribute('data-label') : 'Contato Geral',
       score: selectedOpt ? (parseInt(selectedOpt.getAttribute('data-score'), 10) || 30) : 30
     }, popup);
@@ -568,10 +709,10 @@
   }
 
   // Verifica se o container já possui um título no elemento pai para evitar duplicidade de cabeçalho
-  const parentCard = targetContainer.closest('.form-container, .card, .application-card, section, form, div');
+  const parentCard = targetContainer?.closest ? targetContainer.closest('.form-container, .card, .application-card, section, form, div') : null;
   const hasOuterHeading = Boolean(
-    targetContainer.previousElementSibling?.matches('h1, h2, h3, h4, header') ||
-    (parentCard && parentCard.querySelector('h1, h2, h3'))
+    targetContainer?.previousElementSibling?.matches?.('h1, h2, h3, h4, header') ||
+    (parentCard?.querySelector && parentCard.querySelector('h1, h2, h3'))
   );
 
   targetContainer.innerHTML = `
