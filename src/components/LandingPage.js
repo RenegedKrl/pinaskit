@@ -126,6 +126,40 @@ export function renderLandingPage() {
             <p style="font-size: 14px; color: var(--pk-text-secondary); line-height: 1.5;">Veja quem clicou, de qual anúncio veio e atenda no WhatsApp já sabendo exatamente o que a pessoa quer.</p>
           </div>
         </div>
+
+        <!-- SIMULAÇÃO VISUAL: COMO O BOTÃO APARECE NO SITE DO CLIENTE -->
+        <div style="margin-top: 48px; background-color: var(--pk-bg-subtle); border: 2px dashed var(--pk-border); border-radius: var(--pk-radius-xl); padding: 32px 24px; text-align: center;">
+          <span class="pk-badge pk-badge-purple" style="margin-bottom: 8px;">Demonstração no Site do Cliente</span>
+          <h3 style="font-size: 22px; font-weight: 700; color: var(--pk-text-primary); margin-bottom: 8px;">
+            Veja como seus visitantes interagem com o botão
+          </h3>
+          <p style="font-size: 14px; color: var(--pk-text-secondary); max-width: 600px; margin: 0 auto 24px;">
+            Este é um exemplo de como o botão do Pinas Kit fica instalado no canto da página do seu negócio. Ao clicar, o formulário de qualificação abre na hora!
+          </p>
+
+          <!-- Janela Simulada de Navegador -->
+          <div style="max-width: 760px; margin: 0 auto; background-color: var(--pk-bg-surface); border: 1px solid var(--pk-border); border-radius: var(--pk-radius-lg); box-shadow: var(--pk-shadow-md); overflow: hidden; text-align: left; position: relative;">
+            <div style="background-color: var(--pk-bg-subtle); padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--pk-border); font-size: 12px; color: var(--pk-text-muted);">
+              <span style="display: inline-flex; gap: 4px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #EF4444;"></span><span style="width: 10px; height: 10px; border-radius: 50%; background: #F59E0B;"></span><span style="width: 10px; height: 10px; border-radius: 50%; background: #10B981;"></span></span>
+              <span style="background: var(--pk-bg-card); padding: 2px 12px; border-radius: 4px; font-family: monospace; font-size: 11px;">https://suaclinica.com.br</span>
+            </div>
+            
+            <div style="padding: 36px 28px; min-height: 200px; position: relative;">
+              <h4 style="font-size: 20px; font-weight: 700; color: var(--pk-text-primary); margin-bottom: 6px;">Clínica Médica & Estética Integrada</h4>
+              <p style="font-size: 13px; color: var(--pk-text-secondary); max-width: 460px;">Tratamentos personalizados para realçar sua autoestima com segurança e tecnologia avançada.</p>
+              
+              <!-- Botão Flutuante do WhatsApp do Pinas Kit -->
+              <div style="position: absolute; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 10px;">
+                <span class="pk-badge pk-badge-purple" style="font-size: 11px; box-shadow: var(--pk-shadow-sm);">
+                  Experimente clicar 👇
+                </span>
+                <button class="pk-btn pk-btn-whatsapp" id="btn-mock-client-site-widget" style="border-radius: var(--pk-radius-full); padding: 12px 18px; box-shadow: var(--pk-shadow-lg); font-size: 14px;">
+                  💬 Fale no WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- 3. DEMONSTRAÇÃO VIVA DO PAINEL (MOCKUP INTERATIVO) -->

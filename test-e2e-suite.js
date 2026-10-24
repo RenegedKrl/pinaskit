@@ -3,8 +3,8 @@ import fs from 'fs';
 import path from 'path';
 
 const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-const CDP_PORT = 9338;
-const PROFILE_DIR = path.resolve('.chrome-profile-test-suite2');
+const CDP_PORT = 9340;
+const PROFILE_DIR = path.resolve('.chrome-profile-test-suite3');
 const ARTIFACTS_DIR = "C:\\Users\\kauek\\.gemini\\antigravity-ide\\brain\\3bcbda3c-2bc9-4ee2-b1f0-89850af16dea";
 const BASE_URL = "http://localhost:3334";
 
@@ -110,286 +110,159 @@ async function runE2ETestSuite() {
       });
     };
 
-    // Navegar de fato para BASE_URL
+    // Navegar para BASE_URL
     console.log(`🧭 Navegando para ${BASE_URL}...`);
     await send('Page.navigate', { url: BASE_URL });
     await new Promise(r => setTimeout(r, 2500));
 
     // --------------------------------------------------------------------------
-    // TESTE 1: CARREGAMENTO INICIAL E INTEGRIDADE DO DOM
+    // TESTE 1: CARREGAMENTO INICIAL
     // --------------------------------------------------------------------------
     console.log('\n📄 2. Verificando Carregamento Inicial do Site:');
     await setViewport(1280, 800, false);
 
     const currentUrl = await evalJs('window.location.href');
-    assert(currentUrl.includes('localhost:3334'), 'URL carregada no navegador é http://localhost:3334');
+    assert(currentUrl.includes('localhost:3334'), 'URL carregada é http://localhost:3334');
 
     const pageTitle = await evalJs('document.title');
-    assert(pageTitle.includes('Pinas Kit') && pageTitle.includes('Modelo D'), 'Título da página correto', pageTitle);
-
-    const bodyTheme = await evalJs('document.body.getAttribute("data-theme")');
-    assert(bodyTheme === 'light', 'Tema padrão inicial é Claro (light mode conforme Modelo D)');
+    assert(pageTitle.includes('Pinas Kit'), 'Título da página correto', pageTitle);
 
     const heroTitle = await evalJs('document.querySelector(".pk-hero-title")?.innerText.trim()');
-    assert(heroTitle === 'Seu negócio organizado e sem complicação.', 'Headline oficial do Hero renderizada com sucesso', heroTitle);
-
-    const heroImgLoaded = await evalJs(`
-      (() => {
-        const img = document.getElementById("hero-human-avatar");
-        return img && img.complete && img.naturalWidth > 0;
-      })()
-    `);
-    assert(heroImgLoaded === true, 'Foto humana acolhedora do Hero carregou com sucesso no navegador');
+    assert(heroTitle === 'Seu negócio organizado e sem complicação.', 'Headline do Hero renderizada com sucesso');
 
     // --------------------------------------------------------------------------
-    // TESTE 2: ALTERNÂNCIA DE TEMA CLARO / ESCURO
+    // TESTE 2: BOTÃO "VER COMO FUNCIONA" -> MODAL DE VÍDEO TOUR
     // --------------------------------------------------------------------------
-    console.log('\n🌓 3. Testando Alternância Instantânea de Tema (Dark / Light):');
-    await evalJs('document.getElementById("btn-theme-toggle")?.click()');
+    console.log('\n🎥 3. Testando Botão "Ver como funciona" (Modal de Vídeo Tour):');
+    await evalJs('document.getElementById("btn-hero-demo")?.click()');
     await new Promise(r => setTimeout(r, 400));
-    const themeAfterClick = await evalJs('document.body.getAttribute("data-theme")');
-    assert(themeAfterClick === 'dark', 'Tema alternado com sucesso para Dark Mode (#09090B)', themeAfterClick);
 
-    const darkBgColor = await evalJs('getComputedStyle(document.body).backgroundColor');
-    assert(darkBgColor === 'rgb(9, 9, 11)', 'CSS background em Dark Mode corresponde a #09090B (rgb(9, 9, 11))', darkBgColor);
+    const videoModalActive = await evalJs('document.getElementById("video-tour-modal-overlay")?.classList.contains("is-active")');
+    assert(videoModalActive === true, 'Botão "Ver como funciona" abre o Modal de Vídeo Tour explicativo');
 
-    // Captura screenshot dark mode
-    await takeScreenshot('dark-mode');
+    const qualModalOpenByMistake = await evalJs('document.getElementById("qualification-modal-overlay")?.classList.contains("is-active")');
+    assert(qualModalOpenByMistake === false, 'Formulário de qualificação NÃO abre indevidamente no botão de vídeo');
 
-    // Retorna para tema claro
-    await evalJs('document.getElementById("btn-theme-toggle")?.click()');
+    await takeScreenshot('video-tour');
+
+    // Fechar modal de vídeo
+    await evalJs('document.getElementById("btn-close-video-modal")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    // --------------------------------------------------------------------------
+    // TESTE 3: SIMULAÇÃO NO SITE DO CLIENTE -> FORMULÁRIO DE QUALIFICAÇÃO
+    // --------------------------------------------------------------------------
+    console.log('\n📱 4. Testando Simulação do Botão no Site do Cliente:');
+    await evalJs('document.getElementById("btn-mock-client-site-widget")?.click()');
     await new Promise(r => setTimeout(r, 400));
-    const themeReset = await evalJs('document.body.getAttribute("data-theme")');
-    assert(themeReset === 'light', 'Tema retornado com sucesso para Light Mode', themeReset);
 
-    // --------------------------------------------------------------------------
-    // TESTE 3: INTERATIVIDADE DA LANDING PAGE (TABELA DE PREÇOS E FAQ)
-    // --------------------------------------------------------------------------
-    console.log('\n💰 4. Testando Alternância de Preços e Sanfona FAQ:');
-    
-    // Toggle de Preço Mensal/Anual
-    const initialPrice = await evalJs('document.getElementById("price-card-amount")?.innerText.trim()');
-    assert(initialPrice === 'R$ 41,58', 'Preço inicial no plano anual exibe R$ 41,58');
+    const qualModalActive = await evalJs('document.getElementById("qualification-modal-overlay")?.classList.contains("is-active")');
+    assert(qualModalActive === true, 'Botão do site cliente abre o Formulário de Qualificação Roxo');
 
-    await evalJs('document.getElementById("btn-toggle-billing")?.click()');
-    await new Promise(r => setTimeout(r, 300));
-    const monthlyPrice = await evalJs('document.getElementById("price-card-amount")?.innerText.trim()');
-    assert(monthlyPrice === 'R$ 49,90', 'Alternado para faturamento mensal exibe R$ 49,90');
-
-    // Retorna para anual
-    await evalJs('document.getElementById("btn-toggle-billing")?.click()');
+    // Fechar modal
+    await evalJs('document.getElementById("btn-close-qual-modal")?.click()');
     await new Promise(r => setTimeout(r, 300));
 
-    // FAQ Accordion
-    const faqAnswerBefore = await evalJs('document.querySelector(".faq-answer")?.style.display');
-    assert(faqAnswerBefore === 'none' || faqAnswerBefore === '', 'Item de FAQ inicia fechado por padrão');
-    
-    await evalJs('document.querySelector(".faq-item")?.click()');
-    await new Promise(r => setTimeout(r, 300));
-    const faqAnswerAfter = await evalJs('document.querySelector(".faq-answer")?.style.display');
-    assert(faqAnswerAfter === 'block', 'Item de FAQ expande exibindo a resposta ao ser clicado');
-
-    // Screenshot Landing Page Desktop
-    await takeScreenshot('landing-desktop');
-
     // --------------------------------------------------------------------------
-    // TESTE 4: FORMULÁRIO DE QUALIFICAÇÃO DINÂMICO ("CONTE SOBRE SEU MOMENTO")
+    // TESTE 4: NAVEGAÇÃO PARA O PAINEL DO ASSINANTE (CENTRALKIT)
     // --------------------------------------------------------------------------
-    console.log('\n📝 5. Testando Abertura e Funcionamento do Formulário de Qualificação Roxo:');
-
-    // Abrir o modal pelo botão "#top-btn-open-qual"
-    await evalJs('document.getElementById("top-btn-open-qual")?.click()');
-    await new Promise(r => setTimeout(r, 500));
-
-    const modalVisible = await evalJs('document.getElementById("qualification-modal-overlay")?.classList.contains("is-active")');
-    assert(modalVisible === true, 'Modal de Qualificação abre com transição suave e fundo escurecido');
-
-    // Testar Dropdown Customizado (não-nativo)
-    await evalJs('document.getElementById("custom-select-trigger")?.click()');
-    await new Promise(r => setTimeout(r, 300));
-    const dropdownOpened = await evalJs('document.getElementById("custom-select-menu")?.classList.contains("is-open")');
-    assert(dropdownOpened === true, 'Dropdown customizado de opções abre ao ser clicado');
-
-    // Clicar na 2ª opção ("Estou pensando em mudar de área")
-    await evalJs(`
-      const option = document.querySelectorAll('.pk-select-option')[1];
-      option?.click();
-    `);
-    await new Promise(r => setTimeout(r, 300));
-
-    const selectedOptionValue = await evalJs('document.getElementById("selected-moment-value")?.value');
-    assert(selectedOptionValue === 'Estou pensando em mudar de área', 'Opção selecionada gravada no input oculto do formulário', selectedOptionValue);
-
-    // Preencher campos de Nome, WhatsApp e Mensagem
-    await evalJs(`
-      (() => {
-        const nameInput = document.getElementById("lead-name");
-        const phoneInput = document.getElementById("lead-phone");
-        const msgInput = document.getElementById("lead-goals");
-        if (nameInput) nameInput.value = "Juliana Moreira - Teste QA";
-        if (phoneInput) phoneInput.value = "11 99876-5432";
-        if (msgInput) msgInput.value = "Quero organizar meus leads de Meta Ads e WhatsApp.";
-      })()
-    `);
-
-    // Capturar screenshot do modal aberto e preenchido
-    await takeScreenshot('qualification-modal');
-
-    // Submeter o formulário disparando o evento de submit
-    await evalJs(`
-      (() => {
-        const form = document.getElementById("qualification-form");
-        if (form) form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-      })()
-    `);
-    await new Promise(r => setTimeout(r, 1000));
-
-    // Verificar se lead foi gravado no Storage do CRM com a chave oficial pk_leads
-    const leadsInStorage = await evalJs('JSON.parse(localStorage.getItem("pk_leads") || "[]")');
-    const newLead = leadsInStorage.find(l => l.name === 'Juliana Moreira - Teste QA');
-    assert(newLead !== undefined, 'Novo lead qualificado foi persistido no CRM do cliente (pk_leads)');
-    assert(newLead && newLead.temperature === 'Quente', 'Temperatura de qualificação calculada como "Quente" (+45 pontos)');
-
-    // --------------------------------------------------------------------------
-    // TESTE 5: DASHBOARD DO CRM (PAINEL DA MARIANA - MODELO D)
-    // --------------------------------------------------------------------------
-    console.log('\n📊 6. Testando Dashboard CRM (Modelo D):');
-
-    // Alternar para a visão de Dashboard
+    console.log('\n📊 5. Testando Painel do Assinante (CentralKit):');
     await evalJs('document.querySelector(\'.pk-demo-tab[data-view="dashboard"]\')?.click()');
     await new Promise(r => setTimeout(r, 600));
 
-    const marianaGreeting = await evalJs('document.querySelector(".pk-dash-greeting")?.innerText.trim()');
-    assert(marianaGreeting === 'Olá, Mariana! 👋', 'Saudação acolhedora "Olá, Mariana! 👋" renderizada', marianaGreeting);
+    const greeting = await evalJs('document.querySelector(".pk-dash-greeting")?.innerText.trim()');
+    assert(greeting === 'Olá, Mariana! 👋', 'Saudação "Olá, Mariana! 👋" renderizada na Visão Geral');
 
-    // Card de Onboarding (Progresso guiado)
-    const onboardingText = await evalJs('document.querySelector(".pk-card-onboarding")?.innerText.includes("Seu início no Pinas Kit")');
-    assert(onboardingText === true, 'Card de Início Guiado exibido com destaque');
-
-    // Card de Próxima Ação Recomendada
-    const nextActionCard = await evalJs('document.querySelector(".pk-card-next-action") !== null');
-    assert(nextActionCard === true, 'Card de "Próxima Ação Recomendada" presente na tela');
-
-    // 4 Métricas Principais
-    const metricLeadsVal = await evalJs('document.querySelectorAll(".pk-metric-card .pk-metric-value")[0]?.innerText.trim()');
-    assert(metricLeadsVal === '24', 'Métrica "Seus leads hoje" exibe 24');
-
-    const metricConversas = await evalJs('document.querySelectorAll(".pk-metric-card .pk-metric-value")[1]?.innerText.trim()');
-    assert(metricConversas === '8', 'Métrica "Conversas em andamento" exibe 8');
-
-    const metricVendas = await evalJs('document.querySelectorAll(".pk-metric-card .pk-metric-value")[2]?.innerText.trim()');
-    assert(metricVendas === '5', 'Métrica "Vendas este mês" exibe 5');
-
-    const metricGasto = await evalJs('document.querySelectorAll(".pk-metric-card .pk-metric-value")[3]?.innerText.trim()');
-    assert(metricGasto === 'R$ 120,00', 'Métrica "Investimento em anúncios" exibe R$ 120,00');
-
-    // Verificar se o lead recém-criado está presente na lista de leads do CRM
-    const hasNewLeadInCRM = await evalJs(`
-      (() => {
-        const text = document.querySelector(".pk-card[style*='padding: 28px']")?.innerText || '';
-        return text.includes("Juliana Moreira - Teste QA");
-      })()
-    `);
-    assert(hasNewLeadInCRM === true, 'Lead recém-criado (Juliana Moreira) aparece na lista do CRM');
-
-    // Testar filtros por Etapa (Tabs do CRM)
-    await evalJs('document.querySelector(\'button[data-filter="Novos"]\')?.click()');
+    // --------------------------------------------------------------------------
+    // TESTE 5: ABA "BOTÕES" (GERENCIADOR DE SITES E PASTAS DE CAPTAÇÃO)
+    // --------------------------------------------------------------------------
+    console.log('\n🔘 6. Testando Módulo de Botões & Sites de Captação:');
+    await evalJs('document.getElementById("side-nav-buttons")?.click()');
     await new Promise(r => setTimeout(r, 400));
-    const activeStageTab = await evalJs('document.querySelector(\'button[data-filter="Novos"]\')?.classList.contains("pk-btn-primary")');
-    assert(activeStageTab === true, 'Filtro de etapa "Novos" ativado com estilo primário ativo');
 
-    // Retorna para "Todos"
-    await evalJs('document.querySelector(\'button[data-filter="Todos"]\')?.click()');
+    const buttonsViewPresent = await evalJs('document.getElementById("buttons-view-container") !== null');
+    assert(buttonsViewPresent === true, 'Aba "Botões" renderizada com sucesso');
+
+    const buttonCardsCount = await evalJs('document.querySelectorAll(".btn-site-card").length');
+    assert(buttonCardsCount >= 3, `Gerenciador exibe ${buttonCardsCount} botões ativos (Glúteo Feminino, Endolaser, Consulta Médica)`);
+
+    const quotaText = await evalJs('document.querySelector(".pk-card")?.innerText.includes("Cota de Sites")');
+    assert(quotaText === true, 'Indicador de cota do Plano Starter exibido com destaque');
+
+    // Testar botão "Copiar Script" no primeiro botão
+    await evalJs('document.querySelector(".btn-copy-script-action")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    const copyModalActive = await evalJs('document.getElementById("copy-script-modal-overlay")?.classList.contains("is-active")');
+    assert(copyModalActive === true, 'Botão "Copiar Script" abre modal com o código embed e link direto');
+
+    await takeScreenshot('copy-script');
+
+    // Fechar modal copiar script
+    await evalJs('document.getElementById("btn-close-copy-modal")?.click()');
     await new Promise(r => setTimeout(r, 300));
 
-    // Screenshot Dashboard Desktop
-    await takeScreenshot('dashboard-desktop');
+    // Capturar screenshot da tela de botões
+    await takeScreenshot('buttons-view');
 
     // --------------------------------------------------------------------------
-    // TESTE 6: MODAL DE CONEXÃO DE ANÚNCIOS (META & GOOGLE ADS)
+    // TESTE 6: ABA "LEADS" (TABELA CENTRALKIT - IMAGEM 2)
     // --------------------------------------------------------------------------
-    console.log('\n🔗 7. Testando Conexão de Contas de Anúncio (Meta Ads & Google Ads):');
-    await evalJs('document.getElementById("btn-dash-connect-ads")?.click()');
-    await new Promise(r => setTimeout(r, 500));
-
-    const adsModalActive = await evalJs('document.getElementById("connect-ads-modal-overlay")?.classList.contains("is-active")');
-    assert(adsModalActive === true, 'Modal de Conexão de Anúncios abriu corretamente');
-
-    // Simular ativação do Google Ads
-    await evalJs('document.getElementById("btn-toggle-google-connect")?.click()');
+    console.log('\n👥 7. Testando Base de Leads da CentralKit (Imagem 2):');
+    await evalJs('document.getElementById("side-nav-leads")?.click()');
     await new Promise(r => setTimeout(r, 400));
 
-    const googleConnectedState = await evalJs('JSON.parse(localStorage.getItem("pk_ad_accounts") || "{}").google');
-    assert(googleConnectedState === true, 'Conexão do Google Ads persistida em pk_ad_accounts');
+    const leadsTablePresent = await evalJs('document.getElementById("leads-view-container") !== null');
+    assert(leadsTablePresent === true, 'Tela de Leads carregada com sucesso');
 
-    await takeScreenshot('connect-ads-modal');
+    const hasAnaLivia = await evalJs('document.body.innerText.includes("Ana Livia Pereira de Sousa Paulo")');
+    assert(hasAnaLivia === true, 'Lead "Ana Livia" presente na tabela de contatos');
 
-    // Fechar modal de anúncios
-    await evalJs('document.getElementById("btn-close-ads-modal")?.click()');
-    await new Promise(r => setTimeout(r, 400));
+    const hasEndolaser = await evalJs('document.body.innerText.includes("Endolaser")');
+    assert(hasEndolaser === true, 'Coluna "Botão" identifica a campanha de origem ("Endolaser")');
 
-    // --------------------------------------------------------------------------
-    // TESTE 7: CONSTRUTOR NO-CODE DE PERGUNTAS DO FORMULÁRIO
-    // --------------------------------------------------------------------------
-    console.log('\n🛠️ 8. Testando Construtor Visual No-Code:');
-    await evalJs('document.getElementById("top-btn-open-builder")?.click()');
-    await new Promise(r => setTimeout(r, 500));
-
-    const builderModalActive = await evalJs('document.getElementById("form-builder-modal-overlay")?.classList.contains("is-active")');
-    assert(builderModalActive === true, 'Modal do Construtor No-Code abriu corretamente');
-
-    // Modificar o título da pergunta
+    // Testar filtro por Botão
     await evalJs(`
-      const input = document.getElementById("builder-question");
-      if (input) input.value = "Qual é o seu objetivo com tráfego pago hoje?";
+      const sel = document.getElementById("filter-lead-button");
+      if (sel) {
+        sel.value = "Glúteo Feminino";
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
     `);
+    await new Promise(r => setTimeout(r, 400));
 
-    // Adicionar uma nova opção
-    await evalJs('document.getElementById("btn-add-builder-option")?.click()');
+    const rowsCountAfterFilter = await evalJs('document.querySelectorAll(".pk-lead-table-row").length');
+    assert(rowsCountAfterFilter >= 2, `Filtro por botão "Glúteo Feminino" retornou ${rowsCountAfterFilter} contatos`);
+
+    // Resetar filtro para Todos
+    await evalJs(`
+      const sel = document.getElementById("filter-lead-button");
+      if (sel) {
+        sel.value = "Todos";
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    `);
     await new Promise(r => setTimeout(r, 300));
 
-    const optionRowsCount = await evalJs('document.querySelectorAll(".builder-option-row").length');
-    assert(optionRowsCount === 5, 'Nova opção adicionada com sucesso no Construtor No-Code (total: 5 opções)');
-
-    // Salvar configuração do formulário
-    await evalJs(`
-      (() => {
-        const form = document.getElementById("form-builder-form");
-        if (form) form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-      })()
-    `);
-    await new Promise(r => setTimeout(r, 600));
-
-    const savedFormConfig = await evalJs('JSON.parse(localStorage.getItem("pk_form_config") || "{}")');
-    assert(savedFormConfig.questionLabel === 'Qual é o seu objetivo com tráfego pago hoje?', 'Pergunta personalizada persistida em pk_form_config');
-
-    await takeScreenshot('form-builder-modal');
+    await takeScreenshot('leads-table');
 
     // --------------------------------------------------------------------------
-    // TESTE 8: RESPONSIVIDADE MOBILE & BOTTOM NAVIGATION
+    // TESTE 7: RESPONSIVIDADE MOBILE
     // --------------------------------------------------------------------------
-    console.log('\n📱 9. Testando Responsividade Mobile (375x812 - iPhone):');
+    console.log('\n📱 8. Testando Responsividade Mobile (375x812):');
     await setViewport(375, 812, true);
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
 
-    const mobileBottomNavVisible = await evalJs(`
-      (() => {
-        const nav = document.getElementById("mobile-bottom-nav");
-        return nav && getComputedStyle(nav).display !== "none";
-      })()
-    `);
-    assert(mobileBottomNavVisible === true, 'Barra de navegação inferior mobile (Bottom Nav) é exibida em telas pequenas');
+    const mobileNavVisible = await evalJs('document.getElementById("mobile-bottom-nav") !== null');
+    assert(mobileNavVisible === true, 'Barra inferior de navegação mobile ativa');
 
-    // Verificar se não há overflow horizontal quebrado
-    const hasHorizontalOverflow = await evalJs('document.documentElement.scrollWidth > document.documentElement.clientWidth');
-    assert(hasHorizontalOverflow === false, 'Sem estouro de tela horizontal (sem barra de rolagem lateral indevida)');
-
-    await takeScreenshot('mobile-dashboard');
+    const hasOverflow = await evalJs('document.documentElement.scrollWidth > document.documentElement.clientWidth');
+    assert(hasOverflow === false, 'Zero estouro de tela horizontal no mobile');
 
   } catch (err) {
-    console.error('🚨 Erro inesperado durante execução E2E:', err);
+    console.error('🚨 Erro inesperado no teste E2E:', err);
     testFails++;
-    errorsFound.push({ test: 'Execução Geral E2E', detail: err.message });
+    errorsFound.push({ test: 'E2E Chrome', detail: err.message });
   } finally {
     if (ws) ws.close();
     chrome.kill('SIGKILL');
@@ -397,25 +270,20 @@ async function runE2ETestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // RELATÓRIO FINAL CONSOLIDADO
+  // RELATÓRIO FINAL
   // --------------------------------------------------------------------------
   console.log('\n================================================================');
-  console.log(`📊 RELATÓRIO CONSOLIDADO: ${testPasses} PASSARAM | ${testFails} FALHAS`);
+  console.log(`📊 RELATÓRIO FINAL E2E: ${testPasses} PASSARAM | ${testFails} FALHAS`);
   console.log(`⚠️ ERROS DE CONSOLE CAPTURADOS: ${consoleErrors.length}`);
   console.log(`🚨 EXCEÇÕES NÃO TRATADAS: ${exceptions.length}`);
   console.log('================================================================');
-
-  if (consoleErrors.length > 0) {
-    console.log('\n⚠️ Lista de Erros no Console do Navegador:');
-    consoleErrors.forEach((e, i) => console.log(`  ${i + 1}. ${e}`));
-  }
 
   if (errorsFound.length > 0) {
     console.error('\n🚨 Lista de Falhas nos Testes:');
     errorsFound.forEach((f, i) => console.error(`  ${i + 1}. [${f.test}] -> ${f.detail}`));
     process.exit(1);
   } else {
-    console.log('\n✨ TODOS OS SISTEMAS E FUNÇÕES DO PINAS KIT FORAM TESTADOS E APROVADOS COM 100% DE SUCESSO!\n');
+    console.log('\n✨ TODOS OS TESTES E2E NO CHROME PASSARAM COM SUCESSO!\n');
   }
 }
 

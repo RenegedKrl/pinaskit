@@ -176,6 +176,76 @@ Orientado por regras de negócio reais para que o assinante nunca fique paralisa
 
 ---
 
+## 4.1. Módulo "Botões" (Sites, Pastas de Captação e Links com Cota de Plano)
+*(O Coração Operacional do Sistema inspirado na CentralKit)*
+
+Como estruturado pelo usuário, a aba **Botões** funciona como o gerenciador central onde cada botão representa um site, página ou campanha específica:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              MÓDULO DE BOTÕES (CENTRALKIT)                             │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ Topo: "Meus Botões & Sites de Captação"                                                │
+│ Cota do Plano: "Plano Starter: 3 de 5 botões ativos [═══════════   ] (60% usado)"     │
+│ [ + Criar Novo Botão / Site ]                                                          │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ CARDS DE BOTÕES (SUBPASTAS / SITES):                                                   │
+│                                                                                        │
+│ 🔘 1. Consulta Médica (Landing Page Principal)                                         │
+│    URL do Botão: pinaskit.com.br/b/consulta-medica                                     │
+│    Métricas: 342 Cliques │ 28 Leads Capturados │ 8.1% Conversão                        │
+│    Destino: WhatsApp +55 11 97537-4960                                                 │
+│    [ 📋 Copiar Script ]  [ ⚙️ Personalizar Formulário ]  [ 👁️ Testar ]  [ 📊 Ver Leads ] │
+│                                                                                        │
+│ 🔘 2. Protocolo Estético — Endolaser                                                   │
+│    URL do Botão: pinaskit.com.br/b/endolaser                                           │
+│    Métricas: 189 Cliques │ 19 Leads Capturados │ 10.0% Conversão                       │
+│    Destino: WhatsApp +55 11 98181-4586                                                 │
+│    [ 📋 Copiar Script ]  [ ⚙️ Personalizar Formulário ]  [ 👁️ Testar ]  [ 📊 Ver Leads ] │
+│                                                                                        │
+│ 🔘 3. Glúteo Feminino (Campanha Meta/Google)                                           │
+│    URL do Botão: pinaskit.com.br/b/gluteo-fem                                          │
+│    Métricas: 410 Cliques │ 45 Leads Capturados │ 10.9% Conversão                       │
+│    Destino: WhatsApp +55 11 96490-6555                                                 │
+│    [ 📋 Copiar Script ]  [ ⚙️ Personalizar Formulário ]  [ 👁️ Testar ]  [ 📊 Ver Leads ] │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Regras de Negócio de Botões:
+1. **Cota por Plano:**
+   - Plano Starter: Até 5 botões / sites de captação ativos.
+   - Plano Pro: Até 15 botões ativos.
+   - Plano Enterprise: Ilimitado.
+2. **Script de Instalação Embutível:** Cada botão gera um script de 1 linha (`<script src="https://pinaskit.com/widget.js" data-button-id="..."></script>`) para colar no WordPress, Elementor, Wix ou qualquer site.
+3. **Formulário Independente:** Cada botão possui seu próprio formulário "Conte sobre seu momento", com perguntas e opções customizadas pelo Construtor No-Code.
+
+---
+
+## 4.2. Módulo "Leads" (Tabela Completa CentralKit com Filtro por Botão)
+*(Baseado fielmente na captura oficial da CentralKit enviada pelo usuário)*
+
+A tela de Leads reúne todas as captações com rastreamento de temperatura e origem:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              BASE DE LEADS (CENTRALKIT)                                │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ Filtros no Topo:                                                                       │
+│ [ Selecione o Botão: Todos os botões ▼ ]  [ Período: Últimos 30 dias ▼ ]              │
+│ [ 📊 Exportar Excel ]  [ ⚙️ Regras de Pontuação ]  [ Configurações ]                   │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ TABELA DE CONTATOS CAPTURADOS:                                                         │
+│ [x] TEMPERATURA    NOME             TELEFONE          BOTÃO           ORIGEM    AÇÕES  │
+│ [ ] ❄️ Morno 31pts  Ana Livia        +55 11 97537...   Glúteo Feminino GoogleAds [📈][🗑️]│
+│ [ ] ❄️ Morno 29pts  Andreza          +55 11 98181...   Endolaser       GoogleAds [📈][🗑️]│
+│ [ ] 🔥 Quente 52pts Vitória Freitas  +55 11 96490...   Depilação Laser Meta Ads  [📈][🗑️]│
+│ [ ] 🧊 Frio  12pts  Luana            +55 11 91755...   Glúteo Feminino Google    [📈][🗑️]│
+│ Mostrando 1-4 de 4 leads                                           [ Itens por página: 25 ▼ ]│
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 5. Experiência Mobile (Projetada para o Celular)
 *(Baseada fielmente no Painel 3 da referência visual Modelo D)*
 
