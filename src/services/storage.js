@@ -10,7 +10,30 @@ const STORAGE_KEYS = {
   AD_ACCOUNTS: 'pk_ad_accounts',
   CAMPAIGNS: 'pk_campaigns',
   CURRENT_VIEW: 'pk_current_view',
-  CURRENT_DASH_TAB: 'pk_current_dash_tab'
+  CURRENT_DASH_TAB: 'pk_current_dash_tab',
+  SCORING_RULES: 'pk_scoring_rules',
+  LEAD_AUTOMATION: 'pk_lead_automation'
+};
+
+// Configurações Padrão de Pontuação de Leads (Lead Scoring Engine - Modelo CentralKit)
+const DEFAULT_SCORING_RULES = {
+  thresholds: {
+    coldMax: 30,    // 0 a 30: Frio
+    warmMax: 70     // 31 a 70: Morno; > 70: Quente
+  },
+  pageViewPoints: 5,      // Pontos por página visualizada
+  repeatVisitPoints: 15,  // Pontos por retorno/sessão separada
+  paidAdBonus: 25,        // Bônus se veio de tráfego pago (Meta/Google Ads)
+  emailBonus: 20,         // Bônus se informou e-mail
+  formHotScore: 35,       // Opção de alta intenção
+  formWarmScore: 25,      // Opção de intenção moderada
+  formColdScore: 15       // Opção de curiosidade/longo prazo
+};
+
+const DEFAULT_LEAD_AUTOMATION = {
+  autoCreateDeal: true,
+  initialCrmStage: 'Novo',
+  notifyOnHotLead: true
 };
 
 // Campanhas de Anúncios Iniciais (Meta & Google Ads com Atribuição de Tráfego)
@@ -516,6 +539,18 @@ export const StorageService = {
     return null;
   },
 
+  updateLeadField(id, field, value) {
+    return this.updateLead(id, { [field]: value });
+  },
+
+  deleteLeads(ids) {
+    let leads = this.getLeads();
+    const idSet = new Set(ids);
+    leads = leads.filter(l => !idSet.has(l.id));
+    localStorage.setItem(STORAGE_KEYS.LEADS, JSON.stringify(leads));
+    return leads;
+  },
+
   updateLeadStage(id, newStage, author = 'Mariana') {
     const lead = this.getLeadById(id);
     if (!lead) return null;
@@ -568,6 +603,32 @@ export const StorageService = {
 
   saveFormConfig(config) {
     localStorage.setItem(STORAGE_KEYS.FORM_CONFIG, JSON.stringify(config));
+  },
+
+  // --- REGRAS DE PONTUAÇÃO DE LEADS (LEAD SCORING ENGINE) ---
+  getScoringRules() {
+    const data = localStorage.getItem(STORAGE_KEYS.SCORING_RULES);
+    return data ? JSON.parse(data) : DEFAULT_SCORING_RULES;
+  },
+
+  saveScoringRules(rules) {
+    const current = this.getScoringRules();
+    const merged = { ...current, ...rules };
+    localStorage.setItem(STORAGE_KEYS.SCORING_RULES, JSON.stringify(merged));
+    return merged;
+  },
+
+  // --- AUTOMAÇÕES DE LEADS & CRM ---
+  getLeadAutomationSettings() {
+    const data = localStorage.getItem(STORAGE_KEYS.LEAD_AUTOMATION);
+    return data ? JSON.parse(data) : DEFAULT_LEAD_AUTOMATION;
+  },
+
+  saveLeadAutomationSettings(settings) {
+    const current = this.getLeadAutomationSettings();
+    const merged = { ...current, ...settings };
+    localStorage.setItem(STORAGE_KEYS.LEAD_AUTOMATION, JSON.stringify(merged));
+    return merged;
   },
 
   // --- INTEGRAÇÕES DE ANÚNCIOS (META & GOOGLE) ---

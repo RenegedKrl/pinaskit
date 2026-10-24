@@ -5,10 +5,11 @@
 import { StorageService } from '../services/storage.js';
 import { renderButtonsView } from './ButtonsView.js';
 import { renderLeadsView } from './LeadsView.js';
+import { renderLeadScoringView } from './LeadScoringView.js';
 import { renderNewButtonView } from './NewButtonView.js';
 import { renderCampaignsView } from './CampaignsView.js';
 
-export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null, campaignPlatformFilter = 'Todas', campaignStatusFilter = 'Todas', campaignSearchQuery = '') {
+export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null, campaignPlatformFilter = 'Todas', campaignStatusFilter = 'Todas', campaignSearchQuery = '', leadFilterPeriod = 'Últimos 30 dias', leadFilterTemp = 'Todos', leadSearchQuery = '') {
   const currentTheme = StorageService.getTheme();
   const connectedAds = StorageService.getConnectedAds();
   const leads = StorageService.getLeads();
@@ -95,6 +96,7 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
                 : activeTab === 'buttons' ? 'Gerenciador de Botões & Sites' 
                 : activeTab === 'new-button' ? 'Novo Botão de WhatsApp'
                 : activeTab === 'leads' ? 'Base Geral de Leads' 
+                : activeTab === 'lead-scoring' ? 'Regras de Pontuação de Leads'
                 : activeTab === 'conversations' || activeTab === 'crm' ? 'Conversas & CRM WhatsApp'
                 : activeTab === 'sales' ? 'Vendas & Faturamento'
                 : activeTab === 'ads' ? 'Central de Anúncios'
@@ -105,6 +107,7 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
             <p class="pk-dash-subgreeting" style="font-size: 13px; color: var(--pk-text-secondary); margin-top: 2px;">
               ${activeTab === 'overview' ? 'Vamos continuar configurando seu Pinas Kit?' 
                 : activeTab === 'new-button' ? 'Configure a aparência, triagem e comportamento do seu widget flutuante' 
+                : activeTab === 'lead-scoring' ? 'Defina os critérios e pontuações para classificar seus leads automaticamente entre Quente, Morno e Frio'
                 : 'Workspace: Luana Albuquerque · Plano Starter'}
             </p>
           </div>
@@ -138,8 +141,10 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
           ? renderButtonsView() 
           : activeTab === 'new-button'
           ? renderNewButtonView(activeButtonForEdit)
+          : activeTab === 'lead-scoring'
+          ? renderLeadScoringView()
           : activeTab === 'leads'
-          ? renderLeadsView(leadFilterButton)
+          ? renderLeadsView(leadFilterButton, leadFilterPeriod, leadFilterTemp, leadSearchQuery)
           : activeTab === 'conversations' || activeTab === 'crm'
           ? renderConversationsView(leads)
           : activeTab === 'sales'

@@ -14,12 +14,16 @@ import { renderCopyScriptModal } from './components/CopyScriptModal.js';
 import { renderLeadDrawer } from './components/LeadDrawer.js';
 import { renderUtmBuilderModal } from './components/UtmBuilderModal.js';
 import { renderEditSiteModal } from './components/EditSiteModal.js';
+import { renderLeadSettingsModal } from './components/LeadSettingsModal.js';
 
 class PinasKitApp {
   constructor() {
     this.currentView = StorageService.getCurrentView();
     this.currentDashTab = StorageService.getCurrentDashTab();
     this.leadFilterButton = 'Todos';
+    this.leadFilterPeriod = 'Últimos 30 dias';
+    this.leadFilterTemp = 'Todos';
+    this.leadSearchQuery = '';
     this.activeButtonForEdit = null;
     this.isAnnualBilling = true;
     this.selectedLeadForDrawer = null;
@@ -75,7 +79,7 @@ class PinasKitApp {
       <div id="view-container">
         ${this.currentView === 'landing' 
           ? renderLandingPage() 
-          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit, this.campaignPlatformFilter, this.campaignStatusFilter, this.campaignSearchQuery)}
+          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit, this.campaignPlatformFilter, this.campaignStatusFilter, this.campaignSearchQuery, this.leadFilterPeriod, this.leadFilterTemp, this.leadSearchQuery)}
       </div>
 
       <!-- MODAIS DO SISTEMA -->
@@ -88,6 +92,7 @@ class PinasKitApp {
         ${renderLeadDrawer(this.selectedLeadForDrawer)}
         ${renderUtmBuilderModal()}
         ${renderEditSiteModal()}
+        ${renderLeadSettingsModal()}
       </div>
 
       <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS) -->
@@ -745,7 +750,7 @@ class PinasKitApp {
     }
 
     // ------------------------------------------------------------------------
-    // 6. EVENTOS DO MÓDULO DE LEADS (IMAGEM 2)
+    // 6. EVENTOS DO MÓDULO DE LEADS & LEAD SCORING (PARIDADE CENTRALKIT)
     // ------------------------------------------------------------------------
     // Filtro por Botão no topo da tabela
     const filterBtnSelect = document.getElementById('filter-lead-button');
@@ -757,16 +762,236 @@ class PinasKitApp {
       });
     }
 
-    // Exportar Excel
-    const triggerExport = () => {
-      this.showToast('📊 Exportando base de contatos em planilha segura (criptografia AES-256)...');
-    };
-    document.getElementById('btn-export-excel-leads')?.addEventListener('click', triggerExport);
-    document.getElementById('btn-scoring-rules')?.addEventListener('click', () => {
-      this.openModal('form-builder-modal-overlay');
+    // Filtro por Temperatura
+    document.getElementById('filter-lead-temp')?.addEventListener('change', (e) => {
+      this.leadFilterTemp = e.target.value;
+      this.render();
+      this.bindEvents();
     });
+
+    // Filtro por Período
+    document.getElementById('filter-lead-period')?.addEventListener('change', (e) => {
+      this.leadFilterPeriod = e.target.value;
+      this.render();
+      this.bindEvents();
+    });
+
+    // Busca Instantânea por Nome, Telefone ou E-mail
+    const searchInput = document.getElementById('input-search-leads');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        this.leadSearchQuery = e.target.value;
+        const rows = document.querySelectorAll('.pk-lead-table-row');
+        const q = this.leadSearchQuery.toLowerCase().trim();
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          row.style.display = (!q || text.includes(q)) ? '' : 'none';
+        });
+      });
+    }
+
+    // Exportação Real de Planilha CSV (UTF-8 com BOM para Excel)
+    const triggerExport = (customLeads = null) => {
+      const exportList = customLeads || StorageService.getLeads(this.leadFilterButton);
+      if (exportList.length === 0) {
+        this.showToast('⚠️ Nenhum lead disponível para exportação.');
+        return;
+      }
+
+      const headers = ['ID', 'Nome', 'Telefone', 'E-mail', 'Temperatura', 'Score', 'Botão', 'Origem', 'Campanha', 'Estágio CRM', 'Última Visita'];
+      const rows = exportList.map(l => [
+        l.id,
+        `"${(l.name || '').replace(/"/g, '""')}"`,
+        `"${l.phone || ''}"`,
+        `"${l.email || ''}"`,
+        l.temperature || 'Morno',
+        l.score || 30,
+        `"${l.button || 'Geral'}"`,
+        `"${l.origin || ''}"`,
+        `"${l.campaign || ''}"`,
+        `"${l.stage || 'Novo'}"`,
+        `"${l.lastVisit || ''}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `leads_pinaskit_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      this.showToast(`📊 ${exportList.length} leads exportados com sucesso em planilha Excel (CSV)!`);
+    };
+
+    document.getElementById('btn-export-excel-leads')?.addEventListener('click', () => triggerExport());
+
+    // Navegação para a Tela de Regras de Pontuação
+    document.getElementById('btn-scoring-rules')?.addEventListener('click', () => {
+      this.switchDashTab('lead-scoring');
+    });
+
+    // Retorno da Tela de Pontuação para a Tela de Leads
+    document.getElementById('btn-back-to-leads')?.addEventListener('click', () => {
+      this.switchDashTab('leads');
+    });
+
+    // Modal de Configurações e Automações de Leads
     document.getElementById('btn-leads-settings')?.addEventListener('click', () => {
-      this.openModal('connect-ads-modal-overlay');
+      this.openModal('lead-settings-modal-overlay');
+    });
+    document.getElementById('btn-close-lead-settings')?.addEventListener('click', () => {
+      this.closeModal('lead-settings-modal-overlay');
+    });
+    document.getElementById('btn-cancel-lead-settings')?.addEventListener('click', () => {
+      this.closeModal('lead-settings-modal-overlay');
+    });
+    document.getElementById('lead-settings-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const autoCreateDeal = document.getElementById('setting-auto-deal')?.checked ?? true;
+      const initialCrmStage = document.getElementById('setting-initial-stage')?.value || 'Novo';
+      const notifyOnHotLead = document.getElementById('setting-notify-hot')?.checked ?? true;
+      StorageService.saveLeadAutomationSettings({ autoCreateDeal, initialCrmStage, notifyOnHotLead });
+      this.closeModal('lead-settings-modal-overlay');
+      this.showToast('✅ Configurações e automações salvas com sucesso!');
+    });
+
+    // Checkboxes de Seleção em Lote
+    const checkAll = document.getElementById('check-all-leads');
+    const singleChecks = document.querySelectorAll('.check-single-lead');
+    const bulkBar = document.getElementById('leads-bulk-bar');
+    const bulkCount = document.getElementById('leads-bulk-count');
+
+    const updateBulkBar = () => {
+      const selected = Array.from(singleChecks).filter(c => c.checked).map(c => c.getAttribute('data-id'));
+      if (bulkBar && bulkCount) {
+        if (selected.length > 0) {
+          bulkBar.style.display = 'flex';
+          bulkCount.textContent = `${selected.length} lead${selected.length > 1 ? 's' : ''} selecionado${selected.length > 1 ? 's' : ''}`;
+        } else {
+          bulkBar.style.display = 'none';
+        }
+      }
+    };
+
+    if (checkAll) {
+      checkAll.addEventListener('change', (e) => {
+        singleChecks.forEach(c => c.checked = e.target.checked);
+        updateBulkBar();
+      });
+    }
+
+    singleChecks.forEach(c => {
+      c.addEventListener('change', updateBulkBar);
+    });
+
+    document.getElementById('btn-bulk-export')?.addEventListener('click', () => {
+      const selectedIds = Array.from(singleChecks).filter(c => c.checked).map(c => c.getAttribute('data-id'));
+      const selectedLeads = StorageService.getLeads().filter(l => selectedIds.includes(l.id));
+      triggerExport(selectedLeads);
+    });
+
+    document.getElementById('btn-bulk-delete')?.addEventListener('click', () => {
+      const selectedIds = Array.from(singleChecks).filter(c => c.checked).map(c => c.getAttribute('data-id'));
+      if (confirm(`Deseja realmente remover os ${selectedIds.length} leads selecionados?`)) {
+        StorageService.deleteLeads(selectedIds);
+        this.showToast(`🗑️ ${selectedIds.length} leads removidos com sucesso.`);
+        this.render();
+        this.bindEvents();
+      }
+    });
+
+    // Edição Inline de Células (ex: E-mail)
+    document.querySelectorAll('.editable-lead-field').forEach(fieldEl => {
+      fieldEl.addEventListener('click', (e) => {
+        const leadId = e.currentTarget.getAttribute('data-id');
+        const fieldName = e.currentTarget.getAttribute('data-field');
+        const currentText = e.currentTarget.textContent.trim().replace('+ Inserir e-mail', '');
+
+        const input = document.createElement('input');
+        input.type = fieldName === 'email' ? 'email' : 'text';
+        input.value = currentText;
+        input.className = 'pk-input';
+        input.style.cssText = 'padding: 3px 6px; font-size: 12px; width: 170px;';
+
+        const save = () => {
+          const newVal = input.value.trim();
+          StorageService.updateLeadField(leadId, fieldName, newVal || '-');
+          this.render();
+          this.bindEvents();
+          this.showToast('💾 E-mail do lead atualizado com sucesso!');
+        };
+
+        input.addEventListener('keydown', (ke) => {
+          if (ke.key === 'Enter') save();
+          if (ke.key === 'Escape') {
+            this.render();
+            this.bindEvents();
+          }
+        });
+        input.addEventListener('blur', save);
+
+        e.currentTarget.replaceWith(input);
+        input.focus();
+      });
+    });
+
+    // Sliders e Controles da Tela de Regras de Pontuação (Lead Scoring)
+    const sliderCold = document.getElementById('slider-cold-max');
+    const sliderWarm = document.getElementById('slider-warm-max');
+    const labelCold = document.getElementById('label-cold-range');
+    const labelWarm = document.getElementById('label-warm-range');
+    const labelHot = document.getElementById('label-hot-range');
+
+    const updateScoringRanges = () => {
+      if (!sliderCold || !sliderWarm) return;
+      let cold = parseInt(sliderCold.value, 10);
+      let warm = parseInt(sliderWarm.value, 10);
+      if (cold >= warm) {
+        warm = cold + 5;
+        sliderWarm.value = warm;
+      }
+      if (labelCold) labelCold.textContent = `0 até ${cold} pts`;
+      if (labelWarm) labelWarm.textContent = `${cold + 1} até ${warm} pts`;
+      if (labelHot) labelHot.textContent = `Acima de ${warm} pts`;
+    };
+
+    sliderCold?.addEventListener('input', updateScoringRanges);
+    sliderWarm?.addEventListener('input', updateScoringRanges);
+
+    document.getElementById('btn-save-scoring-rules')?.addEventListener('click', () => {
+      const coldMax = parseInt(document.getElementById('slider-cold-max')?.value, 10) || 30;
+      const warmMax = parseInt(document.getElementById('slider-warm-max')?.value, 10) || 70;
+      const pageViewPoints = parseInt(document.getElementById('input-page-points')?.value, 10) || 5;
+      const repeatVisitPoints = parseInt(document.getElementById('input-session-points')?.value, 10) || 15;
+      const paidAdBonus = parseInt(document.getElementById('input-ad-bonus')?.value, 10) || 25;
+      const emailBonus = parseInt(document.getElementById('input-email-bonus')?.value, 10) || 20;
+      const formHotScore = parseInt(document.getElementById('input-form-hot')?.value, 10) || 35;
+      const formWarmScore = parseInt(document.getElementById('input-form-warm')?.value, 10) || 25;
+      const formColdScore = parseInt(document.getElementById('input-form-cold')?.value, 10) || 15;
+
+      StorageService.saveScoringRules({
+        thresholds: { coldMax, warmMax },
+        pageViewPoints,
+        repeatVisitPoints,
+        paidAdBonus,
+        emailBonus,
+        formHotScore,
+        formWarmScore,
+        formColdScore
+      });
+
+      this.showToast('✅ Regras de pontuação salvas com sucesso!');
+    });
+
+    document.getElementById('btn-reset-scoring-rules')?.addEventListener('click', () => {
+      localStorage.removeItem('pk_scoring_rules');
+      this.render();
+      this.bindEvents();
+      this.showToast('🔄 Regras de pontuação restauradas para os padrões.');
     });
 
     // Exclusão de Lead

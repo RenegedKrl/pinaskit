@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'fix: Ocultacao de badges de temperatura para visitantes no formulario e previews, mantendo classificacao restrita ao CRM',
+    message: 'feat: Implementacao completa da Fase 1 (Lead Scoring Engine interativo com sliders, busca em tempo real, edicao inline e exportacao real de CSV)',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

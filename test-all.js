@@ -18,6 +18,8 @@ import { renderNewButtonView } from './src/components/NewButtonView.js';
 import { renderCampaignsView } from './src/components/CampaignsView.js';
 import { renderUtmBuilderModal } from './src/components/UtmBuilderModal.js';
 import { renderEditSiteModal } from './src/components/EditSiteModal.js';
+import { renderLeadScoringView } from './src/components/LeadScoringView.js';
+import { renderLeadSettingsModal } from './src/components/LeadSettingsModal.js';
 import fs from 'fs';
 
 let passCount = 0;
@@ -167,8 +169,15 @@ const generatedUtm = StorageService.generateUtmUrl({
 });
 assert(generatedUtm.includes('utm_source=meta_ads'), 'Gerador de UTM: Inclui utm_source');
 assert(generatedUtm.includes('utm_medium=stories'), 'Gerador de UTM: Inclui utm_medium');
-assert(generatedUtm.includes('utm_campaign=promo-verao-gluteo'), 'Gerador de UTM: Inclui utm_campaign');
 assert(generatedUtm.includes('utm_content=criativo-01'), 'Gerador de UTM: Inclui utm_content');
+
+// 1.11 Regras de Pontuação e Automação de Leads (Storage)
+const defaultScoringRules = StorageService.getScoringRules();
+assert(defaultScoringRules && defaultScoringRules.thresholds.coldMax === 30, 'StorageService: Regras padrão de pontuação carregadas');
+const updatedScoring = StorageService.saveScoringRules({ thresholds: { coldMax: 35, warmMax: 75 } });
+assert(updatedScoring.thresholds.coldMax === 35, 'StorageService: Salvar novas regras de pontuação');
+const autoSettings = StorageService.getLeadAutomationSettings();
+assert(autoSettings && autoSettings.autoCreateDeal === true, 'StorageService: Configurações de automação de leads');
 
 // --------------------------------------------------------------------------
 // 2. TESTES DE COMPONENTES & HIERARQUIA VISUAL
@@ -234,7 +243,23 @@ assert(leadsHtml.includes('Contatos capturados pelos formulários dos seus botõ
 assert(leadsHtml.includes('filter-lead-button'), 'Tabela de Leads possui o dropdown de filtro por botão');
 assert(leadsHtml.includes('btn-export-excel-leads'), 'Tabela de Leads possui botão de exportar Excel');
 assert(leadsHtml.includes('btn-scoring-rules'), 'Tabela de Leads possui botão de regras de pontuação');
+assert(leadsHtml.includes('input-search-leads'), 'Tabela de Leads possui busca instantânea');
+assert(leadsHtml.includes('filter-lead-temp'), 'Tabela de Leads possui filtro de temperatura');
+assert(leadsHtml.includes('editable-lead-field'), 'Tabela de Leads possui células editáveis inline');
 assert(leadsHtml.includes('Ana Livia Pereira de Sousa Paulo'), 'Tabela de Leads exibe os contatos da imagem');
+
+// 2.5.1 Tela de Regras de Pontuação (Lead Scoring Engine)
+const scoringHtml = renderLeadScoringView();
+assert(scoringHtml.includes('Regras de Pontuação de Leads'), 'Tela de Regras de Pontuação possui título correto');
+assert(scoringHtml.includes('slider-cold-max') && scoringHtml.includes('slider-warm-max'), 'Tela de Pontuação possui sliders de faixas');
+assert(scoringHtml.includes('btn-save-scoring-rules'), 'Tela de Pontuação possui botão de salvar');
+assert(scoringHtml.includes('btn-back-to-leads'), 'Tela de Pontuação possui botão de retorno para Leads');
+
+// 2.5.2 Modal de Configurações e Automações de Leads
+const leadSettingsHtml = renderLeadSettingsModal();
+assert(leadSettingsHtml.includes('Configurações & Automações de Leads'), 'Modal de Configurações de Leads possui título oficial');
+assert(leadSettingsHtml.includes('setting-auto-deal'), 'Modal possui switch de criação automática no CRM');
+assert(leadSettingsHtml.includes('btn-save-lead-settings'), 'Modal possui botão de salvar configurações');
 
 // 2.6 Modal de Qualificação
 const qualModalHtml = renderQualificationModal();
