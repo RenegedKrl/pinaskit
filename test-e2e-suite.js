@@ -86,7 +86,13 @@ async function runE2ETestSuite() {
     await send('DOM.enable');
 
     const evalJs = async (expr) => {
-      const res = await send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
+      const wrapped = (expr.includes('const ') || expr.includes('let ')) && !expr.trim().startsWith('(() =>')
+        ? `(() => { ${expr} })()`
+        : expr;
+      const res = await send('Runtime.evaluate', { expression: wrapped, returnByValue: true, awaitPromise: true });
+      if (res?.exceptionDetails) {
+        console.error('⚠️ [EVAL JS EXCEPTION]:', res.exceptionDetails.text, res.exceptionDetails.exception?.description);
+      }
       return res?.result?.value;
     };
 
@@ -353,6 +359,63 @@ async function runE2ETestSuite() {
 
     const drawerClosed = await evalJs('!document.getElementById("lead-drawer-overlay")?.classList.contains("is-active")');
     assert(drawerClosed === true, 'Drawer lateral fecha corretamente pelo botão de fechar');
+
+    // --------------------------------------------------------------------------
+    // TESTE 11: CONSTRUTOR NO-CODE INTERATIVO COM LIVE PREVIEW EM TEMPO REAL
+    // --------------------------------------------------------------------------
+    console.log('\n🛠️ 11. Testando Construtor No-Code & Live Preview no Celular:');
+    await evalJs('document.getElementById("side-nav-buttons")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    // Abrir o construtor clicando em "Editar Formulário" no card do Glúteo Feminino
+    await evalJs('document.querySelector(".btn-edit-form-action")?.click()');
+    await new Promise(r => setTimeout(r, 500));
+
+    const builderActive = await evalJs('document.getElementById("form-builder-modal-overlay")?.classList.contains("is-active")');
+    assert(builderActive === true, 'Modal do Construtor No-Code abre ao clicar em Editar Formulário');
+
+    const builderHasButtonName = await evalJs('document.getElementById("form-builder-modal")?.innerText.includes("Glúteo Feminino")');
+    assert(builderHasButtonName === true, 'Construtor identifica o botão selecionado ("Glúteo Feminino")');
+
+    const previewNotchExists = await evalJs('document.querySelector(".pk-builder-phone-notch") !== null');
+    assert(previewNotchExists === true, 'Moldura do celular (Phone Mockup) com entalhe renderizada com sucesso');
+
+    // Testar atualização reativa em tempo real: digitar novo título no formulário
+    await evalJs(`
+      const input = document.getElementById("builder-title");
+      if (input) {
+        input.value = "Avaliação Estética Exclusiva";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    `);
+    await new Promise(r => setTimeout(r, 400));
+
+    const previewTitleUpdated = await evalJs('document.getElementById("preview-form-title")?.innerText.trim()');
+    assert(previewTitleUpdated === 'Avaliação Estética Exclusiva', 'Título no Phone Mockup atualizou em tempo real ao digitar', previewTitleUpdated);
+
+    // Testar inserção dinâmica de opção
+    await evalJs('document.getElementById("btn-add-builder-option")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    const previewOptionsCount = await evalJs('document.querySelectorAll(".pk-preview-option-item").length');
+    assert(previewOptionsCount >= 4, `Nova opção inserida com sucesso no Live Preview (Total: ${previewOptionsCount} opções)`);
+
+    // Testar inserção rápida de tag no template
+    await evalJs('document.querySelector(\'.pk-builder-tag-chip[data-tag="{nome}"]\')?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const templateHasTag = await evalJs('document.getElementById("builder-template")?.value.includes("{nome}")');
+    assert(templateHasTag === true, 'Tag rápida {nome} inserida no template da mensagem');
+
+    await takeScreenshot('form-builder-live-preview');
+
+    // Salvar o formulário
+    await evalJs('document.getElementById("btn-save-builder")?.click()');
+    await new Promise(r => setTimeout(r, 600));
+
+    const builderClosed = await evalJs('!document.getElementById("form-builder-modal-overlay")?.classList.contains("is-active")');
+    assert(builderClosed === true, 'Construtor salva as alterações e fecha o modal automaticamente');
 
   } catch (err) {
     console.error('🚨 Erro inesperado no teste E2E:', err);

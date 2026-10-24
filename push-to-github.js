@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Ficha e Drawer lateral do lead com rastreamento UTM, troca de estagio CRM, timeline e notas',
+    message: 'feat: Construtor No-Code interativo de formularios com Phone Mockup e live preview em tempo real',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

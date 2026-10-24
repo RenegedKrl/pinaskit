@@ -171,6 +171,13 @@ assert(adsModalHtml.includes('OAuth 2.0 criptografado'), 'Modal possui selo de s
 const builderModalHtml = renderFormBuilderModal();
 assert(builderModalHtml.includes('Construtor Visual No-Code'), 'Construtor possui cabeçalho de personalização');
 assert(builderModalHtml.includes('btn-add-builder-option'), 'Construtor possui botão para adicionar novas opções');
+assert(builderModalHtml.includes('Pré-visualização ao Vivo'), 'Construtor possui painel de Pré-visualização ao Vivo no Celular');
+assert(builderModalHtml.includes('preview-options-container'), 'Construtor possui container reativo de opções no preview');
+assert(builderModalHtml.includes('btn-reset-builder-defaults'), 'Construtor possui botão de restaurar textos padrão');
+assert(builderModalHtml.includes('pk-builder-tag-chip'), 'Construtor possui tags rápidas para template do WhatsApp');
+
+const builderButton1Html = renderFormBuilderModal(initialButtons[0]);
+assert(builderButton1Html.includes('Personalizar: Glúteo Feminino'), 'Construtor carrega título específico do botão ao editar');
 
 // 2.9 Modal de Vídeo Tour
 const videoModalHtml = renderVideoTourModal();

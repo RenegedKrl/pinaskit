@@ -77,7 +77,7 @@ class PinasKitApp {
       <div id="modals-container">
         ${renderQualificationModal()}
         ${renderConnectAdsModal()}
-        ${renderFormBuilderModal()}
+        ${renderFormBuilderModal(this.activeButtonForEdit)}
         ${renderVideoTourModal()}
         ${renderCopyScriptModal()}
         ${renderLeadDrawer(this.selectedLeadForDrawer)}
@@ -265,7 +265,8 @@ class PinasKitApp {
     // Criar Novo Botão -> Abre o Construtor No-Code
     document.getElementById('btn-create-new-button')?.addEventListener('click', () => {
       this.activeButtonForEdit = null;
-      document.getElementById('builder-question').value = 'O que melhor descreve seu momento?';
+      this.render();
+      this.bindEvents();
       this.openModal('form-builder-modal-overlay');
     });
 
@@ -295,10 +296,8 @@ class PinasKitApp {
         const btnId = e.currentTarget.getAttribute('data-button-id');
         const button = StorageService.getButtonById(btnId);
         this.activeButtonForEdit = button;
-        if (button && button.formConfig) {
-          const qInput = document.getElementById('builder-question');
-          if (qInput) qInput.value = button.formConfig.questionLabel;
-        }
+        this.render();
+        this.bindEvents();
         this.openModal('form-builder-modal-overlay');
       });
     });
@@ -544,45 +543,186 @@ class PinasKitApp {
     }
 
     // ------------------------------------------------------------------------
-    // 9. EVENTOS DO CONSTRUTOR NO-CODE
+    // 9. EVENTOS DO CONSTRUTOR NO-CODE COM LIVE PREVIEW EM TEMPO REAL
     // ------------------------------------------------------------------------
-    document.getElementById('btn-close-builder-modal')?.addEventListener('click', () => this.closeModal('form-builder-modal-overlay'));
+    const closeBuilderModal = () => this.closeModal('form-builder-modal-overlay');
+    document.getElementById('btn-close-builder-modal')?.addEventListener('click', closeBuilderModal);
+    document.getElementById('btn-cancel-builder')?.addEventListener('click', closeBuilderModal);
 
-    // Adicionar nova opção
+    // Função de sincronização da pré-visualização em tempo real (Phone Mockup)
+    const updateBuilderLivePreview = () => {
+      const titleInput = document.getElementById('builder-title');
+      const subtitleInput = document.getElementById('builder-subtitle');
+      const questionInput = document.getElementById('builder-question');
+      const btnTextInput = document.getElementById('builder-btn-text');
+
+      const previewTitle = document.getElementById('preview-form-title');
+      const previewSubtitle = document.getElementById('preview-form-subtitle');
+      const previewQuestion = document.getElementById('preview-question-label');
+      const previewCtaBtn = document.getElementById('preview-cta-btn');
+      const previewOptionsContainer = document.getElementById('preview-options-container');
+
+      if (previewTitle && titleInput) {
+        previewTitle.textContent = titleInput.value.trim() || 'Conte sobre seu momento.';
+      }
+      if (previewSubtitle && subtitleInput) {
+        previewSubtitle.textContent = subtitleInput.value.trim() || 'Preencha os campos para receber uma avaliação personalizada.';
+      }
+      if (previewQuestion && questionInput) {
+        previewQuestion.textContent = questionInput.value.trim() || 'O que melhor descreve seu momento?';
+      }
+      if (previewCtaBtn && btnTextInput) {
+        previewCtaBtn.textContent = `💬 ${btnTextInput.value.trim() || 'Preparar minha mensagem →'}`;
+      }
+
+      if (previewOptionsContainer) {
+        const optionRows = document.querySelectorAll('.builder-option-row');
+        if (optionRows.length === 0) {
+          previewOptionsContainer.innerHTML = '<div style="font-size: 11px; color: var(--pk-text-muted); text-align: center; padding: 10px;">Nenhuma opção cadastrada. Adicione opções ao lado.</div>';
+        } else {
+          previewOptionsContainer.innerHTML = Array.from(optionRows).map((row, idx) => {
+            const label = row.querySelector('.builder-opt-label')?.value || 'Opção sem título';
+            const badge = row.querySelector('.builder-opt-badge')?.value || '🔥 Quente';
+            const badgeClass = badge.includes('Quente') ? 'pk-badge-hot' : badge.includes('Frio') ? 'pk-badge-cold' : 'pk-badge-warm';
+            const isSelected = idx === 0;
+
+            return `
+              <div class="pk-preview-option-item ${isSelected ? 'is-selected' : ''}" data-preview-index="${idx}">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${isSelected ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center;">
+                    ${isSelected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
+                  </div>
+                  <span class="preview-opt-text" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary);">
+                    ${label}
+                  </span>
+                </div>
+                <span class="pk-badge ${badgeClass}" style="font-size: 10px; padding: 2px 6px;">
+                  ${badge}
+                </span>
+              </div>
+            `;
+          }).join('');
+
+          // Permite clicar nas opções dentro do preview para testar interativamente
+          previewOptionsContainer.querySelectorAll('.pk-preview-option-item').forEach(item => {
+            item.addEventListener('click', () => {
+              previewOptionsContainer.querySelectorAll('.pk-preview-option-item').forEach(it => {
+                it.classList.remove('is-selected');
+                const circle = it.querySelector('div[style*="border-radius: 50%"]');
+                if (circle) {
+                  circle.style.borderColor = 'var(--pk-border)';
+                  circle.innerHTML = '';
+                }
+              });
+              item.classList.add('is-selected');
+              const activeCircle = item.querySelector('div[style*="border-radius: 50%"]');
+              if (activeCircle) {
+                activeCircle.style.borderColor = 'var(--pk-primary)';
+                activeCircle.innerHTML = '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>';
+              }
+            });
+          });
+        }
+      }
+    };
+
+    // Vincular inputs principais ao Live Preview (input, change e keyup)
+    ['builder-title', 'builder-subtitle', 'builder-question', 'builder-btn-text'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updateBuilderLivePreview);
+        el.addEventListener('change', updateBuilderLivePreview);
+        el.addEventListener('keyup', updateBuilderLivePreview);
+      }
+    });
+
+    // Função para reatribuir listeners nas opções dinâmicas
+    const bindOptionRowListeners = (row) => {
+      row.querySelector('.builder-opt-label')?.addEventListener('input', updateBuilderLivePreview);
+      row.querySelector('.builder-opt-badge')?.addEventListener('change', updateBuilderLivePreview);
+      row.querySelector('.pk-btn-remove-opt')?.addEventListener('click', () => {
+        row.remove();
+        updateBuilderLivePreview();
+        document.querySelectorAll('.builder-option-row').forEach((r, i) => {
+          const numSpan = r.querySelector('span');
+          if (numSpan) numSpan.textContent = `${i + 1}.`;
+        });
+      });
+    };
+
+    document.querySelectorAll('.builder-option-row').forEach(bindOptionRowListeners);
+
+    // Botão "+ Adicionar Nova Opção"
     document.getElementById('btn-add-builder-option')?.addEventListener('click', () => {
       const list = document.getElementById('builder-options-list');
       if (!list) return;
       const count = list.children.length;
       const row = document.createElement('div');
-      row.className = 'pk-card builder-option-row';
-      row.style.cssText = 'padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;';
+      row.className = 'builder-option-row';
+      row.setAttribute('data-index', count);
+      row.style.cssText = 'background: var(--pk-bg-card); border: 1px solid var(--pk-border); border-radius: 8px; padding: 8px 12px; display: grid; grid-template-columns: 24px 1fr 140px 32px; align-items: center; gap: 8px;';
       row.innerHTML = `
-        <span style="font-size: 14px; font-weight: 700; color: var(--pk-primary);">${count + 1}.</span>
-        <input type="text" class="pk-input builder-opt-label" placeholder="Nova opção..." style="padding: 8px 12px; font-size: 13px;" required/>
-        <select class="pk-input builder-opt-badge" style="width: 130px; padding: 8px; font-size: 13px;">
-          <option value="🔥 Quente">🔥 Quente (+30)</option>
+        <span style="font-size: 13px; font-weight: 800; color: var(--pk-primary); text-align: center;">${count + 1}.</span>
+        <input type="text" class="pk-input builder-opt-label" placeholder="Nova opção..." value="Nova opção de atendimento" style="padding: 7px 10px; font-size: 13px;" required/>
+        <select class="pk-input builder-opt-badge" style="padding: 7px 8px; font-size: 12px; cursor: pointer;">
+          <option value="🔥 Quente" selected>🔥 Quente (+30)</option>
           <option value="❄️ Morno">❄️ Morno (+20)</option>
           <option value="🧊 Frio">🧊 Frio (+10)</option>
         </select>
-        <button type="button" class="pk-btn-remove-opt" style="color: var(--pk-danger); font-size: 16px; cursor: pointer; padding: 4px;" title="Remover Opção">🗑️</button>
+        <button type="button" class="pk-btn-remove-opt" data-index="${count}" style="background: none; border: none; color: var(--pk-danger); font-size: 16px; cursor: pointer; padding: 4px; text-align: center;" title="Remover Opção">
+          🗑️
+        </button>
       `;
-      row.querySelector('.pk-btn-remove-opt')?.addEventListener('click', () => row.remove());
       list.appendChild(row);
+      bindOptionRowListeners(row);
+      updateBuilderLivePreview();
     });
 
-    document.querySelectorAll('.pk-btn-remove-opt').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const row = e.currentTarget.closest('.builder-option-row');
-        if (row) row.remove();
+    // Inserção rápida de Tags no template do WhatsApp
+    document.querySelectorAll('.pk-builder-tag-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const tag = e.currentTarget.getAttribute('data-tag');
+        const textarea = document.getElementById('builder-template');
+        if (textarea && tag) {
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const text = textarea.value;
+          textarea.value = text.substring(0, start) + ' ' + tag + ' ' + text.substring(end);
+          textarea.focus();
+          textarea.selectionStart = textarea.selectionEnd = start + tag.length + 2;
+          this.showToast(`🏷️ Tag ${tag} inserida no template!`);
+        }
       });
     });
 
-    // Salvar Configuração do Construtor
+    // Botão "Restaurar Textos Padrão"
+    document.getElementById('btn-reset-builder-defaults')?.addEventListener('click', () => {
+      const titleInput = document.getElementById('builder-title');
+      const subtitleInput = document.getElementById('builder-subtitle');
+      const questionInput = document.getElementById('builder-question');
+      const btnTextInput = document.getElementById('builder-btn-text');
+      const templateInput = document.getElementById('builder-template');
+
+      if (titleInput) titleInput.value = 'Conte sobre seu momento.';
+      if (subtitleInput) subtitleInput.value = 'Preencha os campos para receber uma avaliação personalizada.';
+      if (questionInput) questionInput.value = 'O que melhor descreve seu momento?';
+      if (btnTextInput) btnTextInput.value = 'Preparar minha mensagem →';
+      if (templateInput) templateInput.value = 'Olá! Meu nome é {nome}. Momento: {momento}. Detalhes: {mensagem}';
+
+      updateBuilderLivePreview();
+      this.showToast('↺ Textos restaurados para o padrão.');
+    });
+
+    // Submissão do Formulário do Construtor
     document.getElementById('form-builder-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const question = document.getElementById('builder-question')?.value;
+      const title = document.getElementById('builder-title')?.value || 'Conte sobre seu momento.';
+      const subtitle = document.getElementById('builder-subtitle')?.value || 'Preencha os campos para receber uma avaliação personalizada.';
+      const question = document.getElementById('builder-question')?.value || 'O que melhor descreve seu momento?';
+      const buttonText = document.getElementById('builder-btn-text')?.value || 'Preparar minha mensagem →';
+      const template = document.getElementById('builder-template')?.value || 'Olá! Meu nome é {nome}. Momento: {momento}. Detalhes: {mensagem}';
+
       const optionRows = document.querySelectorAll('.builder-option-row');
-      
       const options = [];
       optionRows.forEach((row, idx) => {
         const label = row.querySelector('.builder-opt-label')?.value;
@@ -590,32 +730,30 @@ class PinasKitApp {
         if (label) {
           options.push({
             id: String(idx + 1),
-            label: label,
-            score: badge.includes('Quente') ? 30 : badge.includes('Morno') ? 20 : 10,
+            label: label.trim(),
+            score: badge.includes('Quente') ? 35 : badge.includes('Morno') ? 25 : 15,
             badge: badge
           });
         }
       });
 
       const updatedConfig = {
-        title: 'Conte sobre seu momento.',
-        subtitle: 'Preencha os campos para gerar uma mensagem de apresentação sob medida.',
-        buttonText: 'Preparar minha mensagem →',
+        title,
+        subtitle,
+        buttonText,
         questionLabel: question,
         options: options.length > 0 ? options : [
-          { id: '1', label: 'Quero crescer na minha carreira', score: 25, badge: '🔥 Quente' },
-          { id: '2', label: 'Estou pensando em mudar de área', score: 20, badge: '❄️ Morno' }
+          { id: '1', label: 'Quero agendamento rápido', score: 35, badge: '🔥 Quente' },
+          { id: '2', label: 'Desejo tirar dúvidas de valores', score: 25, badge: '❄️ Morno' }
         ],
         whatsappNumber: '5511975374960',
-        whatsappTemplate: 'Olá! Meu nome é {nome}. Momento: {momento}. Detalhes: {mensagem}'
+        whatsappTemplate: template
       };
 
-      // Se estiver editando um botão específico, salva nele
       if (this.activeButtonForEdit) {
         this.activeButtonForEdit.formConfig = updatedConfig;
         StorageService.saveButton(this.activeButtonForEdit);
       } else {
-        // Cria um novo botão no sistema
         StorageService.saveButton({
           name: question.length > 25 ? question.slice(0, 25) + '...' : question,
           slug: `botao-${Date.now().toString().slice(-4)}`,
@@ -627,9 +765,8 @@ class PinasKitApp {
       }
 
       StorageService.saveFormConfig(updatedConfig);
-
       this.closeModal('form-builder-modal-overlay');
-      this.showToast('✅ Botão e formulário de qualificação salvos com sucesso!');
+      this.showToast('✨ Formulário salvo e publicado com sucesso!');
       this.render();
       this.bindEvents();
     });
