@@ -20,6 +20,12 @@ import { renderUtmBuilderModal } from './src/components/UtmBuilderModal.js';
 import { renderEditSiteModal } from './src/components/EditSiteModal.js';
 import { renderLeadScoringView } from './src/components/LeadScoringView.js';
 import { renderLeadSettingsModal } from './src/components/LeadSettingsModal.js';
+import { renderCrmView } from './src/components/CrmView.js';
+import { renderProductsView } from './src/components/ProductsView.js';
+import { renderNewDealModal } from './src/components/NewDealModal.js';
+import { renderNewProductModal } from './src/components/NewProductModal.js';
+import { renderLostDealModal } from './src/components/LostDealModal.js';
+import { formatCurrencyBRL, parseCurrencyToCents } from './src/services/storage.js';
 import fs from 'fs';
 
 let passCount = 0;
@@ -376,6 +382,104 @@ assert(publicEmbedContent === embedContent, 'public/embed.js está perfeitamente
 assert(serverContent.includes('/api/leads'), 'server.js disponibiliza a rota /api/leads para gravação e sincronização');
 assert(serverContent.includes('Access-Control-Allow-Origin'), 'server.js possui cabeçalhos CORS completos para permitir conexões externas');
 assert(typeof StorageService.syncRemoteLeads === 'function', 'StorageService possui o método syncRemoteLeads');
+
+// --------------------------------------------------------------------------
+// 6. TESTES DO CRM KANBAN & CATÁLOGO DE PRODUTOS (FASE 2 CENTRALKIT)
+// --------------------------------------------------------------------------
+console.log('\n💼 6. Testando CRM Kanban & Catálogo de Produtos (Fase 2 CentralKit):');
+
+// Catálogo de Produtos
+const initialProducts = StorageService.getProducts();
+assert(Array.isArray(initialProducts) && initialProducts.length >= 5, 'StorageService: Carregamento do catálogo de produtos (5 itens iniciais)');
+assert(initialProducts.some(p => p.name === 'Mentoria de Carreira Individual'), 'Catálogo inclui Mentoria de Carreira Individual');
+assert(formatCurrencyBRL(250000).includes('2.500,00'), 'formatCurrencyBRL formata 250000 centavos para R$ 2.500,00');
+assert(parseCurrencyToCents('R$ 2.500,00') === 250000, 'parseCurrencyToCents converte string BRL de volta para centavos');
+
+const newProd = StorageService.saveProduct({ name: 'Consultoria Estratégica VIP', kind: 'service', price_cents: 500000 });
+assert(newProd && newProd.id.startsWith('prod-'), 'StorageService: Cadastrar novo produto no catálogo');
+assert(StorageService.getProductById(newProd.id)?.name === 'Consultoria Estratégica VIP', 'StorageService: Buscar produto por ID');
+
+StorageService.updateProduct(newProd.id, { price_cents: 600000, kind: 'product' });
+const updatedProd = StorageService.getProductById(newProd.id);
+assert(updatedProd?.price_cents === 600000 && updatedProd.kind === 'product', 'StorageService: Atualização inline de produto e tipo');
+
+StorageService.deleteProduct(newProd.id);
+assert(!StorageService.getProductById(newProd.id), 'StorageService: Exclusão de produto do catálogo');
+
+// Negócios no CRM
+const initialDeals = StorageService.getDeals('all');
+assert(Array.isArray(initialDeals) && initialDeals.length >= 6, 'StorageService: Carregamento inicial de negócios no CRM (6 oportunidades)');
+
+const openDeals = StorageService.getDeals('open');
+assert(openDeals.every(d => d.status === 'open'), 'StorageService: Filtro de negócios abertos');
+
+const searchDeals = StorageService.getDeals('all', 'Ana Paula');
+assert(searchDeals.length > 0 && searchDeals[0].contactName.includes('Ana'), 'StorageService: Busca em tempo real de negócios');
+
+const testDeal = StorageService.saveDeal({
+  title: 'Negócio Teste Automação',
+  contactName: 'Cliente Teste',
+  contactPhone: '+55 11 90000-0000',
+  stage: 'Novo',
+  status: 'open',
+  price_cents: 150000
+});
+assert(testDeal && testDeal.id.startsWith('deal-'), 'StorageService: Salvar novo negócio no CRM');
+
+StorageService.updateDealStage(testDeal.id, 'Qualificação');
+assert(StorageService.getDealById(testDeal.id)?.stage === 'Qualificação', 'StorageService: Avançar etapa do negócio para Qualificação');
+
+StorageService.markDealWon(testDeal.id);
+assert(StorageService.getDealById(testDeal.id)?.status === 'won', 'StorageService: Concluir negócio como Ganho ✓');
+
+StorageService.markDealLost(testDeal.id, 'Preço', 'Achou caro');
+const lostDeal = StorageService.getDealById(testDeal.id);
+assert(lostDeal?.status === 'lost' && lostDeal.lostReason === 'Preço', 'StorageService: Marcar negócio como Perdido com motivo oficial CentralKit');
+
+StorageService.deleteDeal(testDeal.id);
+assert(!StorageService.getDealById(testDeal.id), 'StorageService: Excluir negócio do CRM');
+
+// Conversão Lead -> Deal
+const leadConversionDeal = StorageService.createDealFromLead('lead-1');
+assert(leadConversionDeal && leadConversionDeal.leadId === 'lead-1', 'StorageService: Converter Lead diretamente em Oportunidade no CRM');
+StorageService.deleteDeal(leadConversionDeal.id);
+
+// Métricas Agregadas do CRM
+const crmMetrics = StorageService.getAggregatedCrmMetrics();
+assert(crmMetrics && crmMetrics.totalOpenFormatted.includes('R$'), 'StorageService: Cálculo de métricas agregadas do CRM (Pipeline em Aberto)');
+assert(crmMetrics.conversionRate.includes('%'), 'StorageService: Taxa de conversão do funil calculada');
+
+// Renderização dos Componentes de UI (Fase 2)
+const crmHtml = renderCrmView('open', '');
+assert(crmHtml.includes('Funil de Oportunidades'), 'CrmView renderiza título oficial do funil');
+assert(crmHtml.includes('data-stage="Novo"'), 'CrmView possui coluna da etapa Novo');
+assert(crmHtml.includes('data-stage="Qualificação"'), 'CrmView possui coluna da etapa Qualificação');
+assert(crmHtml.includes('data-stage="Proposta"'), 'CrmView possui coluna da etapa Proposta');
+assert(crmHtml.includes('data-stage="Negociação"'), 'CrmView possui coluna da etapa Negociação');
+assert(crmHtml.includes('data-stage="Fechamento"'), 'CrmView possui coluna da etapa Fechamento');
+assert(crmHtml.includes('crm-filter-pill'), 'CrmView possui as pills de filtro por status');
+assert(crmHtml.includes('crm-search-input'), 'CrmView possui input de busca em tempo real');
+assert(crmHtml.includes('btn-open-products-catalog'), 'CrmView possui botão de acesso ao catálogo de produtos');
+assert(crmHtml.includes('btn-open-new-deal'), 'CrmView possui botão para criar novo negócio');
+
+const productsHtml = renderProductsView();
+assert(productsHtml.includes('Produtos e serviços'), 'ProductsView renderiza título oficial');
+assert(productsHtml.includes('btn-back-to-crm'), 'ProductsView possui link Voltar ao funil');
+assert(productsHtml.includes('btn-open-new-product'), 'ProductsView possui botão Novo item');
+assert(productsHtml.includes('editable-product-field'), 'ProductsView possui células editáveis inline');
+
+const newDealModalHtml = renderNewDealModal();
+assert(newDealModalHtml.includes('Novo Negócio no CRM'), 'NewDealModal possui título correto');
+assert(newDealModalHtml.includes('new-deal-lead-select'), 'NewDealModal possui seletor de leads vinculados');
+assert(newDealModalHtml.includes('new-deal-product-select'), 'NewDealModal possui seletor de produtos do catálogo');
+
+const newProductModalHtml = renderNewProductModal();
+assert(newProductModalHtml.includes('Novo produto / serviço'), 'NewProductModal possui título correto');
+assert(newProductModalHtml.includes('new-product-kind'), 'NewProductModal possui dropdown de Produto vs Serviço');
+
+const lostDealModalHtml = renderLostDealModal();
+assert(lostDealModalHtml.includes('Por que este negócio foi perdido?'), 'LostDealModal possui título oficial CentralKit');
+assert(lostDealModalHtml.includes('Sem retorno'), 'LostDealModal inclui os motivos oficiais de perda');
 
 // --------------------------------------------------------------------------
 // RESULTADO FINAL

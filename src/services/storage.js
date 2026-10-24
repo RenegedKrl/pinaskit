@@ -12,7 +12,9 @@ const STORAGE_KEYS = {
   CURRENT_VIEW: 'pk_current_view',
   CURRENT_DASH_TAB: 'pk_current_dash_tab',
   SCORING_RULES: 'pk_scoring_rules',
-  LEAD_AUTOMATION: 'pk_lead_automation'
+  LEAD_AUTOMATION: 'pk_lead_automation',
+  PRODUCTS: 'pk_products',
+  DEALS: 'pk_deals'
 };
 
 // Configurações Padrão de Pontuação de Leads (Lead Scoring Engine - Modelo CentralKit)
@@ -35,6 +37,167 @@ const DEFAULT_LEAD_AUTOMATION = {
   initialCrmStage: 'Novo',
   notifyOnHotLead: true
 };
+
+// Formatação e conversão de moeda BRL (Centavos <-> R$)
+export function formatCurrencyBRL(cents) {
+  return ((cents || 0) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export function parseCurrencyToCents(str) {
+  if (!str) return 0;
+  if (typeof str === 'number') return Math.round(str * 100);
+  const clean = str.replace(/[^\d,.-]/g, '').trim();
+  if (!clean) return 0;
+  const numStr = clean.includes(',') ? clean.replace(/\./g, '').replace(',', '.') : clean;
+  const val = Number(numStr);
+  return Number.isFinite(val) ? Math.round(val * 100) : 0;
+}
+
+// Catálogo Oficial de Produtos e Serviços (/painel/crm/produtos - Modelo CentralKit)
+const INITIAL_PRODUCTS = [
+  {
+    id: 'prod-1',
+    name: 'Mentoria de Carreira Individual',
+    kind: 'service',
+    price_cents: 250000,
+    created_at: '2026-10-10'
+  },
+  {
+    id: 'prod-2',
+    name: 'Protocolo Glúteo Max',
+    kind: 'service',
+    price_cents: 180000,
+    created_at: '2026-10-12'
+  },
+  {
+    id: 'prod-3',
+    name: 'Sessão Endolaser Facial & Papada',
+    kind: 'service',
+    price_cents: 320000,
+    created_at: '2026-10-05'
+  },
+  {
+    id: 'prod-4',
+    name: 'Kit Home Care Pós-Procedimento',
+    kind: 'product',
+    price_cents: 35000,
+    created_at: '2026-10-15'
+  },
+  {
+    id: 'prod-5',
+    name: 'Consulta Médica de Avaliação Especializada',
+    kind: 'service',
+    price_cents: 45000,
+    created_at: '2026-10-08'
+  }
+];
+
+// Oportunidades & Negócios no CRM (/painel/crm - 5 Etapas CentralKit)
+const INITIAL_DEALS = [
+  {
+    id: 'deal-1',
+    title: 'Mentoria Executiva - Ana Paula',
+    leadId: 'lead-1',
+    contactName: 'Ana Livia Pereira de Sousa Paulo',
+    contactPhone: '+55 11 97537-4960',
+    contactEmail: 'analivia.sousa@gmail.com',
+    stage: 'Novo',
+    status: 'open',
+    price_cents: 250000,
+    productId: 'prod-1',
+    productName: 'Mentoria de Carreira Individual',
+    assignedTo: 'Mariana',
+    notes: 'Interessada no alinhamento para transição de carreira nos próximos meses.',
+    updated_at: '2026-10-24T14:30:00Z',
+    created_at: '2026-10-24T10:16:00Z'
+  },
+  {
+    id: 'deal-2',
+    title: 'Harmonização Corporal - Andreza',
+    leadId: 'lead-2',
+    contactName: 'Andreza Ferreira',
+    contactPhone: '+55 11 98181-4586',
+    contactEmail: 'andreza.estetica@outlook.com',
+    stage: 'Qualificação',
+    status: 'open',
+    price_cents: 180000,
+    productId: 'prod-2',
+    productName: 'Protocolo Glúteo Max',
+    assignedTo: 'Mariana',
+    notes: 'Gostaria de entender valores e parcelamento no cartão.',
+    updated_at: '2026-10-23T11:20:00Z',
+    created_at: '2026-10-23T09:15:00Z'
+  },
+  {
+    id: 'deal-3',
+    title: 'Endolaser Facial - Carlos Eduardo',
+    leadId: 'lead-3',
+    contactName: 'Carlos Eduardo Mendes',
+    contactPhone: '+55 11 96490-6555',
+    contactEmail: 'carlos.mendes@empresa.com.br',
+    stage: 'Proposta',
+    status: 'open',
+    price_cents: 320000,
+    productId: 'prod-3',
+    productName: 'Sessão Endolaser Facial & Papada',
+    assignedTo: 'Mariana',
+    notes: 'Proposta detalhada enviada no WhatsApp. Aguardando retorno.',
+    updated_at: '2026-10-15T10:00:00Z',
+    created_at: '2026-10-14T16:00:00Z'
+  },
+  {
+    id: 'deal-4',
+    title: 'Mentoria Aceleração - Juliana Costa',
+    leadId: 'lead-4',
+    contactName: 'Juliana Costa',
+    contactPhone: '+55 11 97788-9900',
+    contactEmail: 'juliana.costa@techlead.io',
+    stage: 'Negociação',
+    status: 'open',
+    price_cents: 250000,
+    productId: 'prod-1',
+    productName: 'Mentoria de Carreira Individual',
+    assignedTo: 'Mariana',
+    notes: 'Alinhando datas para as sessões quinzenais.',
+    updated_at: '2026-10-24T08:45:00Z',
+    created_at: '2026-10-22T14:00:00Z'
+  },
+  {
+    id: 'deal-5',
+    title: 'Checkup & Consulta - Dr. Roberto',
+    leadId: 'lead-5',
+    contactName: 'Roberto Alves de Toledo',
+    contactPhone: '+55 11 91234-5678',
+    contactEmail: 'roberto.alves@consultoria.com',
+    stage: 'Fechamento',
+    status: 'won',
+    price_cents: 45000,
+    productId: 'prod-5',
+    productName: 'Consulta Médica de Avaliação Especializada',
+    assignedTo: 'Mariana',
+    notes: 'Fechamento concluído. Pagamento via PIX confirmado!',
+    updated_at: '2026-10-23T17:00:00Z',
+    created_at: '2026-10-21T11:30:00Z'
+  },
+  {
+    id: 'deal-6',
+    title: 'Tratamento Corporal - Camila',
+    leadId: 'lead-6',
+    contactName: 'Camila Rocha',
+    contactPhone: '+55 11 99911-2233',
+    contactEmail: 'camila.rocha@uol.com.br',
+    stage: 'Qualificação',
+    status: 'lost',
+    lostReason: 'Preço',
+    price_cents: 180000,
+    productId: 'prod-2',
+    productName: 'Protocolo Glúteo Max',
+    assignedTo: 'Mariana',
+    notes: 'Achei acima do orçamento no momento. Entrar em contato na Black Friday.',
+    updated_at: '2026-10-20T16:00:00Z',
+    created_at: '2026-10-19T13:00:00Z'
+  }
+];
 
 // Campanhas de Anúncios Iniciais (Meta & Google Ads com Atribuição de Tráfego)
 const INITIAL_CAMPAIGNS = [
@@ -859,5 +1022,191 @@ export const StorageService = {
       const separator = baseUrl.includes('?') ? '&' : '?';
       return `${baseUrl}${params.length ? separator + params.join('&') : ''}`;
     }
+  },
+
+  // --- GERENCIAMENTO DE PRODUTOS E SERVIÇOS (CENTRALKIT /painel/crm/produtos) ---
+  getProducts() {
+    const data = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+    return data ? JSON.parse(data) : INITIAL_PRODUCTS;
+  },
+
+  getProductById(id) {
+    const products = this.getProducts();
+    return products.find(p => p.id === id) || null;
+  },
+
+  saveProduct(productData) {
+    const products = this.getProducts();
+    const newProduct = {
+      id: productData.id || `prod-${Date.now()}`,
+      name: productData.name?.trim() || 'Novo Item',
+      kind: productData.kind || 'service',
+      price_cents: Number(productData.price_cents) || 0,
+      created_at: productData.created_at || new Date().toISOString().split('T')[0]
+    };
+    products.unshift(newProduct);
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    return newProduct;
+  },
+
+  updateProduct(id, patch) {
+    let products = this.getProducts();
+    const idx = products.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      products[idx] = { ...products[idx], ...patch };
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+      return products[idx];
+    }
+    return null;
+  },
+
+  deleteProduct(id) {
+    let products = this.getProducts();
+    products = products.filter(p => p.id !== id);
+    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+    return products;
+  },
+
+  // --- GERENCIAMENTO DE NEGÓCIOS & FUNIL KANBAN (CENTRALKIT /painel/crm) ---
+  getDeals(statusFilter = 'open', searchQuery = '') {
+    const data = localStorage.getItem(STORAGE_KEYS.DEALS);
+    let deals = data ? JSON.parse(data) : INITIAL_DEALS;
+
+    if (statusFilter && statusFilter !== 'all') {
+      deals = deals.filter(d => d.status === statusFilter);
+    }
+
+    if (searchQuery && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      deals = deals.filter(d => {
+        const full = `${d.title} ${d.contactName} ${d.contactPhone} ${d.contactEmail} ${d.productName || ''} ${d.assignedTo || ''}`
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        return full.includes(q);
+      });
+    }
+
+    return deals;
+  },
+
+  getDealById(id) {
+    const deals = this.getDeals('all');
+    return deals.find(d => d.id === id) || null;
+  },
+
+  saveDeal(dealData) {
+    const deals = this.getDeals('all');
+    const newDeal = {
+      id: dealData.id || `deal-${Date.now()}`,
+      title: dealData.title || 'Nova Oportunidade',
+      leadId: dealData.leadId || null,
+      contactName: dealData.contactName || 'Contato sem nome',
+      contactPhone: dealData.contactPhone || '',
+      contactEmail: dealData.contactEmail || '',
+      stage: dealData.stage || 'Novo',
+      status: dealData.status || 'open',
+      price_cents: Number(dealData.price_cents) || 0,
+      productId: dealData.productId || null,
+      productName: dealData.productName || '',
+      assignedTo: dealData.assignedTo || 'Mariana',
+      notes: dealData.notes || '',
+      updated_at: new Date().toISOString(),
+      created_at: dealData.created_at || new Date().toISOString()
+    };
+    deals.unshift(newDeal);
+    localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(deals));
+    return newDeal;
+  },
+
+  updateDeal(id, patch) {
+    let deals = this.getDeals('all');
+    const idx = deals.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      deals[idx] = { 
+        ...deals[idx], 
+        ...patch, 
+        updated_at: new Date().toISOString() 
+      };
+      localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(deals));
+      return deals[idx];
+    }
+    return null;
+  },
+
+  updateDealStage(id, newStage) {
+    return this.updateDeal(id, { stage: newStage });
+  },
+
+  markDealWon(id) {
+    return this.updateDeal(id, { status: 'won', stage: 'Fechamento' });
+  },
+
+  markDealLost(id, reason = 'Outro', notes = '') {
+    return this.updateDeal(id, { 
+      status: 'lost', 
+      lostReason: reason,
+      notes: notes ? `${notes} (Motivo: ${reason})` : `Perdido por: ${reason}`
+    });
+  },
+
+  deleteDeal(id) {
+    let deals = this.getDeals('all');
+    deals = deals.filter(d => d.id !== id);
+    localStorage.setItem(STORAGE_KEYS.DEALS, JSON.stringify(deals));
+    return deals;
+  },
+
+  createDealFromLead(leadId, productId = null) {
+    const lead = this.getLeadById(leadId);
+    if (!lead) return null;
+
+    let product = null;
+    if (productId) {
+      product = this.getProductById(productId);
+    } else {
+      const products = this.getProducts();
+      product = products.find(p => p.name.toLowerCase().includes(lead.button?.toLowerCase() || '')) || products[0];
+    }
+
+    const newDeal = this.saveDeal({
+      title: `${lead.button || 'Atendimento'} - ${lead.name}`,
+      leadId: lead.id,
+      contactName: lead.name,
+      contactPhone: lead.phone,
+      contactEmail: lead.email,
+      stage: 'Novo',
+      status: 'open',
+      productId: product?.id || null,
+      productName: product?.name || 'Consulta / Atendimento',
+      price_cents: product?.price_cents || 250000,
+      assignedTo: 'Mariana',
+      notes: `Convertido a partir do Lead (${lead.temperature || 'Novo'}). Mensagem: ${lead.userMessage || 'Aplicação via site'}`
+    });
+
+    return newDeal;
+  },
+
+  getAggregatedCrmMetrics() {
+    const all = this.getDeals('all');
+    const open = all.filter(d => d.status === 'open');
+    const won = all.filter(d => d.status === 'won');
+    const lost = all.filter(d => d.status === 'lost');
+
+    const totalOpenCents = open.reduce((sum, d) => sum + (d.price_cents || 0), 0);
+    const totalWonCents = won.reduce((sum, d) => sum + (d.price_cents || 0), 0);
+    const avgTicketCents = won.length > 0 ? Math.round(totalWonCents / won.length) : (all.length > 0 ? Math.round((totalOpenCents + totalWonCents) / all.length) : 0);
+    const convRate = (won.length + lost.length) > 0 ? ((won.length / (won.length + lost.length)) * 100).toFixed(1) : (all.length > 0 ? ((won.length / all.length) * 100).toFixed(1) : '0.0');
+
+    return {
+      totalOpenFormatted: formatCurrencyBRL(totalOpenCents),
+      totalWonFormatted: formatCurrencyBRL(totalWonCents),
+      avgTicketFormatted: formatCurrencyBRL(avgTicketCents),
+      conversionRate: `${convRate}%`,
+      openCount: open.length,
+      wonCount: won.length,
+      lostCount: lost.length,
+      totalCount: all.length
+    };
   }
 };

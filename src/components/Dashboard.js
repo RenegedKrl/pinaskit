@@ -8,8 +8,10 @@ import { renderLeadsView } from './LeadsView.js';
 import { renderLeadScoringView } from './LeadScoringView.js';
 import { renderNewButtonView } from './NewButtonView.js';
 import { renderCampaignsView } from './CampaignsView.js';
+import { renderCrmView } from './CrmView.js';
+import { renderProductsView } from './ProductsView.js';
 
-export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null, campaignPlatformFilter = 'Todas', campaignStatusFilter = 'Todas', campaignSearchQuery = '', leadFilterPeriod = 'Últimos 30 dias', leadFilterTemp = 'Todos', leadSearchQuery = '') {
+export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null, campaignPlatformFilter = 'Todas', campaignStatusFilter = 'Todas', campaignSearchQuery = '', leadFilterPeriod = 'Últimos 30 dias', leadFilterTemp = 'Todos', leadSearchQuery = '', crmStatusFilter = 'open', crmSearchQuery = '') {
   const currentTheme = StorageService.getTheme();
   const connectedAds = StorageService.getConnectedAds();
   const leads = StorageService.getLeads();
@@ -46,9 +48,16 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
               <span>Leads</span>
             </div>
 
-            <div class="pk-sidebar-item ${activeTab === 'conversations' || activeTab === 'crm' ? 'is-active' : ''}" id="side-nav-conversations" data-tab="conversations">
+            <!-- ⭐ ABA CRM & FUNIL (CENTRALKIT) -->
+            <div class="pk-sidebar-item ${activeTab === 'crm' || activeTab === 'products' ? 'is-active' : ''}" id="side-nav-crm" data-tab="crm">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+              <span>CRM</span>
+            </div>
+
+            <div class="pk-sidebar-item ${activeTab === 'conversations' ? 'is-active' : ''}" id="side-nav-conversations" data-tab="conversations">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <span>Conversas</span>
+              <span class="pk-badge" style="font-size: 9px; padding: 1px 5px; background: rgba(124, 58, 237, 0.1); color: var(--pk-primary); margin-left: auto;">Em breve</span>
             </div>
 
             <div class="pk-sidebar-item ${activeTab === 'sales' ? 'is-active' : ''}" id="side-nav-sales" data-tab="sales">
@@ -97,7 +106,9 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
                 : activeTab === 'new-button' ? 'Novo Botão de WhatsApp'
                 : activeTab === 'leads' ? 'Base Geral de Leads' 
                 : activeTab === 'lead-scoring' ? 'Regras de Pontuação de Leads'
-                : activeTab === 'conversations' || activeTab === 'crm' ? 'Conversas & CRM WhatsApp'
+                : activeTab === 'crm' ? 'CRM & Funil de Oportunidades'
+                : activeTab === 'products' ? 'Catálogo de Produtos e Serviços'
+                : activeTab === 'conversations' ? 'Conversas & WhatsApp'
                 : activeTab === 'sales' ? 'Vendas & Faturamento'
                 : activeTab === 'ads' ? 'Central de Anúncios'
                 : activeTab === 'automation' ? 'Automações & Qualificação'
@@ -108,6 +119,8 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
               ${activeTab === 'overview' ? 'Vamos continuar configurando seu Pinas Kit?' 
                 : activeTab === 'new-button' ? 'Configure a aparência, triagem e comportamento do seu widget flutuante' 
                 : activeTab === 'lead-scoring' ? 'Defina os critérios e pontuações para classificar seus leads automaticamente entre Quente, Morno e Frio'
+                : activeTab === 'crm' ? 'Arraste ou avance as oportunidades de negócio entre as 5 etapas do funil até o fechamento'
+                : activeTab === 'products' ? 'Cadastre e gerencie os itens e preços para vincular às propostas e negócios'
                 : 'Workspace: Luana Albuquerque · Plano Starter'}
             </p>
           </div>
@@ -145,7 +158,11 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
           ? renderLeadScoringView()
           : activeTab === 'leads'
           ? renderLeadsView(leadFilterButton, leadFilterPeriod, leadFilterTemp, leadSearchQuery)
-          : activeTab === 'conversations' || activeTab === 'crm'
+          : activeTab === 'crm'
+          ? renderCrmView(crmStatusFilter, crmSearchQuery)
+          : activeTab === 'products'
+          ? renderProductsView()
+          : activeTab === 'conversations'
           ? renderConversationsView(leads)
           : activeTab === 'sales'
           ? renderSalesView(leads)

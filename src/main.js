@@ -15,6 +15,9 @@ import { renderLeadDrawer } from './components/LeadDrawer.js';
 import { renderUtmBuilderModal } from './components/UtmBuilderModal.js';
 import { renderEditSiteModal } from './components/EditSiteModal.js';
 import { renderLeadSettingsModal } from './components/LeadSettingsModal.js';
+import { renderNewDealModal } from './components/NewDealModal.js';
+import { renderNewProductModal } from './components/NewProductModal.js';
+import { renderLostDealModal } from './components/LostDealModal.js';
 
 class PinasKitApp {
   constructor() {
@@ -30,6 +33,8 @@ class PinasKitApp {
     this.campaignPlatformFilter = 'Todas';
     this.campaignStatusFilter = 'Todas';
     this.campaignSearchQuery = '';
+    this.crmStatusFilter = 'open';
+    this.crmSearchQuery = '';
     this.init();
   }
 
@@ -82,7 +87,7 @@ class PinasKitApp {
       <div id="view-container">
         ${this.currentView === 'landing' 
           ? renderLandingPage() 
-          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit, this.campaignPlatformFilter, this.campaignStatusFilter, this.campaignSearchQuery, this.leadFilterPeriod, this.leadFilterTemp, this.leadSearchQuery)}
+          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit, this.campaignPlatformFilter, this.campaignStatusFilter, this.campaignSearchQuery, this.leadFilterPeriod, this.leadFilterTemp, this.leadSearchQuery, this.crmStatusFilter, this.crmSearchQuery)}
       </div>
 
       <!-- MODAIS DO SISTEMA -->
@@ -96,6 +101,9 @@ class PinasKitApp {
         ${renderUtmBuilderModal()}
         ${renderEditSiteModal()}
         ${renderLeadSettingsModal()}
+        ${renderNewDealModal()}
+        ${renderNewProductModal()}
+        ${renderLostDealModal()}
       </div>
 
       <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS) -->
@@ -207,13 +215,15 @@ class PinasKitApp {
     attachTabSwitch('#side-nav-overview', 'overview');
     attachTabSwitch('#side-nav-buttons', 'buttons');
     attachTabSwitch('#side-nav-leads', 'leads');
+    attachTabSwitch('#side-nav-crm', 'crm');
     attachTabSwitch('#side-nav-conversations', 'conversations');
-    attachTabSwitch('#side-nav-crm', 'conversations');
     attachTabSwitch('#side-nav-sales', 'sales');
     attachTabSwitch('#side-nav-ads', 'ads');
     attachTabSwitch('#side-nav-automation', 'automation');
     attachTabSwitch('#side-nav-reports', 'reports');
     attachTabSwitch('#side-brand-logo', 'overview');
+    attachTabSwitch('#btn-open-products-catalog', 'products');
+    attachTabSwitch('#btn-back-to-crm', 'crm');
 
     // Itens de rodapé da sidebar fixa
     document.getElementById('side-help')?.addEventListener('click', () => {
@@ -1094,6 +1104,334 @@ class PinasKitApp {
     document.getElementById('check-all-leads')?.addEventListener('change', (e) => {
       const checked = e.target.checked;
       document.querySelectorAll('.check-single-lead').forEach(cb => cb.checked = checked);
+    });
+
+    // ------------------------------------------------------------------------
+    // 6.2 CONVERTER LEAD EM NEGÓCIO NO CRM (DRAWER ACTION)
+    // ------------------------------------------------------------------------
+    document.querySelectorAll('.btn-drawer-create-deal').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const leadId = e.currentTarget.getAttribute('data-lead-id');
+        const deal = StorageService.createDealFromLead(leadId);
+        if (deal) {
+          closeLeadDrawer();
+          this.showToast(`💼 Negócio criado no Funil CRM para "${deal.contactName}"!`);
+          this.switchDashTab('crm');
+        }
+      });
+    });
+
+    // ------------------------------------------------------------------------
+    // 6.3 EVENTOS DO CRM KANBAN & NEGÓCIOS (/painel/crm)
+    // ------------------------------------------------------------------------
+    // Filtro por Status (Abertos, Ganhos, Perdidos, Todos)
+    document.querySelectorAll('.crm-filter-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        const status = e.currentTarget.getAttribute('data-status');
+        this.crmStatusFilter = status;
+        this.render();
+        this.bindEvents();
+      });
+    });
+
+    // Busca em Tempo Real no CRM
+    const crmSearchInput = document.getElementById('crm-search-input');
+    if (crmSearchInput) {
+      crmSearchInput.addEventListener('input', (e) => {
+        this.crmSearchQuery = e.target.value;
+        const filteredDeals = StorageService.getDeals(this.crmStatusFilter, this.crmSearchQuery);
+        const STAGES = ['Novo', 'Qualificação', 'Proposta', 'Negociação', 'Fechamento'];
+        STAGES.forEach(stageId => {
+          const col = document.querySelector(`.pk-kanban-column[data-stage="${stageId}"]`);
+          if (!col) return;
+          const stageDeals = filteredDeals.filter(d => d.stage === stageId);
+          const cardsContainer = col.querySelector('.pk-kanban-cards');
+          if (cardsContainer) {
+            if (stageDeals.length === 0) {
+              cardsContainer.innerHTML = `
+                <div style="padding: 24px 12px; text-align: center; border: 1.5px dashed var(--pk-border); border-radius: 8px; color: var(--pk-text-muted); font-size: 12.5px;">
+                  Nenhum negócio nesta etapa.
+                </div>
+              `;
+            } else {
+              this.render();
+              this.bindEvents();
+              const el = document.getElementById('crm-search-input');
+              if (el) {
+                el.focus();
+                el.selectionStart = el.selectionEnd = el.value.length;
+              }
+            }
+          }
+        });
+      });
+    }
+
+    // Mover Negócio entre Etapas (Anterior / Próximo)
+    const STAGE_ORDER = ['Novo', 'Qualificação', 'Proposta', 'Negociação', 'Fechamento'];
+    document.querySelectorAll('.btn-deal-move-prev').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dealId = e.currentTarget.getAttribute('data-deal-id');
+        const currentStage = e.currentTarget.getAttribute('data-current');
+        const currIdx = STAGE_ORDER.indexOf(currentStage);
+        if (currIdx > 0) {
+          const prevStage = STAGE_ORDER[currIdx - 1];
+          StorageService.updateDealStage(dealId, prevStage);
+          this.showToast(`Oportunidade movida para "${prevStage}"`);
+          this.render();
+          this.bindEvents();
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-deal-move-next').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dealId = e.currentTarget.getAttribute('data-deal-id');
+        const currentStage = e.currentTarget.getAttribute('data-current');
+        const currIdx = STAGE_ORDER.indexOf(currentStage);
+        if (currIdx !== -1 && currIdx < STAGE_ORDER.length - 1) {
+          const nextStage = STAGE_ORDER[currIdx + 1];
+          StorageService.updateDealStage(dealId, nextStage);
+          this.showToast(`🎯 Oportunidade avançada para "${nextStage}"!`);
+          this.render();
+          this.bindEvents();
+        }
+      });
+    });
+
+    // Marcar Negócio como Ganho ✓
+    document.querySelectorAll('.btn-deal-mark-won').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dealId = e.currentTarget.getAttribute('data-deal-id');
+        StorageService.markDealWon(dealId);
+        this.showToast('🎉 Parabéns! Negócio marcado como GANHO com sucesso!');
+        this.render();
+        this.bindEvents();
+      });
+    });
+
+    // Abrir Modal de Marcar como Perdido ✕
+    document.querySelectorAll('.btn-deal-mark-lost').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dealId = e.currentTarget.getAttribute('data-deal-id');
+        const inputId = document.getElementById('lost-deal-id');
+        if (inputId) inputId.value = dealId;
+        this.openModal('lost-deal-modal-overlay');
+      });
+    });
+
+    // Confirmar Perda no Modal
+    document.getElementById('form-confirm-lost-deal')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const dealId = document.getElementById('lost-deal-id')?.value;
+      const reason = document.getElementById('lost-deal-reason')?.value || 'Outro';
+      const notes = document.getElementById('lost-deal-notes')?.value || '';
+      if (dealId) {
+        StorageService.markDealLost(dealId, reason, notes);
+        this.closeModal('lost-deal-modal-overlay');
+        this.showToast(`Negócio marcado como Perdido (Motivo: ${reason}).`);
+        this.render();
+        this.bindEvents();
+      }
+    });
+    document.getElementById('btn-close-lost-deal-modal')?.addEventListener('click', () => this.closeModal('lost-deal-modal-overlay'));
+    document.getElementById('btn-cancel-lost-deal')?.addEventListener('click', () => this.closeModal('lost-deal-modal-overlay'));
+
+    // Excluir Negócio
+    document.querySelectorAll('.btn-deal-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dealId = e.currentTarget.getAttribute('data-deal-id');
+        if (confirm('Tem certeza que deseja excluir esta oportunidade do CRM?')) {
+          StorageService.deleteDeal(dealId);
+          this.showToast('🗑️ Negócio removido do CRM.');
+          this.render();
+          this.bindEvents();
+        }
+      });
+    });
+
+    // Abrir Modal Novo Negócio
+    document.getElementById('btn-open-new-deal')?.addEventListener('click', () => {
+      this.openModal('new-deal-modal-overlay');
+    });
+    document.getElementById('btn-close-new-deal-modal')?.addEventListener('click', () => this.closeModal('new-deal-modal-overlay'));
+    document.getElementById('btn-cancel-new-deal')?.addEventListener('click', () => this.closeModal('new-deal-modal-overlay'));
+
+    // Reatividade do Seletor de Lead no Modal Novo Negócio
+    document.getElementById('new-deal-lead-select')?.addEventListener('change', (e) => {
+      const opt = e.target.selectedOptions[0];
+      if (opt && opt.value) {
+        const name = opt.getAttribute('data-name') || '';
+        const phone = opt.getAttribute('data-phone') || '';
+        const titleInput = document.getElementById('new-deal-title');
+        const nameInput = document.getElementById('new-deal-contact-name');
+        const phoneInput = document.getElementById('new-deal-contact-phone');
+        if (nameInput) nameInput.value = name;
+        if (phoneInput) phoneInput.value = phone;
+        if (titleInput && !titleInput.value) titleInput.value = `Oportunidade - ${name}`;
+      }
+    });
+
+    // Reatividade do Seletor de Produto no Modal Novo Negócio
+    document.getElementById('new-deal-product-select')?.addEventListener('change', (e) => {
+      const opt = e.target.selectedOptions[0];
+      if (opt && opt.value) {
+        const priceCents = parseInt(opt.getAttribute('data-price') || '0', 10);
+        const priceInput = document.getElementById('new-deal-price');
+        if (priceInput) {
+          priceInput.value = (priceCents / 100).toFixed(2).replace('.', ',');
+        }
+      }
+    });
+
+    // Salvar Novo Negócio
+    document.getElementById('form-create-new-deal')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = document.getElementById('new-deal-title')?.value.trim();
+      const contactName = document.getElementById('new-deal-contact-name')?.value.trim();
+      const contactPhone = document.getElementById('new-deal-contact-phone')?.value.trim();
+      const priceStr = document.getElementById('new-deal-price')?.value.trim();
+      const stage = document.getElementById('new-deal-stage')?.value || 'Novo';
+      const assignedTo = document.getElementById('new-deal-assigned')?.value.trim() || 'Mariana';
+      const leadSelect = document.getElementById('new-deal-lead-select');
+      const prodSelect = document.getElementById('new-deal-product-select');
+
+      const leadId = leadSelect?.value || null;
+      const productId = prodSelect?.value || null;
+      const productName = prodSelect?.selectedOptions[0]?.getAttribute('data-name') || '';
+      
+      const cleanPrice = priceStr ? Number(priceStr.replace(/\./g, '').replace(',', '.')) : 0;
+      const price_cents = Math.round(cleanPrice * 100);
+
+      StorageService.saveDeal({
+        title,
+        contactName,
+        contactPhone,
+        stage,
+        status: 'open',
+        price_cents,
+        productId,
+        productName,
+        leadId,
+        assignedTo
+      });
+
+      this.closeModal('new-deal-modal-overlay');
+      this.showToast('💼 Nova oportunidade cadastrada no CRM com sucesso!');
+      this.render();
+      this.bindEvents();
+    });
+
+    // ------------------------------------------------------------------------
+    // 6.4 EVENTOS DO CATÁLOGO DE PRODUTOS E SERVIÇOS (/painel/crm/produtos)
+    // ------------------------------------------------------------------------
+    // Abrir Modal Novo Produto
+    document.getElementById('btn-open-new-product')?.addEventListener('click', () => {
+      this.openModal('new-product-modal-overlay');
+    });
+    document.getElementById('btn-close-new-product-modal')?.addEventListener('click', () => this.closeModal('new-product-modal-overlay'));
+    document.getElementById('btn-cancel-new-product')?.addEventListener('click', () => this.closeModal('new-product-modal-overlay'));
+
+    // Salvar Novo Produto / Serviço
+    document.getElementById('form-create-new-product')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('new-product-name')?.value.trim();
+      const kind = document.getElementById('new-product-kind')?.value || 'service';
+      const priceStr = document.getElementById('new-product-price')?.value.trim();
+      
+      const cleanPrice = priceStr ? Number(priceStr.replace(/\./g, '').replace(',', '.')) : 0;
+      const price_cents = Math.round(cleanPrice * 100);
+
+      if (!name) {
+        this.showToast('Informe o nome do item.');
+        return;
+      }
+
+      StorageService.saveProduct({
+        name,
+        kind,
+        price_cents
+      });
+
+      this.closeModal('new-product-modal-overlay');
+      this.showToast(`📦 Item "${name}" cadastrado no catálogo!`);
+      this.render();
+      this.bindEvents();
+    });
+
+    // Edição Inline de Campos do Produto (Nome e Preço)
+    document.querySelectorAll('.editable-product-field').forEach(field => {
+      field.addEventListener('click', (e) => {
+        const prodId = e.currentTarget.getAttribute('data-id');
+        const fieldName = e.currentTarget.getAttribute('data-field');
+        const prod = StorageService.getProductById(prodId);
+        if (!prod) return;
+
+        const currentVal = fieldName === 'name' ? prod.name : (prod.price_cents / 100).toFixed(2).replace('.', ',');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentVal;
+        input.className = 'pk-input';
+        input.style.cssText = 'height: 30px; padding: 2px 8px; font-size: 13px; font-weight: inherit; width: 140px;';
+
+        const parent = e.currentTarget.parentElement;
+        parent.innerHTML = '';
+        parent.appendChild(input);
+        input.focus();
+        input.select();
+
+        const saveChanges = () => {
+          const newVal = input.value.trim();
+          if (fieldName === 'name') {
+            StorageService.updateProduct(prodId, { name: newVal || prod.name });
+          } else {
+            const clean = newVal ? Number(newVal.replace(/\./g, '').replace(',', '.')) : 0;
+            StorageService.updateProduct(prodId, { price_cents: Math.round(clean * 100) });
+          }
+          this.render();
+          this.bindEvents();
+        };
+
+        input.addEventListener('blur', saveChanges);
+        input.addEventListener('keydown', (ke) => {
+          if (ke.key === 'Enter') {
+            ke.preventDefault();
+            input.blur();
+          } else if (ke.key === 'Escape') {
+            this.render();
+            this.bindEvents();
+          }
+        });
+      });
+    });
+
+    // Alteração Inline do Tipo de Produto (Produto vs Serviço)
+    document.querySelectorAll('.select-product-kind').forEach(select => {
+      select.addEventListener('change', (e) => {
+        const prodId = e.currentTarget.getAttribute('data-id');
+        const kind = e.currentTarget.value;
+        StorageService.updateProduct(prodId, { kind });
+        this.showToast('Tipo atualizado com sucesso.');
+      });
+    });
+
+    // Excluir Produto
+    document.querySelectorAll('.btn-product-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const prodId = e.currentTarget.getAttribute('data-id');
+        const prodName = e.currentTarget.getAttribute('data-name') || 'Item';
+        if (confirm(`Excluir “${prodName}” do catálogo?`)) {
+          StorageService.deleteProduct(prodId);
+          this.showToast(`Item “${prodName}” excluído.`);
+          this.render();
+          this.bindEvents();
+        }
+      });
     });
 
     // ------------------------------------------------------------------------

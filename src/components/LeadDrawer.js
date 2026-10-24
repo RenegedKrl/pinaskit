@@ -69,6 +69,12 @@ export function renderLeadDrawer(lead = null) {
             </button>
           </div>
 
+          <!-- BOTÃO RÁPIDO CRIAR NEGÓCIO NO CRM -->
+          <button type="button" class="pk-btn pk-btn-primary pk-btn-sm btn-drawer-create-deal" data-lead-id="${lead.id}" style="width: 100%; justify-content: center; margin-top: 10px; font-weight: 700; gap: 6px; font-size: 13px;">
+            <span>⚡</span>
+            <span>Criar Negócio no Funil CRM</span>
+          </button>
+
           <!-- ESTÁGIO NO CRM (PIPELINE INTERATIVO) -->
           <div class="pk-drawer-section">
             <div class="pk-drawer-section-title">
