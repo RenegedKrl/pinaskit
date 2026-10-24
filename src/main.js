@@ -1396,16 +1396,20 @@ class PinasKitApp {
     }
 
     if (aiPromptEl) {
-      aiPromptEl.value = `Preciso adicionar um widget de botão flutuante de WhatsApp e formulário de qualificação do Pinas Kit ao meu site.
+      aiPromptEl.value = `Preciso adicionar um widget de botão flutuante de WhatsApp e formulário de qualificação do Pinas Kit (${buttonName}) ao meu site.
 
-Insira o script abaixo em todas as páginas, uma única vez, imediatamente antes do fechamento da tag </body>. Se o site usa um framework (React, Next.js, Vue, Astro, WordPress, Shopify, Elementor, etc.), adicione-o no HTML base/layout:
+1. Insira o script oficial imediatamente antes do fechamento da tag </body> em todas as páginas:
 
 ${scriptTag}
 
-Regras importantes:
-- Não altere nem remova o atributo data-pinaskit (ele identifica seu botão e rastreia UTMs de anúncios do Meta Ads e Google Ads).
-- Não é preciso criar nenhum HTML/CSS/JS adicional: o próprio script renderiza o botão flutuante de WhatsApp e o formulário de qualificação ao final da página.
-- O widget se atualiza sozinho pelo painel; não é preciso mexer no código depois.`;
+2. Localização e Integração do Formulário:
+- Se a página já possui um formulário de contato/aplicação (ex: formulário na coluna da direita com título 'Aplicação' ou similar), substitua apenas a tag <form> antiga por <div id="pinaskit-form"></div> mantendo todo o layout de 2 colunas, textos e estilos ao redor intactos.
+- O formulário NUNCA deve ficar abaixo do rodapé: certifique-se de que ele fique estritamente ACIMA da tag <footer>.
+
+3. Fluxo de envio de leads:
+- Ao preencher o formulário, os dados são gravados diretamente no CRM do Pinas Kit e uma confirmação de sucesso é exibida na própria página.
+- Não há redirecionamento para o WhatsApp do visitante: o assinante entra em contato com o lead a partir do painel.
+- O script rastreia automaticamente UTMs de anúncios do Meta Ads e Google Ads.`;
     }
 
     // Ativa a primeira aba (Código) por padrão

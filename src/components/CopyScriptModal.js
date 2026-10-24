@@ -90,19 +90,23 @@ export function renderCopyScriptModal() {
             <textarea 
               id="copy-ai-prompt-code" 
               class="pk-install-code-text" 
-              rows="10" 
+              rows="12" 
               readonly 
               style="font-size: 11.5px; line-height: 1.45;"
-            >Preciso adicionar um widget de botão flutuante de WhatsApp ao meu site.
+            >Preciso adicionar um widget de botão flutuante de WhatsApp e formulário de qualificação do Pinas Kit ao meu site.
 
-Insira o script abaixo em todas as páginas, uma única vez, imediatamente antes do fechamento da tag </body>. Se o site usa um framework (React, Next.js, Vue, Astro, WordPress, Shopify, etc.), adicione-o no HTML base/layout para carregar em todas as páginas:
+1. Insira o script oficial imediatamente antes do fechamento da tag </body> em todas as páginas:
 
 <script async src="https://pinaskit.com.br/embed.js" data-pinaskit="btn-1" data-api="https://api.pinaskit.com.br/v1"></script>
 
-Regras importantes:
-- Não altere nem remova os atributos data-pinaskit e data-api (eles identificam o botão e rastreiam UTMs de anúncios).
-- Não é preciso criar nenhum HTML/CSS/JS adicional: o próprio script renderiza o botão flutuante e o formulário de qualificação.
-- O widget aparece como um botão flutuante no canto da tela e se atualiza sozinho; não é preciso mexer no código depois.</textarea>
+2. Localização e Integração do Formulário:
+- Se a página já possui um formulário de contato/aplicação (ex: formulário na coluna da direita com título 'Aplicação' ou 'Sua próxima decisão estratégica'), substitua apenas a tag &lt;form&gt; antiga por &lt;div id="pinaskit-form"&gt;&lt;/div&gt; mantendo todo o layout de 2 colunas e textos ao redor intactos.
+- O formulário NUNCA deve ficar abaixo do rodapé: certifique-se de que ele fique estritamente ACIMA da tag &lt;footer&gt;.
+
+3. Fluxo de envio de leads:
+- Ao preencher o formulário, os dados são enviados diretamente para o CRM do Pinas Kit e uma tela de confirmação de sucesso é exibida na própria página.
+- Não há redirecionamento para o WhatsApp do visitante: o próprio assinante/atendente entra em contato com o interessado a partir do painel.
+- O script rastreia automaticamente UTMs de anúncios do Meta Ads e Google Ads.</textarea>
           </div>
 
           <button type="button" class="pk-btn pk-btn-primary" id="btn-do-copy-ai-prompt" style="width: 100%; justify-content: center; font-size: 13.5px; padding: 12px 18px; font-weight: 700;">

@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Central de Anúncios e Atribuição de Tráfego com cálculo dinâmico de CPL, ROI, Diagnóstico Inteligente, Simulador de Retorno e Gerador de UTMs',
+    message: 'fix: Inserção acima do rodapé, substituição inteligente de formulário existente e tela de confirmação sem redirect WhatsApp',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

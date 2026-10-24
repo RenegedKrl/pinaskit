@@ -704,6 +704,25 @@ async function runE2ETestSuite() {
     const embedPopupIsOpen = await evalJs('document.getElementById("pk-embed-popup")?.classList.contains("is-open")');
     assert(embedPopupIsOpen === true, 'Balão popup de WhatsApp abre ao clicar no botão flutuante');
 
+    // 14.1 Testar submissão do formulário na página (sem redirecionar para o WhatsApp do visitante)
+    await evalJs(`
+      const nameInput = document.getElementById("pk-page-name");
+      const phoneInput = document.getElementById("pk-page-phone");
+      if (nameInput) nameInput.value = "Renato Silva";
+      if (phoneInput) phoneInput.value = "11999998888";
+      document.getElementById("pk-embed-page-form")?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    `);
+    await new Promise(r => setTimeout(r, 500));
+
+    const successBoxExists = await evalJs('document.querySelector(".pk-embed-success-box") !== null');
+    assert(successBoxExists === true, 'Submissão do formulário na página exibe a tela de confirmação de sucesso in-place');
+
+    const successBoxTitle = await evalJs('document.querySelector(".pk-embed-success-box h3")?.innerText');
+    assert(successBoxTitle && successBoxTitle.includes('Aplicação enviada com sucesso'), 'Mensagem de sucesso confirma o recebimento sigiloso da aplicação');
+
+    const leadsInStorage = await evalJs('localStorage.getItem("pk_leads")');
+    assert(leadsInStorage && leadsInStorage.includes('Renato Silva'), 'Lead preenchido na página é salvo diretamente no CRM (pk_leads)');
+
     await takeScreenshot('client-site-widget-live');
 
   } catch (err) {

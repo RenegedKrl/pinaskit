@@ -257,8 +257,8 @@
     };
   }
 
-  // Enviar Lead para o Pinas Kit e Redirecionar para o WhatsApp
-  function handleLeadSubmission(data) {
+  // Enviar Lead para o Pinas Kit e Exibir Confirmação de Sucesso
+  function handleLeadSubmission(data, sourceContainer) {
     const traffic = getTrafficSource();
     const score = data.score || 30;
     const temp = score >= 35 ? 'Quente' : score >= 20 ? 'Morno' : 'Frio';
@@ -267,7 +267,7 @@
       id: 'lead-' + Date.now(),
       name: data.name,
       phone: data.phone,
-      email: data.email || `${data.name.toLowerCase().replace(/\\s+/g, '')}@cliente.com`,
+      email: data.email || `${data.name.toLowerCase().replace(/\s+/g, '')}@cliente.com`,
       button: activeConfig.name,
       origin: traffic.origin,
       campaign: traffic.utmCampaign || 'Tráfego Pago',
@@ -286,25 +286,69 @@
       userMessage: data.customMessage || 'Vim pelo site e gostaria de atendimento.'
     };
 
-    // Salva localmente se estiver no mesmo domínio
+    // Salva localmente no CRM se estiver no mesmo navegador/domínio
     try {
       const savedLeads = localStorage.getItem('pk_leads');
       const leads = savedLeads ? JSON.parse(savedLeads) : [];
       leads.unshift(newLead);
       localStorage.setItem('pk_leads', JSON.stringify(leads));
+
+      // Atualiza contadores do botão correspondente
+      const savedButtons = localStorage.getItem('pk_buttons');
+      if (savedButtons) {
+        const buttons = JSON.parse(savedButtons);
+        const b = buttons.find(item => item.id === buttonId || item.name === activeConfig.name);
+        if (b) {
+          b.leadsCount = (b.leadsCount || 0) + 1;
+          b.clicks = (b.clicks || 0) + 1;
+          localStorage.setItem('pk_buttons', JSON.stringify(buttons));
+        }
+      }
     } catch (_) {}
 
-    // Formata mensagem WhatsApp
-    let template = activeConfig.formConfig.whatsappTemplate || 'Olá! Meu nome é {nome}. Tenho interesse em: {momento}. Detalhes: {mensagem}';
-    let text = template
-      .replace(/{nome}/g, data.name)
-      .replace(/{momento}/g, data.selectedOptionLabel || 'Avaliação')
-      .replace(/{mensagem}/g, data.customMessage || '')
-      .replace(/{telefone}/g, data.phone);
-
-    const waNum = activeConfig.whatsapp.replace(/\\D/g, '');
-    const waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank');
+    // Exibe tela de confirmação de sucesso no próprio formulário
+    if (sourceContainer) {
+      const isPopup = sourceContainer.id === 'pk-embed-popup';
+      if (isPopup) {
+        sourceContainer.innerHTML = `
+          <div style="text-align: center; padding: 24px 12px; animation: pkEmbedPop 0.3s ease-out;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #D1FAE5; color: #10B981; display: grid; place-items: center; margin: 0 auto 12px; font-size: 24px; font-weight: 800; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+              ✓
+            </div>
+            <h4 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0 0 6px 0;">
+              Contato Recebido!
+            </h4>
+            <p style="font-size: 13px; color: #475569; margin: 0 0 16px 0; line-height: 1.5;">
+              Obrigado, <strong>${data.name}</strong>! Recebemos suas informações com total sigilo. Entraremos em contato via WhatsApp em breve.
+            </p>
+            <button type="button" id="pk-embed-close-success" style="padding: 7px 18px; font-size: 12.5px; font-weight: 600; border-radius: 8px; border: 1px solid #CBD5E1; background: #F8FAFC; color: #334155; cursor: pointer;">
+              Fechar
+            </button>
+          </div>
+        `;
+        document.getElementById('pk-embed-close-success')?.addEventListener('click', () => {
+          sourceContainer.classList.remove('is-open');
+        });
+      } else {
+        sourceContainer.innerHTML = `
+          <div class="pk-embed-success-box" style="text-align: center; padding: 48px 24px; animation: pkEmbedPop 0.3s ease-out;">
+            <div style="width: 58px; height: 58px; border-radius: 50%; background: #D1FAE5; color: #10B981; display: grid; place-items: center; margin: 0 auto 16px; font-size: 28px; font-weight: 800; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);">
+              ✓
+            </div>
+            <h3 style="font-size: 22px; font-weight: 800; color: #0F172A; margin: 0 0 10px 0;">
+              Aplicação enviada com sucesso!
+            </h3>
+            <p style="font-size: 14.5px; color: #475569; max-width: 440px; margin: 0 auto 18px auto; line-height: 1.6;">
+              Obrigado, <strong>${data.name}</strong>! Recebemos suas informações com total sigilo profissional. Entraremos em contato com você via WhatsApp em breve.
+            </p>
+            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; background: #F1F5F9; font-size: 12.5px; color: #64748B;">
+              <span>🔒</span>
+              <span>Atendimento 100% individual e sigiloso</span>
+            </div>
+          </div>
+        `;
+      }
+    }
   }
 
   // 4. Injetar o Botão Flutuante de WhatsApp (No canto da tela)
@@ -374,25 +418,31 @@
   document.getElementById('pk-embed-floating-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const optEl = document.getElementById('pk-float-option');
-    const selectedOpt = optEl.options[optEl.selectedIndex];
+    const selectedOpt = optEl ? optEl.options[optEl.selectedIndex] : null;
 
     handleLeadSubmission({
       name: document.getElementById('pk-float-name').value.trim(),
       phone: document.getElementById('pk-float-phone').value.trim(),
-      selectedOptionLabel: selectedOpt.getAttribute('data-label'),
-      score: parseInt(selectedOpt.getAttribute('data-score'), 10) || 30
-    });
-    popup.classList.remove('is-open');
+      selectedOptionLabel: selectedOpt ? selectedOpt.getAttribute('data-label') : 'Contato Geral',
+      score: selectedOpt ? (parseInt(selectedOpt.getAttribute('data-score'), 10) || 30) : 30
+    }, popup);
   });
 
   // 5. Injetar o Formulário de Qualificação na Página
   // Se existir um container específico <div id="pinaskit-form"></div>, renderiza nele;
-  // Caso contrário, anexa no final da página (conforme solicitado pelo usuário).
+  // Caso contrário, injeta obrigatoriamente ACIMA do rodapé (footer).
   let targetContainer = document.getElementById('pinaskit-form');
   if (!targetContainer) {
     targetContainer = document.createElement('div');
     targetContainer.id = 'pinaskit-form';
-    document.body.appendChild(targetContainer);
+
+    // Busca tags ou classes comuns de rodapé para injetar SEMPRE acima dele
+    const footer = document.querySelector('footer, .footer, #footer, [role="contentinfo"], .site-footer');
+    if (footer && footer.parentNode) {
+      footer.parentNode.insertBefore(targetContainer, footer);
+    } else {
+      document.body.appendChild(targetContainer);
+    }
   }
 
   targetContainer.innerHTML = `
@@ -445,23 +495,46 @@
         </div>
 
         <button type="submit" class="pk-embed-submit-btn" style="padding: 13px 20px; font-size: 14.5px;">
-          ${WHATSAPP_SVG.replace('width="32" height="32"', 'width="20" height="20"')}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events: none;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           <span>${activeConfig.formConfig.buttonText || activeConfig.ctaText}</span>
         </button>
       </form>
     </div>
   `;
 
-  document.getElementById('pk-embed-page-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const checkedRadio = document.querySelector('input[name="pk-page-option"]:checked');
+  const pageForm = document.getElementById('pk-embed-page-form');
+  if (pageForm) {
+    pageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const checkedRadio = document.querySelector('input[name="pk-page-option"]:checked');
+      const pageSection = targetContainer.querySelector('.pk-embed-page-form-section') || targetContainer;
 
-    handleLeadSubmission({
-      name: document.getElementById('pk-page-name').value.trim(),
-      phone: document.getElementById('pk-page-phone').value.trim(),
-      selectedOptionLabel: checkedRadio ? checkedRadio.getAttribute('data-label') : 'Avaliação',
-      score: checkedRadio ? (parseInt(checkedRadio.getAttribute('data-score'), 10) || 30) : 30,
-      customMessage: document.getElementById('pk-page-message').value.trim()
+      handleLeadSubmission({
+        name: document.getElementById('pk-page-name').value.trim(),
+        phone: document.getElementById('pk-page-phone').value.trim(),
+        selectedOptionLabel: checkedRadio ? checkedRadio.getAttribute('data-label') : 'Avaliação',
+        score: checkedRadio ? (parseInt(checkedRadio.getAttribute('data-score'), 10) || 30) : 30,
+        customMessage: document.getElementById('pk-page-message').value.trim()
+      }, pageSection);
+    });
+  }
+
+  // Suporte a captura transparente de formulários nativos existentes no site
+  document.querySelectorAll('form[data-pinaskit-capture]').forEach(nativeForm => {
+    nativeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nameInput = nativeForm.querySelector('input[name*="name"], input[name*="nome"], input[type="text"]');
+      const phoneInput = nativeForm.querySelector('input[name*="phone"], input[name*="whatsapp"], input[name*="tel"], input[type="tel"]');
+      const selectEl = nativeForm.querySelector('select');
+      const textEl = nativeForm.querySelector('textarea');
+
+      handleLeadSubmission({
+        name: nameInput ? nameInput.value.trim() : 'Visitante do Site',
+        phone: phoneInput ? phoneInput.value.trim() : '',
+        selectedOptionLabel: selectEl ? (selectEl.options[selectEl.selectedIndex]?.text || 'Aplicação') : 'Aplicação',
+        score: 35,
+        customMessage: textEl ? textEl.value.trim() : ''
+      }, nativeForm);
     });
   });
 
