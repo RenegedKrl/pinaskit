@@ -70,7 +70,7 @@ class PinasKitApp {
       <div id="view-container">
         ${this.currentView === 'landing' 
           ? renderLandingPage() 
-          : renderDashboard(this.currentDashTab, this.leadFilterButton)}
+          : renderDashboard(this.currentDashTab, this.leadFilterButton, this.activeButtonForEdit)}
       </div>
 
       <!-- MODAIS DO SISTEMA -->
@@ -263,6 +263,7 @@ class PinasKitApp {
     // ------------------------------------------------------------------------
     // Criar Novo Botão -> Vai para a tela completa CentralKit de Novo Botão
     document.getElementById('btn-create-new-button')?.addEventListener('click', () => {
+      this.activeButtonForEdit = null;
       this.switchDashTab('new-button');
     });
 
@@ -271,12 +272,39 @@ class PinasKitApp {
     // ------------------------------------------------------------------------
     // Voltar para a lista de botões
     const backToButtons = () => {
+      this.activeButtonForEdit = null;
       this.switchDashTab('buttons');
     };
     document.getElementById('btn-back-to-buttons')?.addEventListener('click', backToButtons);
     document.getElementById('btn-cancel-new-button-bottom')?.addEventListener('click', backToButtons);
 
-    // Reatividade do Mockup / Preview ao vivo:
+    // 1. ALTERNADOR DE ABAS DE PRÉ-VISUALIZAÇÃO (BOTÃO FLUTUANTE vs FORMULÁRIO NA PÁGINA)
+    const tabFloat = document.getElementById('btn-preview-mode-float');
+    const tabForm = document.getElementById('btn-preview-mode-form');
+    const floatContainer = document.getElementById('preview-mode-float-container');
+    const formContainer = document.getElementById('preview-mode-form-container');
+
+    if (tabFloat && tabForm && floatContainer && formContainer) {
+      tabFloat.addEventListener('click', () => {
+        floatContainer.style.display = 'block';
+        formContainer.style.display = 'none';
+        tabFloat.style.background = 'var(--pk-primary)';
+        tabFloat.style.color = '#FFF';
+        tabForm.style.background = 'transparent';
+        tabForm.style.color = 'var(--pk-text-secondary)';
+      });
+
+      tabForm.addEventListener('click', () => {
+        floatContainer.style.display = 'none';
+        formContainer.style.display = 'block';
+        tabForm.style.background = 'var(--pk-primary)';
+        tabForm.style.color = '#FFF';
+        tabFloat.style.background = 'transparent';
+        tabFloat.style.color = 'var(--pk-text-secondary)';
+      });
+    }
+
+    // 2. REATIVIDADE DO BOTÃO FLUTUANTE
     const newBtnNameInput = document.getElementById('new-btn-name');
     const previewStoreName = document.getElementById('preview-store-name');
     const previewStoreAvatar = document.getElementById('preview-store-avatar');
@@ -305,11 +333,8 @@ class PinasKitApp {
     if (newBtnCtaInput) {
       newBtnCtaInput.addEventListener('input', (e) => {
         const val = e.target.value || 'Falar no WhatsApp';
-        if (previewActionText) {
-          previewActionText.textContent = val;
-        } else if (previewActionBtn) {
-          previewActionBtn.textContent = val;
-        }
+        if (previewActionText) previewActionText.textContent = val;
+        else if (previewActionBtn) previewActionBtn.textContent = val;
       });
     }
 
@@ -388,20 +413,158 @@ class PinasKitApp {
       if (floatingPopup) floatingPopup.style.display = 'none';
     });
 
-    // Submissão do Formulário de Criação de Botão
+    // 3. REATIVIDADE DO FORMULÁRIO DE QUALIFICAÇÃO NO RODAPÉ
+    const formTitleInput = document.getElementById('new-form-title');
+    const previewFormTitle = document.getElementById('preview-live-form-title');
+    if (formTitleInput && previewFormTitle) {
+      formTitleInput.addEventListener('input', (e) => {
+        previewFormTitle.textContent = e.target.value.trim() || 'Conte sobre seu momento.';
+      });
+    }
+
+    const formSubtitleInput = document.getElementById('new-form-subtitle');
+    const previewFormSubtitle = document.getElementById('preview-live-form-subtitle');
+    if (formSubtitleInput && previewFormSubtitle) {
+      formSubtitleInput.addEventListener('input', (e) => {
+        previewFormSubtitle.textContent = e.target.value.trim() || 'Preencha os campos para receber uma avaliação personalizada.';
+      });
+    }
+
+    const formQuestionInput = document.getElementById('new-btn-question');
+    const previewFormQuestion = document.getElementById('preview-live-form-question');
+    if (formQuestionInput && previewFormQuestion) {
+      formQuestionInput.addEventListener('input', (e) => {
+        previewFormQuestion.textContent = e.target.value.trim() || 'O que melhor descreve seu momento?';
+      });
+    }
+
+    const formCtaInput = document.getElementById('new-form-cta-text');
+    const previewFormCtaText = document.getElementById('preview-live-form-cta-text');
+    if (formCtaInput && previewFormCtaText) {
+      formCtaInput.addEventListener('input', (e) => {
+        previewFormCtaText.textContent = e.target.value.trim() || 'Preparar minha mensagem →';
+      });
+    }
+
+    // Atualização Dinâmica das Opções no Preview
+    const updateNewButtonOptionsPreview = () => {
+      const container = document.getElementById('preview-live-form-options');
+      if (!container) return;
+      const rows = document.querySelectorAll('.new-btn-option-row');
+      container.innerHTML = Array.from(rows).map((row, idx) => {
+        const label = row.querySelector('.new-opt-label')?.value.trim() || `Opção ${idx + 1}`;
+        const badge = row.querySelector('.new-opt-badge')?.value || '🔥 Quente';
+        const badgeClass = badge.includes('Quente') ? 'pk-badge-hot' : badge.includes('Frio') ? 'pk-badge-cold' : 'pk-badge-warm';
+        return `
+          <div class="pk-preview-option-item ${idx === 0 ? 'is-selected' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1.5px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; border-radius: 8px; background: ${idx === 0 ? 'rgba(124,58,237,0.06)' : 'var(--pk-bg-subtle)'};">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center;">
+                ${idx === 0 ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
+              </div>
+              <span class="preview-live-opt-label" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary);">
+                ${label}
+              </span>
+            </div>
+            <span class="pk-badge ${badgeClass}" style="font-size: 10px; padding: 2px 6px;">
+              ${badge}
+            </span>
+          </div>
+        `;
+      }).join('');
+    };
+
+    const attachOptionEvents = () => {
+      document.querySelectorAll('.new-opt-label').forEach(inp => {
+        inp.removeEventListener('input', updateNewButtonOptionsPreview);
+        inp.addEventListener('input', updateNewButtonOptionsPreview);
+      });
+      document.querySelectorAll('.new-opt-badge').forEach(sel => {
+        sel.removeEventListener('change', updateNewButtonOptionsPreview);
+        sel.addEventListener('change', updateNewButtonOptionsPreview);
+      });
+      document.querySelectorAll('.btn-remove-new-option').forEach(btn => {
+        btn.onclick = (e) => {
+          const row = e.currentTarget.closest('.new-btn-option-row');
+          const allRows = document.querySelectorAll('.new-btn-option-row');
+          if (allRows.length > 1 && row) {
+            row.remove();
+            // Re-numerar
+            document.querySelectorAll('.new-btn-option-row').forEach((r, i) => {
+              const numSpan = r.querySelector('span');
+              if (numSpan) numSpan.textContent = `${i + 1}.`;
+            });
+            updateNewButtonOptionsPreview();
+          } else {
+            this.showToast('⚠️ Mantenha pelo menos uma opção de qualificação.');
+          }
+        };
+      });
+    };
+    attachOptionEvents();
+
+    // Botão "+ Adicionar Nova Opção"
+    document.getElementById('btn-add-new-option')?.addEventListener('click', () => {
+      const list = document.getElementById('new-btn-options-list');
+      if (!list) return;
+      const count = list.querySelectorAll('.new-btn-option-row').length + 1;
+      const newRow = document.createElement('div');
+      newRow.className = 'new-btn-option-row';
+      newRow.style.cssText = 'display: grid; grid-template-columns: 24px 1fr 140px 32px; gap: 8px; align-items: center; background: var(--pk-bg-subtle); border: 1px solid var(--pk-border); border-radius: 8px; padding: 6px 10px;';
+      newRow.innerHTML = `
+        <span style="font-size: 13px; font-weight: 800; color: var(--pk-primary); text-align: center;">${count}.</span>
+        <input type="text" class="pk-input new-opt-label" value="" placeholder="Descreva a nova opção..." required style="padding: 7px 10px; font-size: 12.5px;"/>
+        <select class="pk-input new-opt-badge" style="padding: 7px 8px; font-size: 11.5px; cursor: pointer;">
+          <option value="🔥 Quente">🔥 Quente (+30)</option>
+          <option value="❄️ Morno" selected>❄️ Morno (+20)</option>
+          <option value="🧊 Frio">🧊 Frio (+10)</option>
+        </select>
+        <button type="button" class="btn-remove-new-option" title="Remover opção" style="border: none; background: none; color: #EF4444; cursor: pointer; font-size: 14px; padding: 4px; display: grid; place-items: center;">
+          🗑️
+        </button>
+      `;
+      list.appendChild(newRow);
+      attachOptionEvents();
+      updateNewButtonOptionsPreview();
+      const input = newRow.querySelector('.new-opt-label');
+      if (input) input.focus();
+    });
+
+    // Chips de Tags para o Template WhatsApp
+    document.querySelectorAll('.new-form-tag-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const tag = e.currentTarget.getAttribute('data-tag');
+        const textarea = document.getElementById('new-form-template');
+        if (textarea && tag) {
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const text = textarea.value;
+          textarea.value = text.substring(0, start) + tag + text.substring(end);
+          textarea.focus();
+          textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+        }
+      });
+    });
+
+    // 4. SUBMISSÃO DO FORMULÁRIO COMPLETO (SALVAR BOTÃO & FORMULÁRIO)
     const newBtnForm = document.getElementById('new-button-form');
     if (newBtnForm) {
       newBtnForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        const editId = newBtnForm.getAttribute('data-edit-id');
         const name = document.getElementById('new-btn-name')?.value.trim() || 'Novo Botão';
         const whatsapp = document.getElementById('new-btn-whatsapp')?.value.trim().replace(/\D/g, '') || '5511999999999';
-        const prefilled = document.getElementById('new-btn-prefilled')?.value.trim() || '';
-        const ctaText = document.getElementById('new-btn-cta-text')?.value.trim() || 'Falar no WhatsApp';
         const greeting = document.getElementById('new-btn-greeting')?.value.trim() || 'Confirme seus dados para iniciar a conversa';
-        const question = document.getElementById('new-btn-question')?.value.trim() || 'Qual região você gostaria de tratar?';
+        const floatCta = document.getElementById('new-btn-cta-text')?.value.trim() || 'Falar no WhatsApp';
         const color = document.getElementById('new-btn-color-hex')?.value.trim() || '#25D366';
         const position = document.querySelector('input[name="new-btn-position"]:checked')?.value || 'right';
         const isActive = document.getElementById('new-btn-status')?.checked ?? true;
+
+        // Configurações do Formulário de Página
+        const formTitle = document.getElementById('new-form-title')?.value.trim() || 'Conte sobre seu momento.';
+        const formSubtitle = document.getElementById('new-form-subtitle')?.value.trim() || 'Preencha os campos para receber uma avaliação personalizada.';
+        const formQuestion = document.getElementById('new-btn-question')?.value.trim() || 'Qual região você gostaria de tratar?';
+        const formCta = document.getElementById('new-form-cta-text')?.value.trim() || 'Preparar minha mensagem →';
+        const formTemplate = document.getElementById('new-form-template')?.value.trim() || 'Olá! Meu nome é {nome}. Momento: {momento}. Detalhes: {mensagem}';
 
         // Opções de Qualificação
         const options = [];
@@ -425,8 +588,8 @@ class PinasKitApp {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)/g, '');
 
-        const newButton = StorageService.saveButton({
-          id: `btn-${Date.now()}`,
+        const buttonData = {
+          id: editId || `btn-${Date.now()}`,
           name,
           slug: slug || `btn-${Date.now()}`,
           category: 'Campanha WhatsApp',
@@ -439,27 +602,30 @@ class PinasKitApp {
           style: {
             color,
             position,
-            ctaText,
+            ctaText: floatCta,
             greeting
           },
           formConfig: {
-            title: greeting,
-            subtitle: 'Preencha os campos para receber uma avaliação personalizada.',
-            buttonText: ctaText,
-            questionLabel: question,
+            title: formTitle,
+            subtitle: formSubtitle,
+            buttonText: formCta,
+            questionLabel: formQuestion,
             options: options.length ? options : [
               { id: '1', label: 'Quero atendimento imediato', score: 35, badge: '🔥 Quente' },
               { id: '2', label: 'Gostaria de tirar dúvidas', score: 25, badge: '❄️ Morno' }
             ],
-            whatsappTemplate: prefilled ? `${prefilled} [Objetivo: {momento}]` : 'Olá! Vim pelo site. Meu objetivo é: {momento}.'
+            whatsappTemplate: formTemplate
           }
-        });
+        };
 
-        this.showToast(`🎉 Botão "${name}" criado com sucesso!`);
+        const savedButton = StorageService.saveButton(buttonData);
+        this.activeButtonForEdit = null;
+        this.showToast(`🎉 Botão & Formulário "${name}" salvos com sucesso!`);
         this.switchDashTab('buttons');
-        // Abre imediatamente o modal com o script embed e prompt para IA!
+
+        // Abre imediatamente o modal com o script embed e link de teste real!
         setTimeout(() => {
-          this.openCopyScriptModal(newButton.id, newButton.name, newButton.slug);
+          this.openCopyScriptModal(savedButton.id, savedButton.name, savedButton.slug);
         }, 150);
       });
     }
@@ -1038,23 +1204,30 @@ class PinasKitApp {
     const urlEl = document.getElementById('copy-direct-url');
     const aiPromptEl = document.getElementById('copy-ai-prompt-code');
 
-    const scriptTag = `<script async src="https://pinaskit.com.br/embed.js" data-pinaskit="${buttonId}" data-api="https://api.pinaskit.com.br/v1"></script>`;
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const scriptSrc = isLocal ? `${window.location.origin}/embed.js` : 'https://pinaskit.com.br/embed.js';
+    const scriptTag = `<script async src="${scriptSrc}" data-pinaskit="${buttonId}"></script>`;
 
     if (titleEl) titleEl.textContent = buttonName;
     if (scriptEl) scriptEl.value = scriptTag;
     if (urlEl) urlEl.value = `https://pinaskit.com.br/b/${slug}`;
 
-    if (aiPromptEl) {
-      aiPromptEl.value = `Preciso adicionar um widget de botão flutuante de WhatsApp ao meu site.
+    const liveTestBtn = document.getElementById('btn-open-live-test');
+    if (liveTestBtn) {
+      liveTestBtn.href = `/teste-widget.html?button=${buttonId}`;
+    }
 
-Insira o script abaixo em todas as páginas, uma única vez, imediatamente antes do fechamento da tag </body>. Se o site usa um framework (React, Next.js, Vue, Astro, WordPress, Shopify, etc.), adicione-o no HTML base/layout para carregar em todas as páginas:
+    if (aiPromptEl) {
+      aiPromptEl.value = `Preciso adicionar um widget de botão flutuante de WhatsApp e formulário de qualificação do Pinas Kit ao meu site.
+
+Insira o script abaixo em todas as páginas, uma única vez, imediatamente antes do fechamento da tag </body>. Se o site usa um framework (React, Next.js, Vue, Astro, WordPress, Shopify, Elementor, etc.), adicione-o no HTML base/layout:
 
 ${scriptTag}
 
 Regras importantes:
-- Não altere nem remova os atributos data-pinaskit e data-api (eles identificam o botão e rastreiam UTMs de anúncios).
-- Não é preciso criar nenhum HTML/CSS/JS adicional: o próprio script renderiza o botão flutuante e o formulário de qualificação.
-- O widget aparece como um botão flutuante no canto da tela e se atualiza sozinho; não é preciso mexer no código depois.`;
+- Não altere nem remova o atributo data-pinaskit (ele identifica seu botão e rastreia UTMs de anúncios do Meta Ads e Google Ads).
+- Não é preciso criar nenhum HTML/CSS/JS adicional: o próprio script renderiza o botão flutuante de WhatsApp e o formulário de qualificação ao final da página.
+- O widget se atualiza sozinho pelo painel; não é preciso mexer no código depois.`;
     }
 
     // Ativa a primeira aba (Código) por padrão

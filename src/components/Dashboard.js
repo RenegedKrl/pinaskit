@@ -7,7 +7,7 @@ import { renderButtonsView } from './ButtonsView.js';
 import { renderLeadsView } from './LeadsView.js';
 import { renderNewButtonView } from './NewButtonView.js';
 
-export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos') {
+export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todos', activeButtonForEdit = null) {
   const currentTheme = StorageService.getTheme();
   const connectedAds = StorageService.getConnectedAds();
   const leads = StorageService.getLeads();
@@ -135,7 +135,7 @@ export function renderDashboard(activeTab = 'overview', leadFilterButton = 'Todo
         ${activeTab === 'buttons' 
           ? renderButtonsView() 
           : activeTab === 'new-button'
-          ? renderNewButtonView()
+          ? renderNewButtonView(activeButtonForEdit)
           : activeTab === 'leads'
           ? renderLeadsView(leadFilterButton)
           : activeTab === 'conversations' || activeTab === 'crm'

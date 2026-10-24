@@ -1,0 +1,469 @@
+/**
+ * ============================================================================
+ * PINAS KIT — WIDGET EMBED OFICIAL (EMBED.JS)
+ * Permite adicionar o Botão Flutuante de WhatsApp e o Formulário de Qualificação
+ * em qualquer site (WordPress, Shopify, Next.js, HTML estático, etc.)
+ * ============================================================================
+ */
+(function() {
+  'use strict';
+
+  // Evita carregar duas vezes
+  if (window.__PINASKIT_EMBED_LOADED__) return;
+  window.__PINASKIT_EMBED_LOADED__ = true;
+
+  // 1. Identificar a tag do script e parâmetros de configuração
+  const scriptTag = document.currentScript || document.querySelector('script[data-pinaskit]');
+  const urlParams = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : null;
+  const buttonId = (urlParams && urlParams.get('button')) || (scriptTag ? scriptTag.getAttribute('data-pinaskit') : 'btn-1') || 'btn-1';
+  const apiEndpoint = scriptTag ? (scriptTag.getAttribute('data-api') || window.location.origin) : window.location.origin;
+
+  // 2. Obter configurações do botão (do localStorage compartilhado ou dados padrão)
+  const DEFAULT_CONFIGS = {
+    'btn-1': {
+      name: 'Glúteo Feminino',
+      whatsapp: '5511975374960',
+      color: '#25D366',
+      position: 'right',
+      greeting: 'Confirme seus dados para iniciar a conversa',
+      ctaText: 'Falar no WhatsApp',
+      formConfig: {
+        title: 'Conte sobre seu momento.',
+        subtitle: 'Preencha os campos para receber uma avaliação personalizada.',
+        questionLabel: 'Qual é o seu objetivo principal hoje?',
+        options: [
+          { id: '1', label: 'Quero tonificação e aumento de volume', score: 35, badge: '🔥 Quente' },
+          { id: '2', label: 'Gostaria de entender valores e parcelamento', score: 25, badge: '❄️ Morno' },
+          { id: '3', label: 'Tenho interesse para os próximos meses', score: 15, badge: '🧊 Frio' }
+        ],
+        whatsappTemplate: 'Olá! Meu nome é {nome}. Vi o site e meu objetivo é: {momento}. Mensagem: {mensagem}'
+      }
+    },
+    'btn-2': {
+      name: 'Endolaser',
+      whatsapp: '5511981814586',
+      color: '#25D366',
+      position: 'right',
+      greeting: 'Tire suas dúvidas sobre Endolaser no WhatsApp',
+      ctaText: 'Falar com Especialista',
+      formConfig: {
+        title: 'Avaliação de Endolaser.',
+        subtitle: 'Preencha para tirar dúvidas sobre o procedimento de Endolaser.',
+        questionLabel: 'Qual região você gostaria de tratar?',
+        options: [
+          { id: '1', label: 'Papada ou pescoço', score: 30, badge: '🔥 Quente' },
+          { id: '2', label: 'Abdômen ou flancos', score: 30, badge: '🔥 Quente' },
+          { id: '3', label: 'Apenas pesquisando valores no momento', score: 10, badge: '🧊 Frio' }
+        ],
+        whatsappTemplate: 'Olá! Meu nome é {nome}. Gostaria de informações sobre Endolaser para: {momento}.'
+      }
+    },
+    'btn-3': {
+      name: 'Consulta Médica',
+      whatsapp: '5511964906555',
+      color: '#25D366',
+      position: 'right',
+      greeting: 'Agende sua consulta diretamente pelo WhatsApp',
+      ctaText: 'Agendar Consulta',
+      formConfig: {
+        title: 'Agendamento de Consulta.',
+        subtitle: 'Agende sua primeira consulta com nosso especialista.',
+        questionLabel: 'O que melhor descreve sua necessidade médica?',
+        options: [
+          { id: '1', label: 'Consulta de urgência / dor aguda', score: 40, badge: '🔥 Quente' },
+          { id: '2', label: 'Check-up de rotina ou acompanhamento', score: 25, badge: '❄️ Morno' },
+          { id: '3', label: 'Segunda opinião médica', score: 30, badge: '🔥 Quente' }
+        ],
+        whatsappTemplate: 'Olá Dr.! Meu nome é {nome}. Vi seu site e gostaria de agendar consulta para: {momento}.'
+      }
+    }
+  };
+
+  // Tenta ler botões salvos do painel Pinas Kit se estiver no mesmo navegador
+  let activeConfig = DEFAULT_CONFIGS[buttonId] || DEFAULT_CONFIGS['btn-1'];
+  try {
+    const saved = localStorage.getItem('pk_buttons');
+    if (saved) {
+      const list = JSON.parse(saved);
+      const match = list.find(b => b.id === buttonId);
+      if (match) {
+        activeConfig = {
+          name: match.name,
+          whatsapp: match.whatsappNumber || '5511975374960',
+          color: (match.style && match.style.color) ? match.style.color : '#25D366',
+          position: (match.style && match.style.position) ? match.style.position : 'right',
+          greeting: (match.style && match.style.greeting) ? match.style.greeting : 'Confirme seus dados para iniciar a conversa',
+          ctaText: (match.style && match.style.ctaText) ? match.style.ctaText : 'Falar no WhatsApp',
+          formConfig: match.formConfig || activeConfig.formConfig
+        };
+      }
+    }
+  } catch (_) {}
+
+  // 3. Injetar Estilos do Widget Isolados
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    .pk-embed-floating-wrap {
+      position: fixed;
+      bottom: 24px;
+      ${activeConfig.position === 'left' ? 'left: 24px;' : 'right: 24px;'}
+      z-index: 999999;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: ${activeConfig.position === 'left' ? 'flex-start' : 'flex-end'};
+      gap: 12px;
+    }
+    .pk-embed-floating-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: ${activeConfig.color};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(37, 211, 102, 0.4);
+      cursor: pointer;
+      transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease;
+      user-select: none;
+    }
+    .pk-embed-floating-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(37, 211, 102, 0.5);
+    }
+    .pk-embed-popup {
+      display: none;
+      width: 320px;
+      max-width: 90vw;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+      padding: 18px;
+      box-sizing: border-box;
+      color: #1E293B;
+    }
+    .pk-embed-popup.is-open {
+      display: block;
+      animation: pkEmbedPop 200ms ease-out;
+    }
+    @keyframes pkEmbedPop {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pk-embed-popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #E2E8F0;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .pk-embed-popup-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0;
+    }
+    .pk-embed-popup-status {
+      font-size: 11px;
+      color: #10B981;
+      font-weight: 600;
+      margin-top: 2px;
+      display: block;
+    }
+    .pk-embed-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 12px;
+      font-size: 13px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 8px;
+      background: #F8FAFC;
+      color: #1E293B;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    .pk-embed-input:focus {
+      border-color: ${activeConfig.color};
+      background: #FFFFFF;
+    }
+    .pk-embed-submit-btn {
+      width: 100%;
+      background: ${activeConfig.color};
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: filter 150ms ease;
+    }
+    .pk-embed-submit-btn:hover {
+      filter: brightness(0.92);
+    }
+    /* Estilos do Formulário Embutido no Final da Página */
+    .pk-embed-page-form-section {
+      width: 100%;
+      max-width: 680px;
+      margin: 48px auto;
+      padding: 32px 24px;
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-sizing: border-box;
+    }
+  `;
+  document.head.appendChild(styleEl);
+
+  // SVG Oficial do WhatsApp
+  const WHATSAPP_SVG = `
+    <svg width="32" height="32" viewBox="0 0 16 16" fill="#FFFFFF" style="display: block; pointer-events: none;">
+      <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+    </svg>
+  `;
+
+  // Captura de Parâmetros UTM e Origem
+  function getTrafficSource() {
+    const params = new URLSearchParams(window.location.search);
+    const ref = document.referrer.toLowerCase();
+    let origin = 'Direto / Orgânico';
+
+    if (params.get('utm_source')) {
+      const src = params.get('utm_source').toLowerCase();
+      if (src.includes('facebook') || src.includes('meta') || src.includes('instagram')) origin = 'Meta Ads';
+      else if (src.includes('google')) origin = 'Google Ads';
+      else origin = params.get('utm_source');
+    } else if (ref.includes('facebook.com') || ref.includes('instagram.com')) {
+      origin = 'Meta Ads (Referral)';
+    } else if (ref.includes('google.com')) {
+      origin = 'Google Ads / Pesquisa';
+    }
+
+    return {
+      origin,
+      utmSource: params.get('utm_source') || '',
+      utmMedium: params.get('utm_medium') || '',
+      utmCampaign: params.get('utm_campaign') || '',
+      utmContent: params.get('utm_content') || '',
+      utmTerm: params.get('utm_term') || ''
+    };
+  }
+
+  // Enviar Lead para o Pinas Kit e Redirecionar para o WhatsApp
+  function handleLeadSubmission(data) {
+    const traffic = getTrafficSource();
+    const score = data.score || 30;
+    const temp = score >= 35 ? 'Quente' : score >= 20 ? 'Morno' : 'Frio';
+
+    const newLead = {
+      id: 'lead-' + Date.now(),
+      name: data.name,
+      phone: data.phone,
+      email: data.email || `${data.name.toLowerCase().replace(/\\s+/g, '')}@cliente.com`,
+      button: activeConfig.name,
+      origin: traffic.origin,
+      campaign: traffic.utmCampaign || 'Tráfego Pago',
+      utmSource: traffic.utmSource,
+      utmMedium: traffic.utmMedium,
+      utmCampaign: traffic.utmCampaign,
+      utmContent: traffic.utmContent,
+      utmTerm: traffic.utmTerm,
+      temperature: temp,
+      score: score,
+      interactions: 1,
+      lastVisit: 'Agora mesmo',
+      stage: 'Novo',
+      qualQuestion: activeConfig.formConfig.questionLabel,
+      qualAnswer: data.selectedOptionLabel + ` (+${score} pts)`,
+      userMessage: data.customMessage || 'Vim pelo site e gostaria de atendimento.'
+    };
+
+    // Salva localmente se estiver no mesmo domínio
+    try {
+      const savedLeads = localStorage.getItem('pk_leads');
+      const leads = savedLeads ? JSON.parse(savedLeads) : [];
+      leads.unshift(newLead);
+      localStorage.setItem('pk_leads', JSON.stringify(leads));
+    } catch (_) {}
+
+    // Formata mensagem WhatsApp
+    let template = activeConfig.formConfig.whatsappTemplate || 'Olá! Meu nome é {nome}. Tenho interesse em: {momento}. Detalhes: {mensagem}';
+    let text = template
+      .replace(/{nome}/g, data.name)
+      .replace(/{momento}/g, data.selectedOptionLabel || 'Avaliação')
+      .replace(/{mensagem}/g, data.customMessage || '')
+      .replace(/{telefone}/g, data.phone);
+
+    const waNum = activeConfig.whatsapp.replace(/\\D/g, '');
+    const waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
+  }
+
+  // 4. Injetar o Botão Flutuante de WhatsApp (No canto da tela)
+  const floatingWrap = document.createElement('div');
+  floatingWrap.className = 'pk-embed-floating-wrap';
+  floatingWrap.id = 'pk-embed-floating-wrap';
+
+  floatingWrap.innerHTML = `
+    <!-- Balão Popup -->
+    <div class="pk-embed-popup" id="pk-embed-popup">
+      <div class="pk-embed-popup-header">
+        <div>
+          <h4 class="pk-embed-popup-title">${activeConfig.name}</h4>
+          <span class="pk-embed-popup-status">● Online no WhatsApp</span>
+        </div>
+        <span id="pk-embed-close-popup" style="cursor: pointer; font-size: 14px; color: #94A3B8;">✕</span>
+      </div>
+
+      <p style="font-size: 12px; color: #64748B; margin: 0 0 10px 0; line-height: 1.4;">
+        ${activeConfig.greeting}
+      </p>
+
+      <form id="pk-embed-floating-form">
+        <input type="text" class="pk-embed-input" id="pk-float-name" placeholder="Seu nome completo *" required />
+        <input type="tel" class="pk-embed-input" id="pk-float-phone" placeholder="WhatsApp com DDD (Ex: 11999999999) *" required />
+        
+        <label style="font-size: 11.5px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">
+          ${activeConfig.formConfig.questionLabel}
+        </label>
+        <select class="pk-embed-input" id="pk-float-option" style="cursor: pointer;" required>
+          ${activeConfig.formConfig.options.map((opt, i) => `
+            <option value="${opt.id}" data-score="${opt.score}" data-label="${opt.label}" ${i === 0 ? 'selected' : ''}>
+              ${opt.label} (${opt.badge || ''})
+            </option>
+          `).join('')}
+        </select>
+
+        <button type="submit" class="pk-embed-submit-btn">
+          ${WHATSAPP_SVG.replace('width="32" height="32"', 'width="18" height="18"')}
+          <span>${activeConfig.ctaText}</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Botão Circular Verde -->
+    <div class="pk-embed-floating-btn" id="pk-embed-trigger-btn" title="Falar no WhatsApp">
+      ${WHATSAPP_SVG}
+    </div>
+  `;
+
+  document.body.appendChild(floatingWrap);
+
+  // Eventos do Botão Flutuante
+  const triggerBtn = document.getElementById('pk-embed-trigger-btn');
+  const popup = document.getElementById('pk-embed-popup');
+  const closeBtn = document.getElementById('pk-embed-close-popup');
+
+  triggerBtn.addEventListener('click', () => {
+    popup.classList.toggle('is-open');
+  });
+
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    popup.classList.remove('is-open');
+  });
+
+  document.getElementById('pk-embed-floating-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const optEl = document.getElementById('pk-float-option');
+    const selectedOpt = optEl.options[optEl.selectedIndex];
+
+    handleLeadSubmission({
+      name: document.getElementById('pk-float-name').value.trim(),
+      phone: document.getElementById('pk-float-phone').value.trim(),
+      selectedOptionLabel: selectedOpt.getAttribute('data-label'),
+      score: parseInt(selectedOpt.getAttribute('data-score'), 10) || 30
+    });
+    popup.classList.remove('is-open');
+  });
+
+  // 5. Injetar o Formulário de Qualificação na Página
+  // Se existir um container específico <div id="pinaskit-form"></div>, renderiza nele;
+  // Caso contrário, anexa no final da página (conforme solicitado pelo usuário).
+  let targetContainer = document.getElementById('pinaskit-form');
+  if (!targetContainer) {
+    targetContainer = document.createElement('div');
+    targetContainer.id = 'pinaskit-form';
+    document.body.appendChild(targetContainer);
+  }
+
+  targetContainer.innerHTML = `
+    <div class="pk-embed-page-form-section">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 12px; font-weight: 700; color: ${activeConfig.color}; text-transform: uppercase; letter-spacing: 0.5px;">
+          Atendimento Direto no WhatsApp
+        </span>
+        <h3 style="font-size: 22px; font-weight: 800; color: #0F172A; margin: 6px 0 8px 0;">
+          ${activeConfig.formConfig.title}
+        </h3>
+        <p style="font-size: 14px; color: #64748B; margin: 0;">
+          ${activeConfig.formConfig.subtitle}
+        </p>
+      </div>
+
+      <form id="pk-embed-page-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Seu Nome Completo *</label>
+          <input type="text" id="pk-page-name" class="pk-embed-input" placeholder="Ex: Mariana Silva" required />
+        </div>
+
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Seu WhatsApp com DDD *</label>
+          <input type="tel" id="pk-page-phone" class="pk-embed-input" placeholder="Ex: (11) 98765-4321" required />
+        </div>
+
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
+            ${activeConfig.formConfig.questionLabel} *
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${activeConfig.formConfig.options.map((opt, i) => `
+              <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; cursor: pointer; background: #F8FAFC;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <input type="radio" name="pk-page-option" value="${opt.id}" data-score="${opt.score}" data-label="${opt.label}" ${i === 0 ? 'checked' : ''} style="cursor: pointer;"/>
+                  <span style="font-size: 13.5px; font-weight: 500; color: #1E293B;">${opt.label}</span>
+                </div>
+                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #EDE9FE; color: #7C3AED;">
+                  ${opt.badge || '⭐'}
+                </span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Mensagem adicional (opcional)</label>
+          <textarea id="pk-page-message" class="pk-embed-input" rows="2" placeholder="Ex: Gostaria de saber valores e horários disponíveis..."></textarea>
+        </div>
+
+        <button type="submit" class="pk-embed-submit-btn" style="padding: 13px 20px; font-size: 14.5px;">
+          ${WHATSAPP_SVG.replace('width="32" height="32"', 'width="20" height="20"')}
+          <span>${activeConfig.formConfig.buttonText || activeConfig.ctaText}</span>
+        </button>
+      </form>
+    </div>
+  `;
+
+  document.getElementById('pk-embed-page-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const checkedRadio = document.querySelector('input[name="pk-page-option"]:checked');
+
+    handleLeadSubmission({
+      name: document.getElementById('pk-page-name').value.trim(),
+      phone: document.getElementById('pk-page-phone').value.trim(),
+      selectedOptionLabel: checkedRadio ? checkedRadio.getAttribute('data-label') : 'Avaliação',
+      score: checkedRadio ? (parseInt(checkedRadio.getAttribute('data-score'), 10) || 30) : 30,
+      customMessage: document.getElementById('pk-page-message').value.trim()
+    });
+  });
+
+  console.log(`%c[Pinas Kit] Widget ativo para ${activeConfig.name}!`, 'color: #25D366; font-weight: bold;');
+})();

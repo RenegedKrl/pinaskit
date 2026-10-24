@@ -1,5 +1,6 @@
 /* ==========================================================================
    PINAS KIT — MÓDULO DE BOTÕES & SITES DE CAPTAÇÃO (CENTRALKIT V7.0)
+   MODELO D: ASSISTIDO, DIDÁTICO E ULTRA-INTUITIVO
    ========================================================================== */
 
 import { StorageService } from '../services/storage.js';
@@ -15,15 +16,18 @@ export function renderButtonsView() {
       <!-- CABEÇALHO DO MÓDULO -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
-          <h1 style="font-size: 26px; font-weight: 800; color: var(--pk-text-primary);">
-            Meus Botões & Sites de Captação
-          </h1>
-          <p style="font-size: 14px; color: var(--pk-text-secondary); margin-top: 4px;">
-            Cada botão representa um site, página ou campanha com seu próprio link, métricas e formulário de qualificação.
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 style="font-size: 26px; font-weight: 800; color: var(--pk-text-primary); margin: 0;">
+              Meus Botões & Sites de Captação
+            </h1>
+            <span class="pk-badge pk-badge-purple" style="font-size: 11px; font-weight: 700;">CentralKit v7.0</span>
+          </div>
+          <p style="font-size: 14px; color: var(--pk-text-secondary); margin-top: 6px;">
+            Cada botão é um kit completo para o seu site: <strong>Botão Flutuante de WhatsApp</strong> no canto da tela + <strong>Formulário de Qualificação</strong> no final da página.
           </p>
         </div>
 
-        <button class="pk-btn pk-btn-primary" id="btn-create-new-button">
+        <button class="pk-btn pk-btn-primary" id="btn-create-new-button" style="font-weight: 700; box-shadow: 0 4px 14px rgba(124,58,237,0.35);">
           + Criar Novo Botão / Site
         </button>
       </div>
@@ -56,7 +60,7 @@ export function renderButtonsView() {
       </div>
 
       <!-- GRADE DE BOTÕES (SUBPASTAS / SITES) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
         ${buttons.map(btn => `
           <div class="pk-card pk-card-interactive btn-site-card" data-button-id="${btn.id}" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; position: relative;">
             
@@ -71,7 +75,7 @@ export function renderButtonsView() {
                 </span>
               </div>
 
-              <h2 style="font-size: 18px; font-weight: 700; color: var(--pk-text-primary); margin-bottom: 6px;">
+              <h2 style="font-size: 19px; font-weight: 800; color: var(--pk-text-primary); margin-bottom: 6px;">
                 ${btn.name}
               </h2>
 
@@ -84,12 +88,32 @@ export function renderButtonsView() {
               </div>
 
               <!-- Destino WhatsApp -->
-              <p style="font-size: 12px; color: var(--pk-text-muted); margin-bottom: 16px;">
+              <p style="font-size: 12px; color: var(--pk-text-muted); margin-bottom: 12px;">
                 WhatsApp de destino: <strong style="color: var(--pk-text-primary);">+${btn.whatsappNumber}</strong>
               </p>
 
+              <!-- PAINEL DOS 2 COMPONENTES ATIVOS NO SITE -->
+              <div style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--pk-bg-subtle); border: 1px solid var(--pk-border); border-radius: 8px; margin-bottom: 14px; font-size: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <span style="display: flex; align-items: center; gap: 6px; color: var(--pk-text-primary); font-weight: 600;">
+                    <span>🟢</span> Botão Flutuante:
+                  </span>
+                  <span style="color: #10B981; font-weight: 700; font-size: 11.5px;">
+                    Ativo (${btn.style?.position === 'left' ? 'Canto Esquerdo' : 'Canto Direito'})
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <span style="display: flex; align-items: center; gap: 6px; color: var(--pk-text-primary); font-weight: 600;">
+                    <span>📋</span> Formulário no Rodapé:
+                  </span>
+                  <span style="color: var(--pk-primary); font-weight: 700; font-size: 11.5px;">
+                    ${btn.formConfig?.options?.length || 3} opções de triagem
+                  </span>
+                </div>
+              </div>
+
               <!-- 3 Métricas de Desempenho do Botão -->
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; background-color: var(--pk-bg-subtle); border-radius: var(--pk-radius-md); text-align: center;">
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; background-color: var(--pk-bg-card); border: 1px solid var(--pk-border); border-radius: var(--pk-radius-md); text-align: center;">
                 <div>
                   <span style="font-size: 11px; color: var(--pk-text-muted); display: block;">Cliques</span>
                   <strong style="font-size: 16px; color: var(--pk-text-primary);">${btn.clicks}</strong>
@@ -108,19 +132,19 @@ export function renderButtonsView() {
             <!-- Ações do Botão -->
             <div style="border-top: 1px solid var(--pk-border); padding-top: 14px; display: flex; flex-direction: column; gap: 8px;">
               <div style="display: flex; gap: 8px;">
-                <button class="pk-btn pk-btn-primary pk-btn-sm btn-copy-script-action" data-button-id="${btn.id}" data-button-name="${btn.name}" data-slug="${btn.slug}" style="flex: 1;">
+                <button class="pk-btn pk-btn-primary pk-btn-sm btn-copy-script-action" data-button-id="${btn.id}" data-button-name="${btn.name}" data-slug="${btn.slug}" style="flex: 1.1; font-weight: 700;">
                   📋 Copiar Script
                 </button>
-                <button class="pk-btn pk-btn-outline pk-btn-sm btn-test-widget-action" data-button-id="${btn.id}" style="flex: 1;">
-                  👁️ Testar Widget
-                </button>
+                <a href="/teste-widget.html?button=${btn.id}" target="_blank" class="pk-btn pk-btn-outline pk-btn-sm btn-test-widget-action btn-live-site-action" data-button-id="${btn.id}" style="flex: 0.9; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600;" title="Abrir página de teste com este widget ativo">
+                  🚀 Testar no Site
+                </a>
               </div>
 
               <div style="display: flex; gap: 8px;">
-                <button class="pk-btn pk-btn-secondary pk-btn-sm btn-edit-form-action" data-button-id="${btn.id}" style="flex: 1; font-size: 12px;">
+                <button class="pk-btn pk-btn-secondary pk-btn-sm btn-edit-form-action" data-button-id="${btn.id}" style="flex: 1.1; font-size: 12px; font-weight: 600;">
                   ⚙️ Personalizar Pergunta
                 </button>
-                <button class="pk-btn pk-btn-outline pk-btn-sm btn-view-leads-action" data-button-name="${btn.name}" style="flex: 1; font-size: 12px;">
+                <button class="pk-btn pk-btn-outline pk-btn-sm btn-view-leads-action" data-button-name="${btn.name}" style="flex: 0.9; font-size: 12px;">
                   📊 Ver Leads (${btn.leadsCount})
                 </button>
               </div>

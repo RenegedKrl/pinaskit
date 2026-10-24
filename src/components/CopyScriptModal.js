@@ -32,13 +32,13 @@ export function renderCopyScriptModal() {
         <!-- CONTEÚDO DA ABA 1: CÓDIGO DIRETO -->
         <div id="copy-tab-code" class="copy-tab-pane">
           <p style="font-size: 13px; color: var(--pk-text-secondary); line-height: 1.5; margin: 0 0 14px 0;">
-            Cole este script no seu site, uma única vez (de preferência antes de <code>&lt;/body&gt;</code>). As alterações feitas no botão atualizam sozinhas — sem precisar trocar o código.
+            Cole este script no seu site, uma única vez (de preferência antes de <code>&lt;/body&gt;</code>). Ele adiciona automaticamente o <strong>Botão Flutuante de WhatsApp</strong> no canto da tela e o <strong>Formulário de Qualificação</strong> ao final da página!
           </p>
 
           <!-- Bloco do Script de Instalação -->
           <div class="pk-install-code-box">
             <div class="pk-install-label-row">
-              <span style="font-size: 12px; font-weight: 700; color: var(--pk-text-primary);">Script de instalação</span>
+              <span style="font-size: 12px; font-weight: 700; color: var(--pk-text-primary);">Script de instalação (Botão + Formulário)</span>
               <button type="button" class="pk-btn pk-btn-ghost pk-btn-xs" id="btn-do-copy-script" style="color: var(--pk-primary); font-size: 12px;">
                 📋 Copiar Código
               </button>
@@ -50,6 +50,11 @@ export function renderCopyScriptModal() {
               readonly
             >&lt;script async src="https://pinaskit.com.br/embed.js" data-pinaskit="btn-1" data-api="https://api.pinaskit.com.br/v1"&gt;&lt;/script&gt;</textarea>
           </div>
+
+          <!-- Botão para Testar ao Vivo -->
+          <a href="/teste-widget.html" target="_blank" class="pk-btn pk-btn-success" id="btn-open-live-test" style="width: 100%; justify-content: center; gap: 8px; text-decoration: none; font-size: 13px; font-weight: 700; padding: 11px 16px; margin: 12px 0; background: #25D366; border-color: #25D366; color: #FFF; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);">
+            🚀 Testar Script ao Vivo no Navegador (Site Real) →
+          </a>
 
           <!-- Bloco do Link Direto -->
           <div class="pk-install-code-box">

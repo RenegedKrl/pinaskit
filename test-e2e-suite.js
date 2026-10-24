@@ -534,6 +534,30 @@ async function runE2ETestSuite() {
 
     await takeScreenshot('new-button-live-preview');
 
+    // Testa Alternador de Abas do Preview (Botão Flutuante vs Formulário no Rodapé)
+    await evalJs('document.getElementById("btn-preview-mode-form")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const formPreviewVisible = await evalJs('document.getElementById("preview-mode-form-container")?.style.display');
+    assert(formPreviewVisible === 'block', 'Aba de preview do Formulário na Página alternada para exibição (display: block)');
+
+    const liveFormTitle = await evalJs('document.getElementById("preview-live-form-title")?.innerText');
+    assert(liveFormTitle && liveFormTitle.length > 0, 'Título do formulário exibido corretamente no preview ao vivo');
+
+    // Testa adicionar nova opção de qualificação
+    await evalJs('document.getElementById("btn-add-new-option")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const optionsCount = await evalJs('document.querySelectorAll(".new-btn-option-row").length');
+    assert(optionsCount >= 4, 'Nova opção adicionada com sucesso à lista de qualificação (+1 linha)', optionsCount);
+
+    // Retorna para a aba do Botão Flutuante
+    await evalJs('document.getElementById("btn-preview-mode-float")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const floatPreviewVisible = await evalJs('document.getElementById("preview-mode-float-container")?.style.display');
+    assert(floatPreviewVisible === 'block', 'Aba do Botão Flutuante restaurada no preview ao vivo');
+
     // Submete o formulário para criar o botão
     await evalJs(`(() => {
       const form = document.getElementById("new-button-form");
@@ -568,6 +592,34 @@ async function runE2ETestSuite() {
     // Fecha o modal
     await evalJs('document.getElementById("btn-close-copy-modal")?.click()');
     await new Promise(r => setTimeout(r, 300));
+
+    // ------------------------------------------------------------------------
+    // 13. TESTANDO SITE REAL DO CLIENTE COM SCRIPT EMBED OFICIAL ATIVO
+    // ------------------------------------------------------------------------
+    console.log('\n🌐 13. Testando Site Real do Cliente com Script Embed (/teste-widget.html):');
+    await send('Page.navigate', { url: `${BASE_URL}/teste-widget.html?button=btn-1` });
+    await new Promise(r => setTimeout(r, 2000));
+
+    const embedFloatingBtnExists = await evalJs('document.getElementById("pk-embed-floating-wrap") !== null');
+    assert(embedFloatingBtnExists === true, 'Script embed.js carregou e injetou o Botão Flutuante de WhatsApp na página do cliente');
+
+    const embedTriggerHasSvg = await evalJs('document.querySelector("#pk-embed-trigger-btn svg") !== null');
+    assert(embedTriggerHasSvg === true, 'Botão Flutuante no site do cliente possui o logo SVG oficial do WhatsApp');
+
+    const embedPageFormExists = await evalJs('document.getElementById("pk-embed-page-form") !== null');
+    assert(embedPageFormExists === true, 'Script embed.js injetou o Formulário de Qualificação ao final da página (#pinaskit-form)');
+
+    const embedPageFormTitle = await evalJs('document.querySelector(".pk-embed-page-form-section h3")?.innerText');
+    assert(embedPageFormTitle === 'Avaliação Estética Exclusiva' || embedPageFormTitle === 'Conte sobre seu momento.', 'Formulário na página exibe o título configurado pelo usuário', embedPageFormTitle);
+
+    // Clica no botão flutuante para abrir o balão
+    await evalJs('document.getElementById("pk-embed-trigger-btn")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    const embedPopupIsOpen = await evalJs('document.getElementById("pk-embed-popup")?.classList.contains("is-open")');
+    assert(embedPopupIsOpen === true, 'Balão popup de WhatsApp abre ao clicar no botão flutuante');
+
+    await takeScreenshot('client-site-widget-live');
 
   } catch (err) {
     console.error('🚨 Erro inesperado no teste E2E:', err);
