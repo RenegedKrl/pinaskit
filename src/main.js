@@ -476,20 +476,13 @@ class PinasKitApp {
       const rows = document.querySelectorAll('.new-btn-option-row');
       container.innerHTML = Array.from(rows).map((row, idx) => {
         const label = row.querySelector('.new-opt-label')?.value.trim() || `Opção ${idx + 1}`;
-        const badge = row.querySelector('.new-opt-badge')?.value || '🔥 Quente';
-        const badgeClass = badge.includes('Quente') ? 'pk-badge-hot' : badge.includes('Frio') ? 'pk-badge-cold' : 'pk-badge-warm';
         return `
-          <div class="pk-preview-option-item ${idx === 0 ? 'is-selected' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1.5px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; border-radius: 8px; background: ${idx === 0 ? 'rgba(124,58,237,0.06)' : 'var(--pk-bg-subtle)'};">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center;">
-                ${idx === 0 ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
-              </div>
-              <span class="preview-live-opt-label" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary);">
-                ${label}
-              </span>
+          <div class="pk-preview-option-item ${idx === 0 ? 'is-selected' : ''}" style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 10px 12px; border: 1.5px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; border-radius: 8px; background: ${idx === 0 ? 'rgba(124,58,237,0.06)' : 'var(--pk-bg-subtle)'};">
+            <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center; flex-shrink: 0;">
+              ${idx === 0 ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
             </div>
-            <span class="pk-badge ${badgeClass}" style="font-size: 10px; padding: 2px 6px;">
-              ${badge}
+            <span class="preview-live-opt-label" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary); flex: 1;">
+              ${label}
             </span>
           </div>
         `;
@@ -1045,22 +1038,15 @@ class PinasKitApp {
         } else {
           previewOptionsContainer.innerHTML = Array.from(optionRows).map((row, idx) => {
             const label = row.querySelector('.builder-opt-label')?.value || 'Opção sem título';
-            const badge = row.querySelector('.builder-opt-badge')?.value || '🔥 Quente';
-            const badgeClass = badge.includes('Quente') ? 'pk-badge-hot' : badge.includes('Frio') ? 'pk-badge-cold' : 'pk-badge-warm';
             const isSelected = idx === 0;
 
             return `
-              <div class="pk-preview-option-item ${isSelected ? 'is-selected' : ''}" data-preview-index="${idx}">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${isSelected ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center;">
-                    ${isSelected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
-                  </div>
-                  <span class="preview-opt-text" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary);">
-                    ${label}
-                  </span>
+              <div class="pk-preview-option-item ${isSelected ? 'is-selected' : ''}" data-preview-index="${idx}" style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 9px 12px; border: 1.5px solid ${isSelected ? 'var(--pk-primary)' : 'var(--pk-border)'}; border-radius: 8px; background: ${isSelected ? 'rgba(124,58,237,0.06)' : 'var(--pk-bg-subtle)'};">
+                <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${isSelected ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center; flex-shrink: 0;">
+                  ${isSelected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
                 </div>
-                <span class="pk-badge ${badgeClass}" style="font-size: 10px; padding: 2px 6px;">
-                  ${badge}
+                <span class="preview-opt-text" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary); flex: 1;">
+                  ${label}
                 </span>
               </div>
             `;

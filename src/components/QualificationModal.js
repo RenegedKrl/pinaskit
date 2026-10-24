@@ -68,7 +68,6 @@ export function renderQualificationModal() {
                 ${config.options.map(opt => `
                   <div class="pk-select-option" data-value="${opt.label}" data-score="${opt.score}" data-badge="${opt.badge}">
                     <span>${opt.label}</span>
-                    <span class="pk-badge pk-badge-purple" style="font-size: 10px;">${opt.badge}</span>
                   </div>
                 `).join('')}
               </div>

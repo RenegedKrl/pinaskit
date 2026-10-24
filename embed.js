@@ -319,8 +319,9 @@
       all: unset !important;
       display: flex !important;
       align-items: center !important;
-      justify-content: space-between !important;
-      padding: 11px 14px !important;
+      justify-content: flex-start !important;
+      gap: 12px !important;
+      padding: 12px 14px !important;
       border: 1.5px solid #E2E8F0 !important;
       border-radius: 10px !important;
       cursor: pointer !important;
@@ -499,7 +500,7 @@
         <select class="pk-embed-input" id="pk-float-option" style="cursor: pointer;" required>
           ${activeConfig.formConfig.options.map((opt, i) => `
             <option value="${opt.id}" data-score="${opt.score}" data-label="${opt.label}" ${i === 0 ? 'selected' : ''}>
-              ${opt.label} (${opt.badge || ''})
+              ${opt.label}
             </option>
           `).join('')}
         </select>
@@ -606,23 +607,18 @@
           </label>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             ${activeConfig.formConfig.options.map((opt, i) => `
-              <label class="pk-embed-option-card ${i === 0 ? 'is-selected' : ''}" style="all: unset !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 11px 14px !important; border: 1.5px solid ${i === 0 ? '#7C3AED' : '#E2E8F0'} !important; border-radius: 10px !important; cursor: pointer !important; background: ${i === 0 ? 'rgba(124, 58, 237, 0.05)' : '#F8FAFC'} !important; box-sizing: border-box !important; margin: 0 !important; transition: all 150ms ease !important;">
-                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
-                  <input 
-                    type="radio" 
-                    class="pk-embed-radio" 
-                    name="pk-page-option" 
-                    value="${opt.id}" 
-                    data-score="${opt.score}" 
-                    data-label="${opt.label}" 
-                    ${i === 0 ? 'checked' : ''} 
-                    style="all: unset !important; -webkit-appearance: none !important; appearance: none !important; width: 18px !important; min-width: 18px !important; max-width: 18px !important; height: 18px !important; min-height: 18px !important; max-height: 18px !important; border-radius: 50% !important; border: 2px solid ${i === 0 ? '#7C3AED' : '#CBD5E1'} !important; background-color: #FFFFFF !important; margin: 0 !important; padding: 0 !important; display: inline-grid !important; place-content: center !important; flex-shrink: 0 !important; cursor: pointer !important; box-sizing: border-box !important;"
-                  />
-                  <span style="font-size: 13.5px; font-weight: 500; color: #1E293B; line-height: 1.4;">${opt.label}</span>
-                </div>
-                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #EDE9FE; color: #7C3AED; white-space: nowrap; flex-shrink: 0;">
-                  ${opt.badge || '⭐'}
-                </span>
+              <label class="pk-embed-option-card ${i === 0 ? 'is-selected' : ''}" style="all: unset !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px !important; padding: 12px 14px !important; border: 1.5px solid ${i === 0 ? '#7C3AED' : '#E2E8F0'} !important; border-radius: 10px !important; cursor: pointer !important; background: ${i === 0 ? 'rgba(124, 58, 237, 0.05)' : '#F8FAFC'} !important; box-sizing: border-box !important; margin: 0 !important; transition: all 150ms ease !important;">
+                <input 
+                  type="radio" 
+                  class="pk-embed-radio" 
+                  name="pk-page-option" 
+                  value="${opt.id}" 
+                  data-score="${opt.score}" 
+                  data-label="${opt.label}" 
+                  ${i === 0 ? 'checked' : ''} 
+                  style="all: unset !important; -webkit-appearance: none !important; appearance: none !important; width: 18px !important; min-width: 18px !important; max-width: 18px !important; height: 18px !important; min-height: 18px !important; max-height: 18px !important; border-radius: 50% !important; border: 2px solid ${i === 0 ? '#7C3AED' : '#CBD5E1'} !important; background-color: #FFFFFF !important; margin: 0 !important; padding: 0 !important; display: inline-grid !important; place-content: center !important; flex-shrink: 0 !important; cursor: pointer !important; box-sizing: border-box !important;"
+                />
+                <span style="font-size: 14px; font-weight: 500; color: #1E293B; line-height: 1.4; flex: 1;">${opt.label}</span>
               </label>
             `).join('')}
           </div>

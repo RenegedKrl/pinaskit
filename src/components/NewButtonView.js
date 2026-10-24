@@ -403,27 +403,16 @@ export function renderNewButtonView(button = null) {
 
                     <div id="preview-live-form-options" style="display: flex; flex-direction: column; gap: 7px;">
                       ${options.map((opt, idx) => `
-                        <div class="pk-preview-option-item ${idx === 0 ? 'is-selected' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1.5px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; border-radius: 8px; background: ${idx === 0 ? 'rgba(124,58,237,0.06)' : 'var(--pk-bg-subtle)'};">
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center;">
-                              ${idx === 0 ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
-                            </div>
-                            <span class="preview-live-opt-label" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary);">
-                              ${opt.label}
-                            </span>
+                        <div class="pk-preview-option-item ${idx === 0 ? 'is-selected' : ''}" style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 10px 12px; border: 1.5px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; border-radius: 8px; background: ${idx === 0 ? 'rgba(124,58,237,0.06)' : 'var(--pk-bg-subtle)'};">
+                          <div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${idx === 0 ? 'var(--pk-primary)' : 'var(--pk-border)'}; display: grid; place-items: center; flex-shrink: 0;">
+                            ${idx === 0 ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: var(--pk-primary);"></div>' : ''}
                           </div>
-                          <span class="pk-badge ${opt.badge && opt.badge.includes('Quente') ? 'pk-badge-hot' : opt.badge && opt.badge.includes('Frio') ? 'pk-badge-cold' : 'pk-badge-warm'}" style="font-size: 10px; padding: 2px 6px;">
-                            ${opt.badge || '🔥 Quente'}
+                          <span class="preview-live-opt-label" style="font-size: 12px; font-weight: 600; color: var(--pk-text-primary); flex: 1;">
+                            ${opt.label}
                           </span>
                         </div>
                       `).join('')}
                     </div>
-                  </div>
-
-                  <!-- Campo de Mensagem Opcional -->
-                  <div style="margin-bottom: 14px;">
-                    <label style="font-size: 11.5px; font-weight: 600; color: var(--pk-text-muted); display: block; margin-bottom: 3px;">Mensagem adicional (opcional)</label>
-                    <textarea class="pk-input" rows="2" placeholder="Gostaria de agendar para a próxima terça..." disabled style="padding: 8px 10px; font-size: 11.5px; opacity: 0.7; resize: none; background: var(--pk-bg-subtle);"></textarea>
                   </div>
 
                   <!-- Botão CTA no Formulário com Ícone WhatsApp Oficial -->
