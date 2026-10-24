@@ -13,6 +13,7 @@ import { renderConnectAdsModal } from './src/components/ConnectAdsModal.js';
 import { renderFormBuilderModal } from './src/components/FormBuilderModal.js';
 import { renderVideoTourModal } from './src/components/VideoTourModal.js';
 import { renderCopyScriptModal } from './src/components/CopyScriptModal.js';
+import { renderLeadDrawer } from './src/components/LeadDrawer.js';
 import fs from 'fs';
 
 let passCount = 0;
@@ -101,6 +102,15 @@ assert(StorageService.getConnectedAds().facebook === false, 'Estado inicial de a
 StorageService.setConnectedAds({ facebook: true, instagram: true, google: false });
 assert(StorageService.getConnectedAds().facebook === true, 'Conexão simulada do Facebook Ads persistida');
 
+// 1.8 Busca e Manipulação do Lead (Drawer)
+const lead1 = StorageService.getLeadById('lead-1');
+assert(lead1 && lead1.name.includes('Ana Livia'), 'Busca de lead por ID (getLeadById)');
+const updatedStageLead = StorageService.updateLeadStage('lead-1', 'Proposta', 'Mariana');
+assert(updatedStageLead && updatedStageLead.stage === 'Proposta', 'Atualização de estágio no CRM');
+assert(updatedStageLead.timeline[0].title.includes('Proposta'), 'Adição automática de evento de estágio na linha do tempo');
+const updatedNoteLead = StorageService.addLeadNote('lead-1', 'Lead super interessada para o sábado', 'Mariana');
+assert(updatedNoteLead && updatedNoteLead.activityNotes.length > 0, 'Adição de anotação interna no lead');
+
 // --------------------------------------------------------------------------
 // 2. TESTES DE COMPONENTES & HIERARQUIA VISUAL
 // --------------------------------------------------------------------------
@@ -171,6 +181,14 @@ assert(videoModalHtml.includes('tour-play-btn'), 'Modal de Vídeo Tour possui bo
 const copyModalHtml = renderCopyScriptModal();
 assert(copyModalHtml.includes('Instalar Botão no seu Site'), 'Modal Copiar Script possui instruções claras');
 assert(copyModalHtml.includes('copy-script-code'), 'Modal Copiar Script possui o textarea com o código');
+
+// 2.11 Drawer Lateral da Ficha do Lead
+const drawerHtml = renderLeadDrawer(lead1);
+assert(drawerHtml.includes('Ana Livia Pereira de Sousa Paulo'), 'Drawer exibe o nome completo do lead');
+assert(drawerHtml.includes('Falar no WhatsApp'), 'Drawer possui botão direto para conversa no WhatsApp');
+assert(drawerHtml.includes('Origem & Rastreamento de Anúncios'), 'Drawer possui seção de atribuição de tráfego e UTMs');
+assert(drawerHtml.includes('Linha do Tempo do Lead'), 'Drawer possui linha do tempo de atividades');
+assert(drawerHtml.includes('Anotações da Equipe'), 'Drawer possui bloco colaborativo de anotações');
 
 // --------------------------------------------------------------------------
 // 3. TESTES DE ARQUIVOS ESTÁTICOS & ASSETS

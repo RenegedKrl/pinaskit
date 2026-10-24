@@ -300,6 +300,60 @@ async function runE2ETestSuite() {
 
     await takeScreenshot('sidebar-fixed-scrolled');
 
+    // --------------------------------------------------------------------------
+    // TESTE 9: FICHA & DRAWER LATERAL DO LEAD (MODELO D & GESTÃO COMPLETA)
+    // --------------------------------------------------------------------------
+    console.log('\n🗂️ 10. Testando Ficha & Drawer Lateral do Lead (Modelo D):');
+    await evalJs('window.scrollTo(0, 0)');
+    await evalJs('document.getElementById("side-nav-leads")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    // Clicar no nome do primeiro lead (Ana Livia) para abrir o Drawer Lateral
+    await evalJs('document.querySelector(".lead-clickable-name")?.click()');
+    await new Promise(r => setTimeout(r, 500));
+
+    const drawerActive = await evalJs('document.getElementById("lead-drawer-overlay")?.classList.contains("is-active")');
+    assert(drawerActive === true, 'Drawer lateral do Lead abre ao clicar no nome na tabela');
+
+    const drawerHasAnaLivia = await evalJs('document.getElementById("lead-drawer-panel")?.innerText.includes("Ana Livia")');
+    assert(drawerHasAnaLivia === true, 'Drawer exibe o nome correto do Lead ("Ana Livia")');
+
+    const whatsappLink = await evalJs('document.getElementById("drawer-btn-whatsapp")?.getAttribute("href")');
+    assert(whatsappLink && whatsappLink.includes('wa.me'), 'Botão do WhatsApp configurado com link direto (wa.me)');
+
+    const hasUtmTracker = await evalJs('document.getElementById("lead-drawer-panel")?.innerText.toLowerCase().includes("rastreamento de anúncios")');
+    assert(hasUtmTracker === true, 'Card de Rastreamento de Anúncios e UTMs presente no Drawer');
+
+    // Alterar estágio para "Proposta"
+    await evalJs('document.querySelector(\'.pk-stage-pill[data-stage="Proposta"]\')?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    const isPropostaActive = await evalJs('document.querySelector(\'.pk-stage-pill[data-stage="Proposta"]\')?.classList.contains("is-active")');
+    assert(isPropostaActive === true, 'Estágio do pipeline alterado para "Proposta" com sucesso');
+
+    // Inserir anotação da equipe
+    await evalJs(`
+      const input = document.getElementById("drawer-note-input");
+      if (input) {
+        input.value = "Lead respondeu com muito interesse no orçamento.";
+        const form = document.getElementById("drawer-note-form");
+        if (form) form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      }
+    `);
+    await new Promise(r => setTimeout(r, 400));
+
+    const noteAdded = await evalJs('document.getElementById("drawer-notes-list")?.innerText.includes("muito interesse no orçamento")');
+    assert(noteAdded === true, 'Anotação da equipe registrada e exibida em tempo real na ficha');
+
+    await takeScreenshot('lead-drawer');
+
+    // Fechar o Drawer
+    await evalJs('document.getElementById("btn-close-lead-drawer")?.click()');
+    await new Promise(r => setTimeout(r, 300));
+
+    const drawerClosed = await evalJs('!document.getElementById("lead-drawer-overlay")?.classList.contains("is-active")');
+    assert(drawerClosed === true, 'Drawer lateral fecha corretamente pelo botão de fechar');
+
   } catch (err) {
     console.error('🚨 Erro inesperado no teste E2E:', err);
     testFails++;

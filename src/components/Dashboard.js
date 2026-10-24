@@ -347,20 +347,28 @@ function renderConversationsView(leads = []) {
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            ${newLeads.map(l => `
+            ${newLeads.map(l => {
+              const phoneClean = l.phone ? l.phone.replace(/[^0-9]/g, '') : '';
+              const waLink = `https://wa.me/${phoneClean}?text=Olá%20${encodeURIComponent(l.name)}!`;
+              return `
               <div style="background: var(--pk-bg-page); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <strong style="font-size: 13px; color: var(--pk-text-primary);">${l.name}</strong>
+                  <strong class="lead-clickable-name" data-id="${l.id}" style="font-size: 13px; color: var(--pk-text-primary); cursor: pointer; text-decoration: underline; text-decoration-color: var(--pk-primary);">${l.name}</strong>
                   <span class="pk-badge ${l.temperature === 'Quente' ? 'pk-badge-hot' : l.temperature === 'Morno' ? 'pk-badge-warm' : 'pk-badge-cold'}">${l.temperature}</span>
                 </div>
                 <div style="font-size: 12px; color: var(--pk-text-secondary); margin-bottom: 8px;">
                   <span>Origem: <strong>${l.campaign}</strong></span> · <span>${l.phone}</span>
                 </div>
-                <a href="${l.whatsappLink}" target="_blank" class="pk-btn pk-btn-whatsapp pk-btn-xs" style="width: 100%; text-decoration: none; justify-content: center;">
-                  Iniciar WhatsApp →
-                </a>
+                <div style="display: flex; gap: 6px;">
+                  <a href="${waLink}" target="_blank" class="pk-btn pk-btn-whatsapp pk-btn-xs" style="flex: 1; text-decoration: none; justify-content: center;">
+                    WhatsApp →
+                  </a>
+                  <button class="pk-btn pk-btn-outline pk-btn-xs btn-open-lead-drawer" data-id="${l.id}">
+                    👁️ Ficha
+                  </button>
+                </div>
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         </div>
 
@@ -375,20 +383,28 @@ function renderConversationsView(leads = []) {
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            ${chatLeads.map(l => `
+            ${chatLeads.map(l => {
+              const phoneClean = l.phone ? l.phone.replace(/[^0-9]/g, '') : '';
+              const waLink = `https://wa.me/${phoneClean}?text=Olá%20${encodeURIComponent(l.name)}!`;
+              return `
               <div style="background: var(--pk-bg-page); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <strong style="font-size: 13px; color: var(--pk-text-primary);">${l.name}</strong>
+                  <strong class="lead-clickable-name" data-id="${l.id}" style="font-size: 13px; color: var(--pk-text-primary); cursor: pointer; text-decoration: underline; text-decoration-color: var(--pk-primary);">${l.name}</strong>
                   <span class="pk-badge ${l.temperature === 'Quente' ? 'pk-badge-hot' : 'pk-badge-warm'}">${l.temperature}</span>
                 </div>
                 <div style="font-size: 12px; color: var(--pk-text-secondary); margin-bottom: 8px;">
-                  <span>Botão: <strong>${l.buttonName}</strong></span> · <span>Score: ${l.score}pts</span>
+                  <span>Botão: <strong>${l.button || l.buttonName || 'Geral'}</strong></span> · <span>Score: ${l.score}pts</span>
                 </div>
-                <a href="${l.whatsappLink}" target="_blank" class="pk-btn pk-btn-whatsapp pk-btn-xs" style="width: 100%; text-decoration: none; justify-content: center;">
-                  Continuar Conversa →
-                </a>
+                <div style="display: flex; gap: 6px;">
+                  <a href="${waLink}" target="_blank" class="pk-btn pk-btn-whatsapp pk-btn-xs" style="flex: 1; text-decoration: none; justify-content: center;">
+                    Continuar →
+                  </a>
+                  <button class="pk-btn pk-btn-outline pk-btn-xs btn-open-lead-drawer" data-id="${l.id}">
+                    👁️ Ficha
+                  </button>
+                </div>
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         </div>
 
@@ -406,13 +422,18 @@ function renderConversationsView(leads = []) {
             ${wonLeads.map(l => `
               <div style="background: var(--pk-bg-page); border: 1px solid var(--pk-border); border-radius: 8px; padding: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <strong style="font-size: 13px; color: var(--pk-text-primary);">${l.name}</strong>
+                  <strong class="lead-clickable-name" data-id="${l.id}" style="font-size: 13px; color: var(--pk-text-primary); cursor: pointer; text-decoration: underline; text-decoration-color: var(--pk-primary);">${l.name}</strong>
                   <span class="pk-badge pk-badge-success">R$ 1.250</span>
                 </div>
                 <div style="font-size: 12px; color: var(--pk-text-secondary); margin-bottom: 8px;">
                   <span>Cliente convertido via ${l.campaign}</span>
                 </div>
-                <span style="font-size: 11px; color: var(--pk-success); font-weight: 600;">✓ Negócio Ganho</span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 11px; color: var(--pk-success); font-weight: 600;">✓ Negócio Ganho</span>
+                  <button class="pk-btn pk-btn-outline pk-btn-xs btn-open-lead-drawer" data-id="${l.id}">
+                    👁️ Ficha
+                  </button>
+                </div>
               </div>
             `).join('')}
           </div>

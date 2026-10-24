@@ -105,9 +105,11 @@ export function renderLeadsView(selectedButton = 'Todos', selectedPeriod = 'Últ
                   </span>
                 </td>
 
-                <!-- Nome -->
+                <!-- Nome com link para Drawer da Ficha Completa -->
                 <td style="padding: 14px 16px; font-weight: 600; color: var(--pk-text-primary);">
-                  ${lead.name}
+                  <span class="lead-clickable-name" data-id="${lead.id}" style="cursor: pointer; transition: all 150ms ease; border-bottom: 1px dashed var(--pk-primary);" title="Clique para abrir Ficha Completa do Lead">
+                    ${lead.name}
+                  </span>
                 </td>
 
                 <!-- Telefone com Link WhatsApp -->

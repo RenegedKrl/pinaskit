@@ -11,6 +11,7 @@ import { renderConnectAdsModal } from './components/ConnectAdsModal.js';
 import { renderFormBuilderModal } from './components/FormBuilderModal.js';
 import { renderVideoTourModal } from './components/VideoTourModal.js';
 import { renderCopyScriptModal } from './components/CopyScriptModal.js';
+import { renderLeadDrawer } from './components/LeadDrawer.js';
 
 class PinasKitApp {
   constructor() {
@@ -19,6 +20,7 @@ class PinasKitApp {
     this.leadFilterButton = 'Todos';
     this.activeButtonForEdit = null;
     this.isAnnualBilling = true;
+    this.selectedLeadForDrawer = null;
     this.init();
   }
 
@@ -78,6 +80,7 @@ class PinasKitApp {
         ${renderFormBuilderModal()}
         ${renderVideoTourModal()}
         ${renderCopyScriptModal()}
+        ${renderLeadDrawer(this.selectedLeadForDrawer)}
       </div>
 
       <!-- CONTAINER DE NOTIFICAÇÕES (TOASTS) -->
@@ -346,10 +349,85 @@ class PinasKitApp {
       });
     });
 
-    document.querySelectorAll('.btn-lead-analytics').forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.showToast('📈 Exibindo linha do tempo e cliques de campanha deste contato.');
+    // Abertura do Drawer da Ficha Completa do Lead
+    const handleOpenLeadDrawer = (leadId) => {
+      const lead = StorageService.getLeadById(leadId);
+      if (lead) {
+        this.selectedLeadForDrawer = lead;
+        this.render();
+        this.bindEvents();
+        const drawer = document.getElementById('lead-drawer-overlay');
+        if (drawer) {
+          drawer.classList.add('is-active');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    };
+
+    document.querySelectorAll('.lead-clickable-name, .btn-lead-analytics, .btn-open-lead-drawer').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.getAttribute('data-id');
+        handleOpenLeadDrawer(id);
       });
+    });
+
+    // Eventos de Fechamento do Drawer
+    const closeLeadDrawer = () => {
+      const drawer = document.getElementById('lead-drawer-overlay');
+      if (drawer) {
+        drawer.classList.remove('is-active');
+        document.body.style.overflow = '';
+      }
+    };
+    document.getElementById('btn-close-lead-drawer')?.addEventListener('click', closeLeadDrawer);
+    document.getElementById('lead-drawer-overlay')?.addEventListener('click', (e) => {
+      if (e.target.id === 'lead-drawer-overlay') closeLeadDrawer();
+    });
+
+    // Copiar Telefone no Drawer
+    document.getElementById('drawer-btn-copy-phone')?.addEventListener('click', (e) => {
+      const phone = e.currentTarget.getAttribute('data-phone');
+      if (phone) {
+        navigator.clipboard?.writeText(phone);
+        this.showToast(`📋 Telefone copiado: ${phone}`);
+      }
+    });
+
+    // Alteração de Estágio no Pipeline CRM via Pills
+    document.querySelectorAll('.pk-stage-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        const leadId = e.currentTarget.getAttribute('data-lead-id');
+        const newStage = e.currentTarget.getAttribute('data-stage');
+        const updatedLead = StorageService.updateLeadStage(leadId, newStage, 'Mariana');
+        if (updatedLead) {
+          this.selectedLeadForDrawer = updatedLead;
+          this.showToast(`🎯 Estágio atualizado para "${newStage}"!`);
+          this.render();
+          this.bindEvents();
+          document.getElementById('lead-drawer-overlay')?.classList.add('is-active');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+
+    // Salvar Nova Anotação da Equipe na Ficha do Lead
+    document.getElementById('drawer-note-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const leadId = e.currentTarget.getAttribute('data-lead-id');
+      const input = document.getElementById('drawer-note-input');
+      const text = input ? input.value.trim() : '';
+      if (text) {
+        const updatedLead = StorageService.addLeadNote(leadId, text, 'Mariana');
+        if (updatedLead) {
+          this.selectedLeadForDrawer = updatedLead;
+          this.showToast('📝 Anotação interna salva na ficha!');
+          this.render();
+          this.bindEvents();
+          document.getElementById('lead-drawer-overlay')?.classList.add('is-active');
+          document.body.style.overflow = 'hidden';
+        }
+      }
     });
 
     // Checkbox selecionar todos

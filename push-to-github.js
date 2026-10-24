@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'fix: Sidebar fixa no scroll da pagina e ajuste de layout (Pinas Kit no topo e Ajuda/Configuracoes no rodape)',
+    message: 'feat: Ficha e Drawer lateral do lead com rastreamento UTM, troca de estagio CRM, timeline e notas',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

@@ -88,52 +88,151 @@ const INITIAL_BUTTONS = [
   }
 ];
 
-// Leads Iniciais (Fielmente baseados na tela de Leads da CentralKit - Imagem 2)
+// Leads Iniciais (Fielmente baseados na tela de Leads da CentralKit - Imagem 2 com enriquecimento completo)
 const INITIAL_LEADS = [
   {
     id: 'lead-1',
     name: 'Ana Livia Pereira de Sousa Paulo',
     phone: '+55 11 97537-4960',
-    email: '-',
+    email: 'analivia.sousa@gmail.com',
     button: 'Glúteo Feminino',
     origin: 'Google Ads',
     campaign: 'Google_Pesquisa_SP',
+    utmSource: 'google_ads',
+    utmMedium: 'cpc',
+    utmCampaign: 'campanha-gluteo-outubro',
+    utmContent: 'criativo-responsivo-texto-01',
+    utmTerm: 'harmonizacao gluteo sp centro',
     temperature: 'Morno',
     score: 31,
     interactions: 1,
     lastVisit: '15/10/2026, 10:16',
     stage: 'Em conversa',
-    notes: 'Interessada no procedimento estético para novembro.'
+    qualQuestion: 'Qual o seu objetivo principal com o tratamento?',
+    qualAnswer: 'Quero modelar e aumentar o volume (+30 pts)',
+    userMessage: 'Olá! Gostaria de agendar uma avaliação presencial no sábado.',
+    activityNotes: [
+      {
+        id: 'note-1',
+        author: 'Mariana',
+        text: 'Lead super interessada, pediu retorno via WhatsApp na quinta-feira após às 14h.',
+        date: '15/10/2026, 10:25'
+      }
+    ],
+    timeline: [
+      {
+        time: '15/10/2026, 10:25',
+        icon: '📝',
+        title: 'Anotação interna adicionada',
+        desc: 'Interessada no procedimento para novembro, prefere sábado.'
+      },
+      {
+        time: '15/10/2026, 10:20',
+        icon: '💬',
+        title: 'Conversa no WhatsApp iniciada',
+        desc: 'Contato respondido via WhatsApp (+55 11 97537-4960)'
+      },
+      {
+        time: '15/10/2026, 10:16',
+        icon: '📋',
+        title: 'Formulário de Qualificação preenchido',
+        desc: 'Pontuação: 31 pontos · Temperatura: Morno'
+      },
+      {
+        time: '15/10/2026, 10:14',
+        icon: '🎯',
+        title: 'Clique no Anúncio Google Ads',
+        desc: 'Termo: "harmonizacao gluteo sp centro" (CPC: R$ 2,40)'
+      }
+    ]
   },
   {
     id: 'lead-2',
     name: 'Andreza',
     phone: '+55 11 98181-4586',
-    email: '-',
+    email: 'andreza.estetica@outlook.com',
     button: 'Endolaser',
     origin: 'Google Ads',
     campaign: 'Google_Display_SP',
+    utmSource: 'google_ads',
+    utmMedium: 'display',
+    utmCampaign: 'endolaser-rosto-corpo',
+    utmContent: 'banner-antes-depois-300x250',
+    utmTerm: 'endolaser papada sp',
     temperature: 'Morno',
     score: 29,
     interactions: 1,
     lastVisit: '15/10/2026, 08:10',
     stage: 'Novo',
-    notes: 'Perguntou sobre valores de parcelamento.'
+    qualQuestion: 'Qual região você gostaria de tratar?',
+    qualAnswer: 'Papada ou pescoço (+30 pts)',
+    userMessage: 'Gostaria de saber valores e quantas sessões são recomendadas.',
+    activityNotes: [
+      {
+        id: 'note-2',
+        author: 'Mariana',
+        text: 'Perguntou sobre valores de parcelamento no cartão em até 12x.',
+        date: '15/10/2026, 08:15'
+      }
+    ],
+    timeline: [
+      {
+        time: '15/10/2026, 08:10',
+        icon: '📋',
+        title: 'Contato capturado no site',
+        desc: 'Botão Endolaser Facial (Score: 29 pontos)'
+      },
+      {
+        time: '15/10/2026, 08:08',
+        icon: '🎯',
+        title: 'Clique em Anúncio Google Display',
+        desc: 'Campanha Endolaser Rosto & Corpo'
+      }
+    ]
   },
   {
     id: 'lead-3',
     name: 'VITORIA DE FREITAS',
     phone: '+55 11 96490-6555',
-    email: '-',
+    email: 'vitoria.freitas@gmail.com',
     button: 'Depilação á Laser',
-    origin: 'Google Ads',
-    campaign: 'Google_Campanha_Feminina',
-    temperature: 'Morno',
-    score: 27,
-    interactions: 1,
+    origin: 'Meta Ads',
+    campaign: 'Instagram_Stories_Promo',
+    utmSource: 'meta_ads',
+    utmMedium: 'stories',
+    utmCampaign: 'depilacao-laser-verao',
+    utmContent: 'video-reels-depilacao-laser',
+    utmTerm: 'depilacao laser sem dor',
+    temperature: 'Quente',
+    score: 52,
+    interactions: 2,
     lastVisit: '12/10/2026, 16:59',
     stage: 'Em conversa',
-    notes: 'Quer saber sobre pacotes de 10 sessões.'
+    qualQuestion: 'Qual área do corpo você deseja iniciar?',
+    qualAnswer: 'Corpo inteiro / Pacote VIP (+40 pts)',
+    userMessage: 'Quero saber se tem horário disponível para iniciar esta semana ainda.',
+    activityNotes: [
+      {
+        id: 'note-3',
+        author: 'Mariana',
+        text: 'Cliente pronta para fechar o pacote de 10 sessões.',
+        date: '12/10/2026, 17:10'
+      }
+    ],
+    timeline: [
+      {
+        time: '12/10/2026, 17:05',
+        icon: '🔥',
+        title: 'Lead classificado como Quente (52 pts)',
+        desc: 'Alta intenção de compra identificada'
+      },
+      {
+        time: '12/10/2026, 16:59',
+        icon: '🎯',
+        title: 'Clique no Anúncio Meta Ads (Instagram Stories)',
+        desc: 'Campanha Depilação a Laser Verão'
+      }
+    ]
   },
   {
     id: 'lead-4',
@@ -143,12 +242,28 @@ const INITIAL_LEADS = [
     button: 'Glúteo Feminino',
     origin: 'Google',
     campaign: 'Orgânico_Busca_Direta',
+    utmSource: 'organico',
+    utmMedium: 'direto',
+    utmCampaign: 'busca-organica-google',
+    utmContent: '-',
+    utmTerm: 'clinica luana albuquerque',
     temperature: 'Frio',
     score: 12,
     interactions: 1,
     lastVisit: '09/10/2026, 14:12',
     stage: 'Novo',
-    notes: 'Visitou a página e preencheu nome e telefone.'
+    qualQuestion: 'Qual o seu objetivo principal com o tratamento?',
+    qualAnswer: 'Apenas pesquisando valores no momento (+10 pts)',
+    userMessage: 'Olá, apenas dando uma olhada.',
+    activityNotes: [],
+    timeline: [
+      {
+        time: '09/10/2026, 14:12',
+        icon: '🧊',
+        title: 'Lead capturado (Frio - 12 pts)',
+        desc: 'Apenas pesquisando preços no momento'
+      }
+    ]
   }
 ];
 
@@ -259,6 +374,66 @@ export const StorageService = {
     leads = leads.filter(l => l.id !== id);
     localStorage.setItem(STORAGE_KEYS.LEADS, JSON.stringify(leads));
     return leads;
+  },
+
+  getLeadById(id) {
+    const leads = this.getLeads();
+    return leads.find(l => l.id === id) || null;
+  },
+
+  updateLead(id, updates) {
+    let leads = this.getLeads();
+    const idx = leads.findIndex(l => l.id === id);
+    if (idx !== -1) {
+      leads[idx] = { ...leads[idx], ...updates };
+      localStorage.setItem(STORAGE_KEYS.LEADS, JSON.stringify(leads));
+      return leads[idx];
+    }
+    return null;
+  },
+
+  updateLeadStage(id, newStage, author = 'Mariana') {
+    const lead = this.getLeadById(id);
+    if (!lead) return null;
+    const oldStage = lead.stage || 'Novo';
+    const now = new Date();
+    const timeStr = `${now.toLocaleDateString('pt-BR')}, ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+    const timeline = lead.timeline || [];
+    timeline.unshift({
+      time: timeStr,
+      icon: '🔄',
+      title: `Estágio alterado para "${newStage}"`,
+      desc: `Atualizado por ${author} (anterior: ${oldStage})`
+    });
+
+    return this.updateLead(id, { stage: newStage, timeline });
+  },
+
+  addLeadNote(id, noteText, author = 'Mariana') {
+    const lead = this.getLeadById(id);
+    if (!lead) return null;
+    const now = new Date();
+    const timeStr = `${now.toLocaleDateString('pt-BR')}, ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+    const notes = lead.activityNotes || [];
+    const newNote = {
+      id: `note-${Date.now()}`,
+      author,
+      text: noteText,
+      date: timeStr
+    };
+    notes.unshift(newNote);
+
+    const timeline = lead.timeline || [];
+    timeline.unshift({
+      time: timeStr,
+      icon: '📝',
+      title: `Nova anotação de ${author}`,
+      desc: noteText.length > 60 ? noteText.slice(0, 60) + '...' : noteText
+    });
+
+    return this.updateLead(id, { activityNotes: notes, timeline });
   },
 
   // --- CONFIGURAÇÃO GLOBAL DE FORMULÁRIO (PADRÃO FALLBACK) ---
