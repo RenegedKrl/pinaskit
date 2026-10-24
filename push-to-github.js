@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Pinas Kit v7.0 - CRM Simples e Intuitivo (Modelo D)',
+    message: 'fix: Sidebar fixa no scroll da pagina e ajuste de layout (Pinas Kit no topo e Ajuda/Configuracoes no rodape)',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

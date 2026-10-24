@@ -320,38 +320,62 @@
 .pk-dashboard-wrapper {
   display: flex;
   min-height: calc(100vh - 37px);
+  position: relative;
+  width: 100%;
 }
 
-/* Sidebar */
+/* Sidebar Desktop Fixa (Permanente no Scroll) */
 .pk-sidebar {
   width: 240px;
+  position: fixed;
+  top: 37px;
+  left: 0;
+  bottom: 0;
+  height: calc(100vh - 37px);
+  max-height: calc(100vh - 37px);
   background-color: var(--pk-sidebar-bg);
   border-right: 1px solid var(--pk-sidebar-border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: var(--pk-space-5);
+  padding: 14px 12px;
   transition: background-color var(--pk-transition-theme);
+  z-index: 900;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pk-border) transparent;
+}
+
+.pk-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pk-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--pk-border);
+  border-radius: var(--pk-radius-full);
 }
 
 .pk-sidebar-menu {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: var(--pk-space-6);
+  gap: 3px;
+  margin-top: 8px;
 }
 
 .pk-sidebar-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  font-size: 14px;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--pk-text-secondary);
   border-radius: var(--pk-radius-md);
   transition: all var(--pk-transition-fast);
   cursor: pointer;
+  user-select: none;
 }
 
 .pk-sidebar-item:hover {
@@ -365,13 +389,24 @@
   font-weight: 600;
 }
 
+.pk-sidebar-footer {
+  border-top: 1px solid var(--pk-border);
+  padding-top: 10px;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 /* Conteúdo Principal do Dashboard */
 .pk-main-content {
   flex: 1;
+  margin-left: 240px;
   padding: var(--pk-space-8);
-  max-width: 1320px;
-  margin: 0 auto;
-  width: 100%;
+  width: calc(100% - 240px);
+  max-width: calc(100vw - 240px);
+  box-sizing: border-box;
+  min-height: calc(100vh - 37px);
 }
 
 .pk-dash-header {
@@ -646,6 +681,9 @@
   }
 
   .pk-main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
     padding-bottom: 80px;
   }
 }

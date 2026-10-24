@@ -189,9 +189,29 @@ class PinasKitApp {
     attachTabSwitch('#side-nav-overview', 'overview');
     attachTabSwitch('#side-nav-buttons', 'buttons');
     attachTabSwitch('#side-nav-leads', 'leads');
-    attachTabSwitch('#side-nav-crm', 'crm');
+    attachTabSwitch('#side-nav-conversations', 'conversations');
+    attachTabSwitch('#side-nav-crm', 'conversations');
+    attachTabSwitch('#side-nav-sales', 'sales');
     attachTabSwitch('#side-nav-ads', 'ads');
+    attachTabSwitch('#side-nav-automation', 'automation');
+    attachTabSwitch('#side-nav-reports', 'reports');
     attachTabSwitch('#side-brand-logo', 'overview');
+
+    // Itens de rodapé da sidebar fixa
+    document.getElementById('side-help')?.addEventListener('click', () => {
+      this.openModal('video-tour-modal-overlay');
+    });
+    document.getElementById('side-settings')?.addEventListener('click', () => {
+      this.openModal('connect-ads-modal-overlay');
+    });
+
+    // Ações internas das abas de Anúncios, Automação e Relatórios
+    document.getElementById('btn-open-ads-modal')?.addEventListener('click', () => this.openModal('connect-ads-modal-overlay'));
+    document.getElementById('btn-connect-google-ads')?.addEventListener('click', () => this.openModal('connect-ads-modal-overlay'));
+    document.getElementById('btn-edit-rules-auto')?.addEventListener('click', () => this.openModal('form-builder-modal-overlay'));
+    document.getElementById('btn-export-reports')?.addEventListener('click', () => {
+      this.showToast('📊 Exportando relatório executivo de ROI e conversões...');
+    });
 
     // Navegação Mobile (Bottom Nav)
     document.querySelectorAll('[data-mobile-tab]').forEach(item => {

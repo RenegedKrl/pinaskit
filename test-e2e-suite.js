@@ -121,6 +121,12 @@ async function runE2ETestSuite() {
     console.log('\n📄 2. Verificando Carregamento Inicial do Site:');
     await setViewport(1280, 800, false);
 
+    await evalJs(`
+      localStorage.clear();
+      document.querySelector('.pk-demo-tab[data-view="landing"]')?.click();
+    `);
+    await new Promise(r => setTimeout(r, 600));
+
     const currentUrl = await evalJs('window.location.href');
     assert(currentUrl.includes('localhost:3334'), 'URL carregada é http://localhost:3334');
 
@@ -168,10 +174,12 @@ async function runE2ETestSuite() {
     // --------------------------------------------------------------------------
     console.log('\n📊 5. Testando Painel do Assinante (CentralKit):');
     await evalJs('document.querySelector(\'.pk-demo-tab[data-view="dashboard"]\')?.click()');
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
+    await evalJs('document.getElementById("side-nav-overview")?.click()');
+    await new Promise(r => setTimeout(r, 400));
 
     const greeting = await evalJs('document.querySelector(".pk-dash-greeting")?.innerText.trim()');
-    assert(greeting === 'Olá, Mariana! 👋', 'Saudação "Olá, Mariana! 👋" renderizada na Visão Geral');
+    assert(greeting === 'Olá, Mariana! 👋', 'Saudação "Olá, Mariana! 👋" renderizada na Visão Geral', greeting);
 
     // --------------------------------------------------------------------------
     // TESTE 5: ABA "BOTÕES" (GERENCIADOR DE SITES E PASTAS DE CAPTAÇÃO)
@@ -258,6 +266,39 @@ async function runE2ETestSuite() {
 
     const hasOverflow = await evalJs('document.documentElement.scrollWidth > document.documentElement.clientWidth');
     assert(hasOverflow === false, 'Zero estouro de tela horizontal no mobile');
+
+    // --------------------------------------------------------------------------
+    // TESTE 8: SIDEBAR FIXA NO SCROLL DA PÁGINA (SOLICITAÇÃO DO USUÁRIO)
+    // --------------------------------------------------------------------------
+    console.log('\n📌 9. Testando Fixação da Sidebar Desktop no Scroll:');
+    await setViewport(1280, 800, false);
+    await new Promise(r => setTimeout(r, 400));
+    await evalJs('document.getElementById("side-nav-overview")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    const sidebarPos = await evalJs('window.getComputedStyle(document.querySelector(".pk-sidebar"))?.position');
+    assert(sidebarPos === 'fixed', `Sidebar desktop possui position: fixed (atual: ${sidebarPos})`);
+
+    const initialLogoTop = await evalJs('document.getElementById("side-brand-logo")?.getBoundingClientRect().top');
+    const initialHelpTop = await evalJs('document.getElementById("side-help")?.getBoundingClientRect().top');
+    const initialSettingsBottom = await evalJs('document.getElementById("side-settings")?.getBoundingClientRect().bottom');
+
+    assert(initialLogoTop >= 35 && initialLogoTop <= 65, `Logo 'Pinas Kit' visível no topo (Y=${initialLogoTop}px)`);
+    assert(initialSettingsBottom <= 800, `Item 'Configurações' visível no rodapé sem corte (Bottom=${initialSettingsBottom}px)`);
+
+    // Rola a página 800px para baixo
+    await evalJs('window.scrollTo(0, 800)');
+    await new Promise(r => setTimeout(r, 400));
+
+    const scrolledLogoTop = await evalJs('document.getElementById("side-brand-logo")?.getBoundingClientRect().top');
+    const scrolledSettingsBottom = await evalJs('document.getElementById("side-settings")?.getBoundingClientRect().bottom');
+    const scrollY = await evalJs('window.scrollY');
+
+    assert(scrollY > 0, `Página rolou com sucesso (scrollY=${scrollY}px)`);
+    assert(Math.abs(scrolledLogoTop - initialLogoTop) < 2, `Logo 'Pinas Kit' permaneceu 100% fixo no topo durante o scroll (Delta=${Math.abs(scrolledLogoTop - initialLogoTop)}px)`);
+    assert(Math.abs(scrolledSettingsBottom - initialSettingsBottom) < 2, `Itens do rodapé permaneceram 100% fixos na tela (Delta=${Math.abs(scrolledSettingsBottom - initialSettingsBottom)}px)`);
+
+    await takeScreenshot('sidebar-fixed-scrolled');
 
   } catch (err) {
     console.error('🚨 Erro inesperado no teste E2E:', err);
