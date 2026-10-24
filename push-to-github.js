@@ -77,7 +77,7 @@ async function runPush() {
   const commitId = await git.commit({
     fs,
     dir: REPO_DIR,
-    message: 'feat: Vinculação de site exclusivo por botão com validação de domínio no embed.js, modal de edição e sincronização automática',
+    message: 'fix: Reducao dos seletores radio para 18px com reset defensivo contra CSS externo, remocao do campo de mensagem adicional e integracao visual seamless',
     author: {
       name: creds.username,
       email: 'kaue.kfd63@gmail.com'

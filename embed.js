@@ -204,52 +204,139 @@
       display: block;
     }
     .pk-embed-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 9px 12px;
-      font-size: 13px;
-      border: 1.5px solid #CBD5E1;
-      border-radius: 8px;
-      background: #F8FAFC;
-      color: #1E293B;
-      margin-bottom: 10px;
-      outline: none;
+      all: unset !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      padding: 11px 14px !important;
+      font-size: 13.5px !important;
+      border: 1.5px solid #CBD5E1 !important;
+      border-radius: 8px !important;
+      background: #F8FAFC !important;
+      color: #1E293B !important;
+      margin-bottom: 10px !important;
+      outline: none !important;
+      display: block !important;
+      font-family: inherit !important;
+      line-height: normal !important;
+      transition: border-color 150ms ease, background 150ms ease !important;
     }
     .pk-embed-input:focus {
-      border-color: ${activeConfig.color};
-      background: #FFFFFF;
+      border-color: #7C3AED !important;
+      background: #FFFFFF !important;
     }
     .pk-embed-submit-btn {
-      width: 100%;
-      background: ${activeConfig.color};
-      color: #FFFFFF;
-      border: none;
-      border-radius: 8px;
-      padding: 11px 16px;
-      font-size: 13.5px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: filter 150ms ease;
+      width: 100% !important;
+      background: #7C3AED !important;
+      color: #FFFFFF !important;
+      border: none !important;
+      border-radius: 10px !important;
+      padding: 14px 20px !important;
+      font-size: 14.5px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
+      transition: filter 150ms ease, transform 150ms ease !important;
+      box-sizing: border-box !important;
+      text-decoration: none !important;
+      letter-spacing: 0.2px !important;
     }
     .pk-embed-submit-btn:hover {
-      filter: brightness(0.92);
+      filter: brightness(0.92) !important;
+      transform: translateY(-1px) !important;
     }
     /* Estilos do Formulário Embutido no Final da Página */
     .pk-embed-page-form-section {
-      width: 100%;
-      max-width: 680px;
-      margin: 48px auto;
-      padding: 32px 24px;
-      background: #FFFFFF;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      box-sizing: border-box;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    .pk-embed-page-form-section.is-standalone {
+      max-width: 680px !important;
+      margin: 48px auto !important;
+      padding: 32px 24px !important;
+      background: #FFFFFF !important;
+      border: 1.5px solid #E2E8F0 !important;
+      border-radius: 16px !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+    }
+    #pinaskit-form .pk-embed-page-form-section:not(.is-standalone) {
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+
+    /* Reset Defensivo para os Radio Buttons (Círculos) */
+    .pk-embed-radio {
+      all: unset !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      width: 18px !important;
+      min-width: 18px !important;
+      max-width: 18px !important;
+      height: 18px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      aspect-ratio: 1 / 1 !important;
+      border: 2px solid #CBD5E1 !important;
+      border-radius: 50% !important;
+      background-color: #FFFFFF !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: inline-grid !important;
+      place-content: center !important;
+      flex-shrink: 0 !important;
+      box-sizing: border-box !important;
+      cursor: pointer !important;
+      outline: none !important;
+      box-shadow: none !important;
+      transition: all 150ms ease !important;
+    }
+    .pk-embed-radio:checked {
+      border-color: #7C3AED !important;
+      background-color: #FFFFFF !important;
+    }
+    .pk-embed-radio::before {
+      content: "" !important;
+      width: 8px !important;
+      height: 8px !important;
+      border-radius: 50% !important;
+      background-color: #7C3AED !important;
+      display: block !important;
+      transform: scale(0) !important;
+      transition: transform 120ms ease-in-out !important;
+    }
+    .pk-embed-radio:checked::before {
+      transform: scale(1) !important;
+    }
+    .pk-embed-option-card {
+      all: unset !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 11px 14px !important;
+      border: 1.5px solid #E2E8F0 !important;
+      border-radius: 10px !important;
+      cursor: pointer !important;
+      background: #F8FAFC !important;
+      transition: all 150ms ease !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+    }
+    .pk-embed-option-card:hover {
+      border-color: #CBD5E1 !important;
+      background: #F1F5F9 !important;
+    }
+    .pk-embed-option-card:has(.pk-embed-radio:checked),
+    .pk-embed-option-card.is-selected {
+      border-color: #7C3AED !important;
+      background: rgba(124, 58, 237, 0.05) !important;
     }
   `;
   document.head.appendChild(styleEl);
@@ -462,7 +549,10 @@
   // 5. Injetar o Formulário de Qualificação na Página
   // Se existir um container específico <div id="pinaskit-form"></div>, renderiza nele;
   // Caso contrário, injeta obrigatoriamente ACIMA do rodapé (footer).
-  let targetContainer = document.getElementById('pinaskit-form');
+  const existingFormEl = document.getElementById('pinaskit-form');
+  const isAutoInjected = !existingFormEl;
+  let targetContainer = existingFormEl;
+
   if (!targetContainer) {
     targetContainer = document.createElement('div');
     targetContainer.id = 'pinaskit-form';
@@ -476,19 +566,28 @@
     }
   }
 
+  // Verifica se o container já possui um título no elemento pai para evitar duplicidade de cabeçalho
+  const parentCard = targetContainer.closest('.form-container, .card, .application-card, section, form, div');
+  const hasOuterHeading = Boolean(
+    targetContainer.previousElementSibling?.matches('h1, h2, h3, h4, header') ||
+    (parentCard && parentCard.querySelector('h1, h2, h3'))
+  );
+
   targetContainer.innerHTML = `
-    <div class="pk-embed-page-form-section">
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span style="font-size: 12px; font-weight: 700; color: ${activeConfig.color}; text-transform: uppercase; letter-spacing: 0.5px;">
-          Atendimento Direto no WhatsApp
-        </span>
-        <h3 style="font-size: 22px; font-weight: 800; color: #0F172A; margin: 6px 0 8px 0;">
-          ${activeConfig.formConfig.title}
-        </h3>
-        <p style="font-size: 14px; color: #64748B; margin: 0;">
-          ${activeConfig.formConfig.subtitle}
-        </p>
-      </div>
+    <div class="pk-embed-page-form-section ${isAutoInjected ? 'is-standalone' : ''}">
+      ${(isAutoInjected || !hasOuterHeading) ? `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <span style="font-size: 11.5px; font-weight: 700; color: #7C3AED; text-transform: uppercase; letter-spacing: 0.5px;">
+            Atendimento Direto no WhatsApp
+          </span>
+          <h3 style="font-size: 22px; font-weight: 800; color: #0F172A; margin: 6px 0 8px 0;">
+            ${activeConfig.formConfig.title}
+          </h3>
+          <p style="font-size: 13.5px; color: #64748B; margin: 0;">
+            ${activeConfig.formConfig.subtitle}
+          </p>
+        </div>
+      ` : ''}
 
       <form id="pk-embed-page-form" style="display: flex; flex-direction: column; gap: 14px;">
         <div>
@@ -507,12 +606,21 @@
           </label>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             ${activeConfig.formConfig.options.map((opt, i) => `
-              <label style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; cursor: pointer; background: #F8FAFC;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <input type="radio" name="pk-page-option" value="${opt.id}" data-score="${opt.score}" data-label="${opt.label}" ${i === 0 ? 'checked' : ''} style="cursor: pointer;"/>
-                  <span style="font-size: 13.5px; font-weight: 500; color: #1E293B;">${opt.label}</span>
+              <label class="pk-embed-option-card ${i === 0 ? 'is-selected' : ''}" style="all: unset !important; display: flex !important; align-items: center !important; justify-content: space-between !important; padding: 11px 14px !important; border: 1.5px solid ${i === 0 ? '#7C3AED' : '#E2E8F0'} !important; border-radius: 10px !important; cursor: pointer !important; background: ${i === 0 ? 'rgba(124, 58, 237, 0.05)' : '#F8FAFC'} !important; box-sizing: border-box !important; margin: 0 !important; transition: all 150ms ease !important;">
+                <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1;">
+                  <input 
+                    type="radio" 
+                    class="pk-embed-radio" 
+                    name="pk-page-option" 
+                    value="${opt.id}" 
+                    data-score="${opt.score}" 
+                    data-label="${opt.label}" 
+                    ${i === 0 ? 'checked' : ''} 
+                    style="all: unset !important; -webkit-appearance: none !important; appearance: none !important; width: 18px !important; min-width: 18px !important; max-width: 18px !important; height: 18px !important; min-height: 18px !important; max-height: 18px !important; border-radius: 50% !important; border: 2px solid ${i === 0 ? '#7C3AED' : '#CBD5E1'} !important; background-color: #FFFFFF !important; margin: 0 !important; padding: 0 !important; display: inline-grid !important; place-content: center !important; flex-shrink: 0 !important; cursor: pointer !important; box-sizing: border-box !important;"
+                  />
+                  <span style="font-size: 13.5px; font-weight: 500; color: #1E293B; line-height: 1.4;">${opt.label}</span>
                 </div>
-                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #EDE9FE; color: #7C3AED;">
+                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #EDE9FE; color: #7C3AED; white-space: nowrap; flex-shrink: 0;">
                   ${opt.badge || '⭐'}
                 </span>
               </label>
@@ -520,18 +628,33 @@
           </div>
         </div>
 
-        <div>
-          <label style="font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">Mensagem adicional (opcional)</label>
-          <textarea id="pk-page-message" class="pk-embed-input" rows="2" placeholder="Ex: Gostaria de saber valores e horários disponíveis..."></textarea>
-        </div>
-
-        <button type="submit" class="pk-embed-submit-btn" style="padding: 13px 20px; font-size: 14.5px;">
+        <button type="submit" class="pk-embed-submit-btn">
+          <span>${activeConfig.formConfig.buttonText || 'Enviar Aplicação'}</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="pointer-events: none;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          <span>${activeConfig.formConfig.buttonText || activeConfig.ctaText}</span>
         </button>
       </form>
     </div>
   `;
+
+  // Reatividade visual ao selecionar opções (compatível com todos os navegadores)
+  targetContainer.querySelectorAll('input[name="pk-page-option"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      targetContainer.querySelectorAll('.pk-embed-option-card').forEach(c => {
+        c.classList.remove('is-selected');
+        c.style.setProperty('border-color', '#E2E8F0', 'important');
+        c.style.setProperty('background', '#F8FAFC', 'important');
+        const r = c.querySelector('input[type="radio"]');
+        if (r) r.style.setProperty('border-color', '#CBD5E1', 'important');
+      });
+      const card = radio.closest('.pk-embed-option-card');
+      if (card) {
+        card.classList.add('is-selected');
+        card.style.setProperty('border-color', '#7C3AED', 'important');
+        card.style.setProperty('background', 'rgba(124, 58, 237, 0.05)', 'important');
+        radio.style.setProperty('border-color', '#7C3AED', 'important');
+      }
+    });
+  });
 
   const pageForm = document.getElementById('pk-embed-page-form');
   if (pageForm) {
@@ -543,9 +666,9 @@
       handleLeadSubmission({
         name: document.getElementById('pk-page-name').value.trim(),
         phone: document.getElementById('pk-page-phone').value.trim(),
-        selectedOptionLabel: checkedRadio ? checkedRadio.getAttribute('data-label') : 'Avaliação',
+        selectedOptionLabel: checkedRadio ? checkedRadio.getAttribute('data-label') : 'Aplicação',
         score: checkedRadio ? (parseInt(checkedRadio.getAttribute('data-score'), 10) || 30) : 30,
-        customMessage: document.getElementById('pk-page-message').value.trim()
+        customMessage: 'Aplicação direta via formulário do site.'
       }, pageSection);
     });
   }
