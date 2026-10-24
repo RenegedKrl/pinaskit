@@ -1,0 +1,121 @@
+/* ==========================================================================
+   PINAS KIT — DESIGN SYSTEM & TOKENS (MODELO D: ASSISTIDO E DIDÁTICO)
+   ========================================================================== */
+
+:root {
+  /* Brand Palette (Violeta / Neon) */
+  --pk-primary: #7C3AED;
+  --pk-primary-hover: #6D28D9;
+  --pk-primary-active: #5B21B6;
+  --pk-primary-light: #EDE9FE;
+  --pk-primary-gradient: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
+  --pk-primary-gradient-hover: linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%);
+
+  /* Functional Colors */
+  --pk-success: #10B981;
+  --pk-success-hover: #059669;
+  --pk-success-light: #D1FAE5;
+  --pk-success-text: #065F46;
+
+  --pk-danger: #DC2626;
+  --pk-danger-hover: #B91C1C;
+  --pk-danger-light: #FEE2E2;
+  --pk-danger-text: #991B1B;
+
+  --pk-warning: #F59E0B;
+  --pk-warning-light: #FEF3C7;
+  --pk-warning-text: #92400E;
+
+  --pk-info: #2563EB;
+  --pk-info-light: #DBEAFE;
+  --pk-info-text: #1E40AF;
+
+  /* Typography */
+  --pk-font-main: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --pk-font-data: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Spacing Scale */
+  --pk-space-1: 4px;
+  --pk-space-2: 8px;
+  --pk-space-3: 12px;
+  --pk-space-4: 16px;
+  --pk-space-5: 20px;
+  --pk-space-6: 24px;
+  --pk-space-8: 32px;
+  --pk-space-10: 40px;
+  --pk-space-12: 48px;
+  --pk-space-16: 64px;
+
+  /* Border Radii */
+  --pk-radius-sm: 8px;
+  --pk-radius-md: 12px;
+  --pk-radius-lg: 16px;
+  --pk-radius-xl: 20px;
+  --pk-radius-2xl: 24px;
+  --pk-radius-full: 9999px;
+
+  /* Shadows */
+  --pk-shadow-sm: 0 1px 2px 0 rgba(24, 21, 44, 0.05);
+  --pk-shadow-md: 0 4px 6px -1px rgba(24, 21, 44, 0.07), 0 2px 4px -2px rgba(24, 21, 44, 0.05);
+  --pk-shadow-lg: 0 10px 15px -3px rgba(24, 21, 44, 0.08), 0 4px 6px -4px rgba(24, 21, 44, 0.04);
+  --pk-shadow-xl: 0 20px 25px -5px rgba(24, 21, 44, 0.1), 0 8px 10px -6px rgba(24, 21, 44, 0.05);
+  --pk-shadow-purple: 0 10px 25px -5px rgba(124, 58, 237, 0.25);
+  --pk-shadow-green: 0 10px 25px -5px rgba(16, 185, 129, 0.25);
+
+  /* Transitions */
+  --pk-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --pk-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --pk-transition-theme: 300ms ease-in-out;
+}
+
+/* ==========================================================================
+   TEMA CLARO (LIGHT THEME — PADRÃO OFICIAL MODELO D)
+   ========================================================================== */
+body[data-theme='light'] {
+  --pk-bg-app: #F8F7FC;
+  --pk-bg-surface: #FFFFFF;
+  --pk-bg-card: #FFFFFF;
+  --pk-bg-subtle: #F1F0F7;
+  --pk-bg-hover: #ECEAF5;
+  --pk-border: #E6E4F0;
+  --pk-border-focus: #7C3AED;
+
+  --pk-text-primary: #18152C;
+  --pk-text-secondary: #57536B;
+  --pk-text-muted: #8E8A9F;
+  --pk-text-inverse: #FFFFFF;
+
+  --pk-sidebar-bg: #FFFFFF;
+  --pk-sidebar-border: #EBE9F5;
+  --pk-sidebar-item-active: #EDE9FE;
+  --pk-sidebar-text-active: #7C3AED;
+
+  --pk-header-bg: rgba(255, 255, 255, 0.92);
+  --pk-card-glow: rgba(124, 58, 237, 0.06);
+}
+
+/* ==========================================================================
+   TEMA ESCURO (DARK THEME — COMPLETO E COM ALTO CONTRASTE)
+   ========================================================================== */
+body[data-theme='dark'] {
+  --pk-bg-app: #09090B;
+  --pk-bg-surface: #121216;
+  --pk-bg-card: #18181D;
+  --pk-bg-subtle: #22222A;
+  --pk-bg-hover: #2A2A35;
+  --pk-border: #2D2D38;
+  --pk-border-focus: #8B5CF6;
+
+  --pk-text-primary: #F8FAFC;
+  --pk-text-secondary: #94A3B8;
+  --pk-text-muted: #64748B;
+  --pk-text-inverse: #09090B;
+
+  --pk-sidebar-bg: #121216;
+  --pk-sidebar-border: #242430;
+  --pk-sidebar-item-active: rgba(124, 58, 237, 0.2);
+  --pk-sidebar-text-active: #A78BFA;
+
+  --pk-header-bg: rgba(18, 18, 22, 0.92);
+  --pk-card-glow: rgba(139, 92, 246, 0.12);
+}

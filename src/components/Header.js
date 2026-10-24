@@ -1,0 +1,43 @@
+/* ==========================================================================
+   PINAS KIT — HEADER & DEMO SWITCHER
+   ========================================================================== */
+
+import { StorageService } from '../services/storage.js';
+
+export function renderHeader(currentView, onViewChange) {
+  const currentTheme = StorageService.getTheme();
+
+  return `
+    <header class="pk-header" id="main-header">
+      <div class="pk-header-container">
+        <!-- Logo -->
+        <a href="#inicio" class="pk-logo" id="logo-brand">
+          <div class="pk-logo-icon">P</div>
+          <span>Pinas Kit</span>
+        </a>
+
+        <!-- Links Principais -->
+        <nav class="pk-nav-links" id="nav-desktop">
+          <a href="#como-funciona" class="pk-nav-link" id="nav-how-it-works">Como funciona</a>
+          <a href="#beneficios" class="pk-nav-link" id="nav-benefits">Benefícios</a>
+          <a href="#precos" class="pk-nav-link" id="nav-pricing">Preços</a>
+          <a href="#duvidas" class="pk-nav-link" id="nav-faq">Dúvidas</a>
+        </nav>
+
+        <!-- Ações do Header -->
+        <div class="pk-header-actions">
+          <!-- Botão de Alternância de Tema -->
+          <button class="pk-theme-toggle" id="btn-theme-toggle" aria-label="Alternar tema claro/escuro" title="Alternar Tema Claro/Escuro">
+            ${currentTheme === 'dark' 
+              ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>` 
+              : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`}
+          </button>
+
+          <!-- Botões de Acesso -->
+          <button class="pk-btn pk-btn-outline pk-btn-sm" id="btn-login-header">Entrar</button>
+          <button class="pk-btn pk-btn-primary pk-btn-sm" id="btn-start-header">Começar grátis</button>
+        </div>
+      </div>
+    </header>
+  `;
+}

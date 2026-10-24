@@ -1,0 +1,671 @@
+/* ==========================================================================
+   PINAS KIT — LAYOUT & TELAS (MODELO D: ASSISTIDO E DIDÁTICO)
+   ========================================================================== */
+
+/* Barra de Alternância de Demonstração (Topo Fixo) */
+.pk-demo-bar {
+  background-color: #121216;
+  color: #E2E8F0;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 1px solid #27272A;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.pk-demo-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pk-demo-tab {
+  padding: 4px 12px;
+  border-radius: var(--pk-radius-sm);
+  color: #94A3B8;
+  font-size: 13px;
+  transition: all var(--pk-transition-fast);
+}
+
+.pk-demo-tab:hover {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.pk-demo-tab.is-active {
+  background-color: var(--pk-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER PRINCIPAL DA LANDING PAGE
+   -------------------------------------------------------------------------- */
+.pk-header {
+  position: sticky;
+  top: 37px;
+  width: 100%;
+  background-color: var(--pk-header-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--pk-border);
+  z-index: 900;
+  transition: background-color var(--pk-transition-theme);
+}
+
+.pk-header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pk-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--pk-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.pk-logo-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--pk-primary-gradient);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+}
+
+.pk-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-space-6);
+}
+
+.pk-nav-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pk-text-secondary);
+  transition: color var(--pk-transition-fast);
+}
+
+.pk-nav-link:hover {
+  color: var(--pk-primary);
+}
+
+.pk-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-space-3);
+}
+
+.pk-theme-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--pk-radius-md);
+  display: grid;
+  place-items: center;
+  color: var(--pk-text-secondary);
+  background-color: var(--pk-bg-subtle);
+  border: 1px solid var(--pk-border);
+  transition: all var(--pk-transition-fast);
+}
+
+.pk-theme-toggle:hover {
+  color: var(--pk-primary);
+  border-color: var(--pk-primary);
+  background-color: var(--pk-bg-hover);
+}
+
+/* --------------------------------------------------------------------------
+   HERO DA LANDING PAGE (MODELO D)
+   -------------------------------------------------------------------------- */
+.pk-hero-section {
+  padding: var(--pk-space-12) 0 var(--pk-space-16);
+  position: relative;
+  overflow: hidden;
+}
+
+.pk-hero-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 48px;
+}
+
+.pk-hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: var(--pk-space-5);
+}
+
+.pk-hero-title {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--pk-text-primary);
+  margin-bottom: var(--pk-space-5);
+}
+
+.pk-hero-subtitle {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--pk-text-secondary);
+  margin-bottom: var(--pk-space-8);
+  max-width: 560px;
+}
+
+.pk-hero-ctas {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--pk-space-6);
+}
+
+.pk-hero-trust {
+  display: flex;
+  align-items: center;
+  gap: var(--pk-space-4);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pk-text-muted);
+  flex-wrap: wrap;
+  margin-bottom: var(--pk-space-8);
+}
+
+.pk-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pk-trust-check {
+  color: var(--pk-success);
+  font-weight: 700;
+}
+
+/* 3 Cards Rápidos Abaixo do Hero */
+.pk-hero-quick-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 580px;
+}
+
+.pk-quick-card {
+  background-color: var(--pk-bg-surface);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  box-shadow: var(--pk-shadow-sm);
+  transition: all var(--pk-transition-fast);
+}
+
+.pk-quick-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--pk-primary);
+  box-shadow: var(--pk-shadow-md);
+}
+
+.pk-quick-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--pk-radius-full);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.pk-quick-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pk-text-primary);
+  line-height: 1.3;
+}
+
+/* Imagem Hero com Fotografia Humanizada */
+.pk-hero-media {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pk-hero-glow {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, rgba(124, 58, 237, 0) 70%);
+  filter: blur(40px);
+  z-index: 1;
+}
+
+.pk-hero-avatar-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 440px;
+  border-radius: var(--pk-radius-2xl);
+  overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(24, 21, 44, 0.15);
+  border: 4px solid var(--pk-bg-surface);
+  background-color: var(--pk-bg-surface);
+}
+
+.pk-hero-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: transform 400ms ease;
+}
+
+.pk-hero-avatar-card:hover .pk-hero-img {
+  transform: scale(1.02);
+}
+
+.pk-floating-badge {
+  position: absolute;
+  top: 24px;
+  right: -10px;
+  z-index: 3;
+  background-color: var(--pk-bg-surface);
+  color: var(--pk-text-primary);
+  padding: 10px 16px;
+  border-radius: var(--pk-radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--pk-border);
+  box-shadow: var(--pk-shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: pk-float 4s ease-in-out infinite;
+}
+
+@keyframes pk-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* --------------------------------------------------------------------------
+   DASHBOARD DESKTOP (MODELO D: ASSISTIDO E DIDÁTICO)
+   -------------------------------------------------------------------------- */
+.pk-dashboard-wrapper {
+  display: flex;
+  min-height: calc(100vh - 37px);
+}
+
+/* Sidebar */
+.pk-sidebar {
+  width: 240px;
+  background-color: var(--pk-sidebar-bg);
+  border-right: 1px solid var(--pk-sidebar-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--pk-space-5);
+  transition: background-color var(--pk-transition-theme);
+}
+
+.pk-sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--pk-space-6);
+}
+
+.pk-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--pk-text-secondary);
+  border-radius: var(--pk-radius-md);
+  transition: all var(--pk-transition-fast);
+  cursor: pointer;
+}
+
+.pk-sidebar-item:hover {
+  background-color: var(--pk-bg-hover);
+  color: var(--pk-primary);
+}
+
+.pk-sidebar-item.is-active {
+  background-color: var(--pk-sidebar-item-active);
+  color: var(--pk-sidebar-text-active);
+  font-weight: 600;
+}
+
+/* Conteúdo Principal do Dashboard */
+.pk-main-content {
+  flex: 1;
+  padding: var(--pk-space-8);
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.pk-dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--pk-space-6);
+}
+
+.pk-dash-greeting {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--pk-text-primary);
+}
+
+.pk-dash-subgreeting {
+  font-size: 14px;
+  color: var(--pk-text-secondary);
+  margin-top: 2px;
+}
+
+.pk-dash-user-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pk-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: var(--pk-radius-full);
+  background-color: var(--pk-bg-card);
+  border: 1px solid var(--pk-border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pk-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--pk-radius-full);
+  object-fit: cover;
+}
+
+/* Área de Onboarding & Próxima Ação (Lado a Lado) */
+.pk-assist-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--pk-space-6);
+  margin-bottom: var(--pk-space-6);
+}
+
+.pk-card-onboarding {
+  border-color: rgba(124, 58, 237, 0.2);
+}
+
+.pk-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: var(--pk-space-4);
+}
+
+.pk-step-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--pk-radius-md);
+  background-color: var(--pk-bg-subtle);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--pk-transition-fast);
+}
+
+.pk-step-item.is-completed {
+  color: var(--pk-text-muted);
+}
+
+.pk-step-badge-check {
+  width: 22px;
+  height: 22px;
+  background-color: var(--pk-success);
+  color: #FFFFFF;
+  border-radius: var(--pk-radius-full);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pk-step-badge-pending {
+  width: 22px;
+  height: 22px;
+  background-color: var(--pk-primary);
+  color: #FFFFFF;
+  border-radius: var(--pk-radius-full);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pk-card-next-action {
+  background: var(--pk-primary-gradient);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--pk-shadow-purple);
+  position: relative;
+  overflow: hidden;
+}
+
+.pk-card-next-action .pk-btn {
+  background-color: #FFFFFF;
+  color: var(--pk-primary);
+  font-weight: 700;
+  align-self: flex-start;
+  margin-top: var(--pk-space-4);
+}
+
+.pk-card-next-action .pk-btn:hover {
+  background-color: #F8F7FC;
+  transform: translateY(-2px);
+}
+
+/* 4 Indicadores Essenciais */
+.pk-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--pk-space-4);
+  margin-bottom: var(--pk-space-6);
+}
+
+.pk-metric-card {
+  padding: var(--pk-space-5);
+}
+
+.pk-metric-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pk-text-secondary);
+}
+
+.pk-metric-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--pk-text-primary);
+  font-family: var(--pk-font-data);
+  line-height: 1.15;
+  margin: 6px 0;
+}
+
+.pk-metric-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pk-trend-up {
+  color: var(--pk-success);
+}
+
+/* Banner de Ajuda Guiada Inferior */
+.pk-help-banner {
+  background-color: var(--pk-bg-card);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-xl);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--pk-space-8);
+  box-shadow: var(--pk-shadow-sm);
+}
+
+.pk-help-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pk-help-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--pk-radius-full);
+  object-fit: cover;
+  border: 2px solid var(--pk-primary);
+}
+
+/* Navegação Mobile Inferior */
+.pk-mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--pk-bg-surface);
+  border-top: 1px solid var(--pk-border);
+  padding: 8px 16px;
+  z-index: 800;
+  justify-content: space-around;
+}
+
+.pk-mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pk-text-muted);
+}
+
+.pk-mobile-nav-item.is-active {
+  color: var(--pk-primary);
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVIDADE (MOBILE & TABLET)
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .pk-demo-bar {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .pk-demo-switcher {
+    flex-shrink: 0;
+  }
+
+  .pk-hero-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .pk-hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pk-hero-ctas,
+  .pk-hero-trust,
+  .pk-hero-quick-cards {
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pk-assist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pk-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pk-sidebar {
+    display: none;
+  }
+
+  .pk-mobile-nav {
+    display: flex;
+  }
+
+  .pk-main-content {
+    padding-bottom: 80px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pk-hero-title {
+    font-size: 36px;
+  }
+
+  .pk-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pk-hero-quick-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .pk-help-banner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}
